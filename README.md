@@ -18,14 +18,16 @@ Auto connect copy/
 
 ## Run locally
 
-Mock data is loaded with `fetch()`, so open via a local server (not `file://`):
+The project uses `fetch()` to load data, which requires a local web server to function correctly.
 
+**Detailed Instructions:**
+👉 **[See the Local Server Setup Guide (Windows & Mac)](./RUN-LOCALLY.md)**
+
+Quick command (from root):
 ```bash
-cd web
-python3 -m http.server 8080
+cd web && python3 -m http.server 8080
 ```
-
-Then visit: http://localhost:8080
+Then visit: [http://localhost:8080](http://localhost:8080)
 
 ## Pages
 
