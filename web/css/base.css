@@ -1,3 +1,17 @@
+/**
+ * =============================================================================
+ * base.css — Global reset and defaults
+ * =============================================================================
+ * Loaded 2nd on every page (after variables.css).
+ *
+ * Makes all pages share the same:
+ *   - dark background and white text
+ *   - RTL/LTR direction (class on <body> from i18n.js)
+ *   - centered content via .container
+ * =============================================================================
+ */
+
+/* Remove default browser spacing; padding/border included in width */
 *,
 *::before,
 *::after {
@@ -10,6 +24,7 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Default look for every page */
 body {
   font-family: var(--font-main);
   background: var(--bg-main);
@@ -18,10 +33,12 @@ body {
   min-height: 100vh;
 }
 
+/* Arabic: right-to-left (set by setLanguage in i18n.js) */
 body.rtl {
   direction: rtl;
 }
 
+/* English: left-to-right */
 body.ltr {
   direction: ltr;
 }
@@ -40,6 +57,7 @@ ul {
   list-style: none;
 }
 
+/* Forms inherit colors so they match dark theme */
 button,
 input,
 select,
@@ -54,16 +72,24 @@ button {
   background: none;
 }
 
+/**
+ * .container — wraps main content; max 1200px centered.
+ * Used in: header, footer, hero, services, emergency, etc.
+ */
 .container {
   width: min(100% - 2rem, var(--max-width));
   margin-inline: auto;
 }
 
+/**
+ * .page-main — padding under the sticky header for <main> content.
+ */
 .page-main {
   padding-block: 1.5rem 3rem;
   min-height: calc(100vh - var(--header-height) - 120px);
 }
 
+/* Accessibility: hide text visually but keep for screen readers */
 .sr-only {
   position: absolute;
   width: 1px;

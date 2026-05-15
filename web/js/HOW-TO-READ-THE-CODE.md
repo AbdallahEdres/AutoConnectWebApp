@@ -1,5 +1,7 @@
 # How to read the AutoConnect JavaScript
 
+> **CSS:** see [`../css/HOW-TO-READ-THE-CSS.md`](../css/HOW-TO-READ-THE-CSS.md) for colors, classes, and which page uses which styles.
+
 Read files in this order when studying the project.
 
 ## 1. Script load order (every HTML page)

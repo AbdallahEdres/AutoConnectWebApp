@@ -84,9 +84,10 @@ Endpoint map is in `API_ENDPOINTS` (same file). Full request/response shapes: `w
 
 ## Understanding the code
 
-Every JS file has a comment block at the top explaining what it does. Start here:
+Every JS and CSS file has a comment block at the top explaining what it does. Start here:
 
-- **`web/js/HOW-TO-READ-THE-CODE.md`** — load order, data flow, file map
+- **`web/js/HOW-TO-READ-THE-CODE.md`** — JavaScript load order, data flow, file map
+- **`web/css/HOW-TO-READ-THE-CSS.md`** — CSS load order, classes per page, what each style does
 - **`web/data/API.md`** — request/response format for PHP team
 
 ## Team notes
