@@ -1,0 +1,8 @@
+[
+  { "id": 1, "provider_id": 1, "user_name": "سارة م.", "user_name_en": "Sara M.", "rate": 5, "comment": "خدمة ممتازة وسريعة", "comment_en": "Excellent and fast service", "created_at": "2024-11-02" },
+  { "id": 2, "provider_id": 1, "user_name": "كريم ع.", "user_name_en": "Karim A.", "rate": 4, "comment": "أسعار معقولة", "comment_en": "Fair prices", "created_at": "2024-10-18" },
+  { "id": 3, "provider_id": 2, "user_name": "منى ح.", "user_name_en": "Mona H.", "rate": 5, "comment": "وصل الونش في 12 دقيقة", "comment_en": "Tow truck arrived in 12 minutes", "created_at": "2024-12-01" },
+  { "id": 4, "provider_id": 3, "user_name": "يوسف ر.", "user_name_en": "Youssef R.", "rate": 5, "comment": "أفضل ورشة في مدينة نصر", "comment_en": "Best garage in Nasr City", "created_at": "2024-09-20" },
+  { "id": 5, "provider_id": 4, "user_name": "نورا س.", "user_name_en": "Nora S.", "rate": 4, "comment": "تبديل إطارات محترف", "comment_en": "Professional tire change", "created_at": "2024-11-15" },
+  { "id": 6, "provider_id": 6, "user_name": "علي ف.", "user_name_en": "Ali F.", "rate": 4, "comment": "مناسب للموتوسيكل", "comment_en": "Good for motorcycles", "created_at": "2024-10-05" }
+]

@@ -1,0 +1,7 @@
+[
+  { "id": 1, "name": "ميكانيكي", "name_en": "Mechanic", "slug": "mechanic", "parent_id": null },
+  { "id": 2, "name": "كهرباء سيارات", "name_en": "Auto Electric", "slug": "electric", "parent_id": 1 },
+  { "id": 3, "name": "قطع غيار", "name_en": "Spare Parts", "slug": "spare-parts", "parent_id": null },
+  { "id": 4, "name": "ونش / طوارئ", "name_en": "Towing / Emergency", "slug": "towing", "parent_id": null },
+  { "id": 5, "name": "إطارات وزيوت", "name_en": "Tires & Oil", "slug": "tires", "parent_id": null }
+]

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoConnect — Settings</title>
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+</head>
+<body class="rtl">
+  <div id="site-header"></div>
+
+  <main class="page-main container layout-with-sidebar">
+    <aside class="sidebar">
+      <h3 data-i18n="account_mgmt"></h3>
+      <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:1rem" data-i18n="account_mgmt_sub"></p>
+      <nav class="sidebar-nav">
+        <a href="profile.html" data-i18n="profile_details"></a>
+        <a href="settings.html" class="active" data-i18n="security"></a>
+        <a href="favorites.html" data-i18n="nav_favorites"></a>
+        <a href="#" data-i18n="notifications"></a>
+      </nav>
+      <button type="button" class="btn btn-primary btn-block" style="margin-top:1.5rem" data-i18n="upgrade_plan"></button>
+    </aside>
+
+    <div>
+      <h1 class="section-title" data-i18n="settings_title"></h1>
+      <p class="section-subtitle" data-i18n="settings_sub"></p>
+
+      <div class="settings-grid">
+        <article class="card">
+          <h3 data-i18n="security_tips"></h3>
+          <ul class="tips-list" style="margin-top:1rem">
+            <li data-i18n="tip1"></li>
+            <li data-i18n="tip2"></li>
+            <li data-i18n="tip3"></li>
+          </ul>
+          <div class="map-placeholder" style="margin-top:1.5rem;height:120px">🔒</div>
+        </article>
+
+        <article class="card">
+          <h3 data-i18n="change_password"></h3>
+          <form id="password-form" style="margin-top:1rem">
+            <div class="form-group">
+              <label for="current-password" data-i18n="current_password"></label>
+              <input class="form-control" type="password" id="current-password" placeholder="********">
+            </div>
+            <div class="form-group">
+              <label for="new-password" data-i18n="new_password"></label>
+              <input class="form-control" type="password" id="new-password" placeholder="********">
+            </div>
+            <div class="form-group">
+              <label for="confirm-password" data-i18n="confirm_new_password"></label>
+              <input class="form-control" type="password" id="confirm-password" placeholder="********">
+            </div>
+            <button type="submit" class="btn btn-primary" data-i18n="update_password"></button>
+          </form>
+        </article>
+
+        <article class="card delete-account-card">
+          <h3 style="color:var(--accent-red)">⚠ <span data-i18n="delete_account"></span></h3>
+          <p style="color:var(--text-secondary);margin:0.75rem 0;font-size:0.9rem" data-i18n="delete_account_desc"></p>
+          <button type="button" class="btn btn-outline" id="delete-account-btn" data-i18n="delete_my_account"></button>
+        </article>
+      </div>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/mock-handlers.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/layout.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/settings.js"></script>
+</body>
+</html>

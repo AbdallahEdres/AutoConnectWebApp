@@ -1,0 +1,8 @@
+[
+  { "id": 1, "name": "القاهرة", "name_en": "Cairo", "lat": 30.0444, "long": 31.2357 },
+  { "id": 2, "name": "الجيزة", "name_en": "Giza", "lat": 30.0131, "long": 31.2089 },
+  { "id": 3, "name": "الشيخ زايد", "name_en": "Sheikh Zayed", "lat": 30.0287, "long": 30.9785 },
+  { "id": 4, "name": "مدينة نصر", "name_en": "Nasr City", "lat": 30.0626, "long": 31.34 },
+  { "id": 5, "name": "المعادي", "name_en": "Maadi", "lat": 29.96, "long": 31.27 },
+  { "id": 6, "name": "6 أكتوبر", "name_en": "6th of October", "lat": 29.9285, "long": 30.9188 }
+]

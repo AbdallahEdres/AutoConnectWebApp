@@ -1,0 +1,28 @@
+{
+  "id": 1,
+  "fname": "أحمد",
+  "lname": "إبراهيم",
+  "fname_en": "Ahmed",
+  "lname_en": "Ibrahim",
+  "email": "demo@autoconnect.com",
+  "phone": "01012345678",
+  "role": "client",
+  "vehicle_type": "car",
+  "vehicle_brand": "Toyota Corolla 2021",
+  "city": "القاهرة، مصر",
+  "city_en": "Cairo, Egypt",
+  "saved_location": "المعادي، شارع 9",
+  "saved_location_en": "Maadi, Street 9",
+  "saved_lat": 29.96,
+  "saved_long": 31.27,
+  "favorite_provider_ids": [3, 4, 2, 7, 9],
+  "total_visits": 12,
+  "last_visit_days_ago": 14,
+  "next_maintenance": "تغيير الزيت - 500 كم",
+  "next_maintenance_en": "Oil change - 500 km",
+  "service_history": [
+    { "provider_id": 3, "service": "فحص شامل", "service_en": "Full inspection", "date": "2024-10-20" },
+    { "provider_id": 4, "service": "تغيير زيت", "service_en": "Oil change", "date": "2024-09-05" },
+    { "provider_id": 2, "service": "ونش طوارئ", "service_en": "Emergency tow", "date": "2024-08-12" }
+  ]
+}
