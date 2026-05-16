@@ -12,10 +12,10 @@
 
 // Main switch: true = fake data from JSON files, false = real PHP requests
 var API_CONFIG = {
-  baseUrl: "../api",       // folder where providers.php, login.php, etc. will live
-  useMock: true,           // change to false when backend is connected
-  mockDelayMs: 350,        // pretend network delay (milliseconds) so UI feels realistic
-  logMockCalls: true       // print "[Mock API] ..." in browser console for debugging
+  baseUrl: "/AutoConnectWebApp/backend/api",
+  useMock: false,
+  mockDelayMs: 350,
+  logMockCalls: false
 };
 
 /**
@@ -32,6 +32,7 @@ var API_ENDPOINTS = {
   login: "/login.php",
   register: "/register.php",
   addProvider: "/add_provider.php",
+  editProvider: "/edit_provider.php",
   updatePassword: "/update_password.php",
   reviews: "/reviews.php",
   favorites: "/favorites.php",
