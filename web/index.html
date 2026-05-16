@@ -46,21 +46,24 @@
           <h3 data-i18n="mechanic"></h3>
           <p style="color:var(--text-secondary);font-size:0.9rem">صيانة وإصلاح مع فنيين معتمدين</p>
           <ul><li>24/7</li><li>فنيون معتمدون</li></ul>
-          <a href="pages/services.html?category=mechanic" class="btn btn-ghost btn-block" data-i18n="discover_more"></a>
+          <a href="pages/services.html?category_slug=mechanic" class="btn btn-ghost btn-block" data-i18n="discover_more"></a>
         </article>
         <article class="service-type-card">
           <div class="icon-box">⚙️</div>
           <h3 data-i18n="spare_parts"></h3>
           <p style="color:var(--text-secondary);font-size:0.9rem">قطع أصلية وتوصيل</p>
           <ul><li>قطع أصلية</li><li>توصيل للمنزل</li></ul>
-          <a href="pages/services.html?category=spare-parts" class="btn btn-ghost btn-block" data-i18n="shop_now"></a>
+          <a href="pages/services.html?category_slug=spare-parts" class="btn btn-ghost btn-block" data-i18n="shop_now"></a>
         </article>
         <article class="service-type-card">
           <div class="icon-box">🚛</div>
           <h3 data-i18n="towing"></h3>
           <p style="color:var(--text-secondary);font-size:0.9rem">ونش طوارئ سريع</p>
           <ul><li>استجابة 15 دقيقة</li><li>تتبع GPS</li></ul>
-          <a href="pages/emergency.html" class="btn btn-ghost btn-block" data-i18n="order_now"></a>
+          <div style="display: flex; flex-direction: row; gap: 0.5rem; margin-top: 0.5rem;">
+            <a href="pages/services.html?category_slug=towing" class="btn btn-ghost btn-block" data-i18n="shop_now"></a>
+            <a href="pages/emergency.html" class="btn btn-primary btn-block" data-i18n="order_now"></a>
+          </div>
         </article>
       </div>
 

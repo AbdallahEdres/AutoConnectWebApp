@@ -11,7 +11,7 @@ header('Access-Control-Allow-Origin: *');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
-    echo json_encode(['success' => false, 'message' => 'Method Not Allowed.']);
+    echo json_encode(['success' => false, 'message' => 'Method Not Allowed, GET method required.']);
     exit;
 }
 
@@ -25,35 +25,23 @@ $user_lng = isset($_GET['lng'])  ? (float)$_GET['lng']
 
 // ── Filters ──────────────────────────────────────────────────
 $where_clauses = ["p.status = 'active'"]; // Default: only active
-$bind_types    = '';
-$bind_values   = [];
 
 // 1. Keyword search — accepts 'q' or 'search' (frontend alias)
 $search_term = !empty($_GET['q']) ? $_GET['q'] : (!empty($_GET['search']) ? $_GET['search'] : '');
 if ($search_term !== '') {
-    $where_clauses[] = '(p.name LIKE ? OR p.address LIKE ?)';
-    $bind_types     .= 'ss';
-    $keyword         = '%' . trim($search_term) . '%';
-    $bind_values[]   = $keyword;
-    $bind_values[]   = $keyword;
+    $where_clauses[] = '(p.name LIKE "%' . $search_term . '%" OR p.address LIKE "%' . $search_term . '%")';
 }
 
 // 2. Category — accepts numeric 'category_id' or slug 'category_slug' (frontend alias)
 if (!empty($_GET['category_id'])) {
-    $where_clauses[] = 'p.category_id = ?';
-    $bind_types     .= 'i';
-    $bind_values[]   = (int) $_GET['category_id'];
+    $where_clauses[] = 'p.category_id = "' . $_GET['category_id'] . '"';
 } elseif (!empty($_GET['category_slug'])) {
-    $where_clauses[] = 'p.category_id = (SELECT id FROM categories WHERE slug = ? LIMIT 1)';
-    $bind_types     .= 's';
-    $bind_values[]   = trim($_GET['category_slug']);
+    $where_clauses[] = 'p.category_id = (SELECT id FROM categories WHERE slug = "' . $_GET['category_slug'] . '" LIMIT 1)';
 }
 
 // 3. City
 if (!empty($_GET['city'])) {
-    $where_clauses[] = 'p.city = ?';
-    $bind_types     .= 's';
-    $bind_values[]   = trim($_GET['city']);
+    $where_clauses[] = 'p.city = "' . $_GET['city'] . '"';
 }
 
 // 4. Open Now Filter — accepts 'open_now=true' or 'status=open' (frontend alias)

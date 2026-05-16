@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
       e.preventDefault();
       var type = document.getElementById("search-type").value;
       var loc = document.getElementById("search-location").value;
-      var url = "pages/services.html?category=" + encodeURIComponent(type);
+      var url = "pages/services.html?category_slug=" + encodeURIComponent(type);
       if (loc) url += "&city=" + encodeURIComponent(loc);
       window.location.href = url;
     });
