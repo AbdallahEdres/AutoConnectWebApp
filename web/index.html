@@ -10,9 +10,18 @@
   <link rel="stylesheet" href="css/pages.css">
 </head>
 <body class="rtl">
+  <!-- ========================================== -->
+  <!-- 1. HEADER INJECTION POINT                  -->
+  <!-- Handled by: web/js/layout.js -> injectHeader() -->
+  <!-- ========================================== -->
   <div id="site-header"></div>
 
   <main class="page-main">
+    <!-- ========================================== -->
+    <!-- 2. HERO SECTION START                      -->
+    <!-- Search form Handled by: web/js/home.js     -->
+    <!-- (submit listener & fillCategorySelect())   -->
+    <!-- ========================================== -->
     <section class="hero container">
       <div class="hero-grid">
         <div>
@@ -36,7 +45,14 @@
         </div>
       </div>
     </section>
+    <!-- ========================================== -->
+    <!-- HERO SECTION END                           -->
+    <!-- ========================================== -->
 
+    <!-- ========================================== -->
+    <!-- 3. SERVICES CARDS SECTION START            -->
+    <!-- Static links mapping to specific categories-->
+    <!-- ========================================== -->
     <section class="container">
       <h2 class="section-title" data-i18n="services_title"></h2>
       <p class="section-subtitle" data-i18n="services_sub"></p>
@@ -66,7 +82,13 @@
           </div>
         </article>
       </div>
+      <!-- ========================================== -->
+      <!-- SERVICES CARDS SECTION END                 -->
+      <!-- ========================================== -->
 
+      <!-- ========================================== -->
+      <!-- 4. CALL TO ACTION (CTA) BANNER START       -->
+      <!-- ========================================== -->
       <section class="cta-banner">
         <div class="hero-image" style="min-height:160px"></div>
         <div>
@@ -76,9 +98,16 @@
           <a href="pages/services.html" class="btn btn-ghost" data-i18n="learn_more"></a>
         </div>
       </section>
+      <!-- ========================================== -->
+      <!-- CALL TO ACTION (CTA) BANNER END            -->
+      <!-- ========================================== -->
     </section>
   </main>
 
+  <!-- ========================================== -->
+  <!-- 5. FOOTER INJECTION POINT                  -->
+  <!-- Handled by: web/js/layout.js -> injectFooter() -->
+  <!-- ========================================== -->
   <div id="site-footer"></div>
 
   <script src="js/config.js"></script>

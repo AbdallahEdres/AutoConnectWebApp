@@ -1,0 +1,47 @@
+/* ----- PROFILE DASHBOARD (profile.html) ----- */
+.profile-header-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: start;
+}
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.stat-box {
+  text-align: center;
+}
+
+.stat-box .number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent-yellow);
+}
+
+.add-provider-card {
+  border: 2px dashed var(--border-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-lg);
+}
+
+.add-provider-card:hover {
+  border-color: var(--accent-yellow);
+  color: var(--accent-yellow);
+}
+
+@media (max-width: 900px) {
+  .profile-stats {
+    grid-template-columns: 1fr;
+  }
+}
+

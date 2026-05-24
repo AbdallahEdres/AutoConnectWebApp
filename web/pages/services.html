@@ -10,6 +10,10 @@
   <link rel="stylesheet" href="../css/pages.css">
 </head>
 <body class="rtl">
+  <!-- ========================================== -->
+  <!-- 1. HEADER INJECTION POINT                  -->
+  <!-- Handled by: web/js/layout.js -> injectHeader() -->
+  <!-- ========================================== -->
   <div id="site-header"></div>
 
   <main class="page-main container">
@@ -17,6 +21,11 @@
     <p class="section-subtitle" data-i18n="filtered_sub"></p>
     <div id="active-filters" style="margin-bottom:1rem;display:flex;gap:0.5rem;flex-wrap:wrap"></div>
 
+    <!-- ========================================== -->
+    <!-- 2. FILTER BAR START                        -->
+    <!-- Handled by: web/js/services.js             -->
+    <!-- (listens to #apply-filter click)           -->
+    <!-- ========================================== -->
     <div class="filter-bar">
       <div class="form-group">
         <label data-i18n="search_services"></label>
@@ -47,6 +56,15 @@
       </div>
       <button type="button" class="btn btn-primary" id="apply-filter" data-i18n="apply_filter"></button>
     </div>
+    <!-- ========================================== -->
+    <!-- FILTER BAR END                             -->
+    <!-- ========================================== -->
+
+    <!-- ========================================== -->
+    <!-- 3. RESULTS GRID START                      -->
+    <!-- Handled by: web/js/services.js             -->
+    <!-- (calls getProviders() and renders cards inside #providers-grid) -->
+    <!-- ========================================== -->
 
     <div class="results-header">
       <p id="results-count"></p>
@@ -54,6 +72,9 @@
     </div>
 
     <div class="grid-3" id="providers-grid"></div>
+    <!-- ========================================== -->
+    <!-- RESULTS GRID END                           -->
+    <!-- ========================================== -->
 
     <nav class="pagination" aria-label="Pagination">
       <button type="button" class="active">1</button>
@@ -62,6 +83,10 @@
     </nav>
   </main>
 
+  <!-- ========================================== -->
+  <!-- 4. FOOTER INJECTION POINT                  -->
+  <!-- Handled by: web/js/layout.js -> injectFooter() -->
+  <!-- ========================================== -->
   <div id="site-footer"></div>
 
   <script src="../js/config.js"></script>

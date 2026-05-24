@@ -11,6 +11,10 @@
 </head>
 <body class="rtl">
   <div class="layout-with-sidebar container page-main" style="padding-top:1.5rem">
+    <!-- ========================================== -->
+    <!-- 1. SIDEBAR NAVIGATION START                -->
+    <!-- Static sidebar used for profile pages      -->
+    <!-- ========================================== -->
     <aside class="sidebar">
       <p class="logo" style="font-size:1rem;margin-bottom:0.25rem">AUTO CONNECT</p>
       <p style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:1rem">مخطط الميكانيكي الحديث</p>
@@ -23,10 +27,17 @@
       <p style="margin-top:1.5rem;font-size:0.8rem;color:var(--text-secondary)" data-i18n="system_status"></p>
       <p><span class="status-dot open"></span> <span data-i18n="connected"></span></p>
     </aside>
+    <!-- ========================================== -->
+    <!-- SIDEBAR NAVIGATION END                     -->
+    <!-- ========================================== -->
 
     <div>
       <h1 style="color:var(--accent-yellow);margin-bottom:1rem" data-i18n="profile_title"></h1>
 
+      <!-- ========================================== -->
+      <!-- 2. USER PROFILE INFO & STATS START         -->
+      <!-- Handled by: web/js/profile.js -> loadUserProfile() -->
+      <!-- ========================================== -->
       <div class="grid-2" style="margin-bottom:1.25rem">
         <article class="card profile-header-card">
           <h2 id="user-name"></h2>
@@ -53,7 +64,14 @@
           </div>
         </article>
       </div>
+      <!-- ========================================== -->
+      <!-- USER PROFILE INFO & STATS END              -->
+      <!-- ========================================== -->
 
+      <!-- ========================================== -->
+      <!-- 3. FAVORITE PROVIDERS WIDGET START         -->
+      <!-- Handled by: web/js/profile.js -> loadProfileFavorites() -->
+      <!-- ========================================== -->
       <section style="margin-bottom:1.25rem">
         <div style="display:flex;justify-content:space-between;margin-bottom:1rem">
           <h2 class="section-title" data-i18n="favorite_providers"></h2>
@@ -67,6 +85,9 @@
           </a>
         </div>
       </section>
+      <!-- ========================================== -->
+      <!-- FAVORITE PROVIDERS WIDGET END              -->
+      <!-- ========================================== -->
 
       <div class="grid-2">
         <article class="card">
@@ -90,6 +111,10 @@
     </div>
   </div>
 
+  <!-- ========================================== -->
+  <!-- 4. FOOTER INJECTION POINT                  -->
+  <!-- Handled by: web/js/layout.js -> injectFooter() -->
+  <!-- ========================================== -->
   <div id="site-footer"></div>
 
   <script src="../js/config.js"></script>

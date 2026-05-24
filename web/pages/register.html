@@ -10,18 +10,33 @@
   <link rel="stylesheet" href="../css/pages.css">
 </head>
 <body class="rtl">
+  <!-- ========================================== -->
+  <!-- 1. HEADER INJECTION POINT                  -->
+  <!-- Handled by: web/js/layout.js -> injectHeader() -->
+  <!-- ========================================== -->
   <div id="site-header"></div>
 
   <main class="page-main auth-card-wrap">
+    <!-- ========================================== -->
+    <!-- 2. MAIN REGISTER CARD START                -->
+    <!-- ========================================== -->
     <div class="auth-card" id="register-card">
       <h2 class="section-title" data-i18n="register_title"></h2>
       <p class="section-subtitle" id="register-subtitle" data-i18n="register_sub"></p>
 
+      <!-- ========================================== -->
+      <!-- ROLE SELECTOR TABS                         -->
+      <!-- Handled by: web/js/auth.js -> setupRoleToggle() -->
+      <!-- ========================================== -->
       <div class="role-toggle" id="register-role-toggle">
         <button type="button" data-role="provider" data-i18n="service_provider"></button>
         <button type="button" class="active" data-role="customer" data-i18n="customer"></button>
       </div>
 
+      <!-- ========================================== -->
+      <!-- REGISTER FORM START                        -->
+      <!-- Handled by: web/js/auth.js -> handleRegisterSubmit() -->
+      <!-- ========================================== -->
       <form id="register-form">
         <!-- Account (both roles) -->
         <div class="form-group">
@@ -104,6 +119,9 @@
 
         <button type="submit" class="btn btn-primary btn-block" id="register-submit" data-i18n="create_account"></button>
       </form>
+      <!-- ========================================== -->
+      <!-- REGISTER FORM END                          -->
+      <!-- ========================================== -->
 
       <p class="auth-footer-text" style="margin-top:1rem">
         <span data-i18n="have_account"></span>
@@ -112,8 +130,15 @@
         <a href="services.html" data-i18n="continue_guest"></a>
       </p>
     </div>
+    <!-- ========================================== -->
+    <!-- MAIN REGISTER CARD END                     -->
+    <!-- ========================================== -->
   </main>
 
+  <!-- ========================================== -->
+  <!-- 3. FOOTER INJECTION POINT                  -->
+  <!-- Handled by: web/js/layout.js -> injectFooter() -->
+  <!-- ========================================== -->
   <div id="site-footer"></div>
 
   <script src="../js/config.js"></script>

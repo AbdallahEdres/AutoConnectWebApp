@@ -12,7 +12,7 @@
 
 // Main switch: true = fake data from JSON files, false = real PHP requests
 var API_CONFIG = {
-  baseUrl: "/AutoConnectWebApp/backend/api",
+  baseUrl: "/autoconnect/backend/api",
   useMock: false,
   mockDelayMs: 350,
   logMockCalls: false
