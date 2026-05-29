@@ -1,49 +1,48 @@
 <!DOCTYPE html>
 <html lang="ar">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AutoConnect — Favorites</title>
+  <title>AutoConnect — المفضلة</title>
   <link rel="stylesheet" href="../css/variables.css">
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/pages.css">
 </head>
+
 <body class="rtl">
   <div id="site-header"></div>
 
   <main class="page-main container">
-    <h1 class="section-title" data-i18n="favorites_title"></h1>
-    <p class="section-subtitle" data-i18n="favorites_sub"></p>
+    <h1 class="section-title" data-i18n="favorites_title">المفضلة</h1>
+    <p class="section-subtitle" data-i18n="favorites_sub">مزودو الخدمة المحفوظون في قائمتك</p>
 
     <div class="pills">
-      <button type="button" class="pill active" data-category="" data-i18n="all_providers"></button>
-      <button type="button" class="pill" data-category="mechanic" data-i18n="mechanic"></button>
+      <button type="button" class="pill active" data-category="" data-i18n="all_providers">جميع المزودين</button>
+      <button type="button" class="pill" data-category="mechanic" data-i18n="mechanic">ميكانيكي</button>
       <button type="button" class="pill" data-category="tires">إطارات</button>
-      <button type="button" class="pill" data-category="towing" data-i18n="towing"></button>
+      <button type="button" class="pill" data-category="towing" data-i18n="towing">ونش</button>
     </div>
 
     <div class="grid-auto" id="favorites-grid"></div>
 
-    <section class="card" style="margin-top:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">
+    <section class="card"
+      style="margin-top:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">
       <div>
-        <h3 data-i18n="more_services"></h3>
-        <p style="color:var(--text-secondary);font-size:0.9rem" data-i18n="filtered_sub"></p>
+        <h3 data-i18n="more_services">خدمات إضافية</h3>
+        <p style="color:var(--text-secondary);font-size:0.9rem" data-i18n="filtered_sub">عرض النتائج بناء على اختيارك
+        </p>
       </div>
-      <a href="services.html" class="btn btn-outline" data-i18n="explore_directory"></a>
+      <a href="services.html" class="btn btn-outline" data-i18n="explore_directory">استعرض الدليل</a>
     </section>
   </main>
 
   <div id="site-footer"></div>
 
-  <script src="../js/config.js"></script>
-  <script src="../js/i18n.js"></script>
-  <script src="../js/utils.js"></script>
-  <script src="../js/mock-handlers.js"></script>
-  <script src="../js/api.js"></script>
-  <script src="../js/ui.js"></script>
-  <script src="../js/layout.js"></script>
-  <script src="../js/app.js"></script>
-  <script src="../js/favorites.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/pages.js"></script>
+  <script src="js/translat.js"></script>
 </body>
+
 </html>

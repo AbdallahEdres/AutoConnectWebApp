@@ -1,128 +1,129 @@
 <!DOCTYPE html>
 <html lang="ar">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AutoConnect — Register</title>
+  <title>AutoConnect — إنشاء حساب</title>
   <link rel="stylesheet" href="../css/variables.css">
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/pages.css">
 </head>
+
 <body class="rtl">
   <div id="site-header"></div>
 
   <main class="page-main auth-card-wrap">
     <div class="auth-card" id="register-card">
-      <h2 class="section-title" data-i18n="register_title"></h2>
-      <p class="section-subtitle" id="register-subtitle" data-i18n="register_sub"></p>
+      <h2 class="section-title" data-i18n="register_title">إنشاء حساب جديد</h2>
+      <p class="section-subtitle" id="register-subtitle" data-i18n="register_sub">انضم إلى أوتو كونيكت واستفد من خدماتنا
+        المحفوظة</p>
 
       <div class="role-toggle" id="register-role-toggle">
-        <button type="button" data-role="provider" data-i18n="service_provider"></button>
-        <button type="button" class="active" data-role="customer" data-i18n="customer"></button>
+        <button type="button" data-role="provider" data-i18n="service_provider">مزود خدمة</button>
+        <button type="button" class="active" data-role="customer" data-i18n="customer">عميل</button>
       </div>
 
       <form id="register-form">
-        <!-- Account (both roles) -->
+        <!-- حقول مشتركة -->
         <div class="form-group">
-          <label for="reg-email" data-i18n="email"></label>
+          <label for="reg-email" data-i18n="email">البريد الإلكتروني</label>
           <input class="form-control" type="email" id="reg-email" required>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="reg-password" data-i18n="password"></label>
+            <label for="reg-password" data-i18n="password">كلمة المرور</label>
             <input class="form-control" type="password" id="reg-password" required>
           </div>
           <div class="form-group">
-            <label for="confirm-password" data-i18n="confirm_password"></label>
+            <label for="confirm-password" data-i18n="confirm_password">تأكيد كلمة المرور</label>
             <input class="form-control" type="password" id="confirm-password" required>
           </div>
         </div>
 
-        <!-- Customer fields -->
+        <!-- حقول العميل -->
         <div id="customer-fields">
           <div class="form-group">
-            <label for="full-name" data-i18n="full_name"></label>
+            <label for="full-name" data-i18n="full_name">الاسم الكامل</label>
             <input class="form-control" type="text" id="full-name">
           </div>
           <div class="form-group">
-            <label for="phone" data-i18n="phone"></label>
+            <label for="phone" data-i18n="phone">رقم الهاتف</label>
             <input class="form-control" type="tel" id="phone">
           </div>
         </div>
 
-        <!-- Provider portfolio (matches provider-register design) -->
+        <!-- حقول مزود الخدمة -->
         <div id="provider-fields" class="register-fields-hidden">
-          <h3 style="font-size:1rem;margin:1rem 0 0.75rem;color:var(--accent-yellow)" data-i18n="provider_form_title"></h3>
+          <h3 style="font-size:1rem;margin:1rem 0 0.75rem;color:var(--accent-yellow)" data-i18n="provider_form_title">
+            بيانات مقدم الخدمة</h3>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="workshop-name" data-i18n="workshop_name"></label>
+              <label for="workshop-name" data-i18n="workshop_name">اسم الورشة / المركز</label>
               <input class="form-control" type="text" id="workshop-name">
             </div>
             <div class="form-group">
-              <label for="mobile" data-i18n="mobile"></label>
+              <label for="mobile" data-i18n="mobile">رقم الموبايل</label>
               <input class="form-control" type="tel" id="mobile" placeholder="+20">
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="provider-category" data-i18n="service_type"></label>
+              <label for="provider-category" data-i18n="service_type">نوع الخدمة</label>
               <select class="form-control" id="provider-category"></select>
             </div>
             <div class="form-group">
-              <label for="availability" data-i18n="availability"></label>
+              <label for="availability" data-i18n="availability">التوفر</label>
               <select class="form-control" id="availability">
-                <option value="open" data-i18n="open_now"></option>
-                <option value="closed" data-i18n="status_closed"></option>
+                <option value="open" data-i18n="open_now">مفتوح الآن</option>
+                <option value="closed" data-i18n="status_closed">مغلق</option>
               </select>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="working-hours" data-i18n="working_hours"></label>
+              <label for="working-hours" data-i18n="working_hours">مواعيد العمل</label>
               <input class="form-control" type="text" id="working-hours" placeholder="9:00 - 18:00">
             </div>
             <div class="form-group">
-              <label for="city-area" data-i18n="city_area"></label>
+              <label for="city-area" data-i18n="city_area">المدينة / المنطقة</label>
               <input class="form-control" type="text" id="city-area">
             </div>
           </div>
 
           <div class="form-group">
-            <label for="service-desc" data-i18n="service_desc"></label>
+            <label for="service-desc" data-i18n="service_desc">وصف الخدمة (نبذة سريعة)</label>
             <textarea class="form-control" id="service-desc" rows="4"></textarea>
           </div>
 
           <div class="form-group">
-            <label data-i18n="pin_on_map"></label>
+            <label data-i18n="pin_on_map">حدد مكانك بدقة على الخريطة</label>
             <div class="map-placeholder" style="height:160px">📍 Map placeholder</div>
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" id="register-submit" data-i18n="create_account"></button>
+        <button type="submit" class="btn btn-primary btn-block" id="register-submit" data-i18n="create_account">إنشاء
+          حساب</button>
       </form>
 
       <p class="auth-footer-text" style="margin-top:1rem">
-        <span data-i18n="have_account"></span>
-        <a href="login.html" data-i18n="signup_link"></a>
+        <span data-i18n="have_account">لديك حساب بالفعل؟</span>
+        <a href="login.html" data-i18n="signup_link">سجل الآن</a>
         ·
-        <a href="services.html" data-i18n="continue_guest"></a>
+        <a href="services.html" data-i18n="continue_guest">المتابعة كزائر</a>
       </p>
     </div>
   </main>
 
   <div id="site-footer"></div>
 
-  <script src="../js/config.js"></script>
-  <script src="../js/i18n.js"></script>
-  <script src="../js/utils.js"></script>
-  <script src="../js/mock-handlers.js"></script>
-  <script src="../js/api.js"></script>
-  <script src="../js/layout.js"></script>
-  <script src="../js/app.js"></script>
-  <script src="../js/auth.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/pages.js"></script>
+  <script src="js/translat.js"></script>
 </body>
+
 </html>

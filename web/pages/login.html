@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="ar">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AutoConnect — Login</title>
+  <title>AutoConnect — تسجيل الدخول</title>
   <link rel="stylesheet" href="../css/variables.css">
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/pages.css">
 </head>
+
 <body class="rtl auth-page">
   <div id="site-header"></div>
 
@@ -16,28 +18,29 @@
     <div class="auth-card">
       <p class="auth-logo">AutoConnect</p>
       <div class="role-toggle">
-        <button type="button" data-i18n="service_provider"></button>
-        <button type="button" class="active" data-i18n="customer"></button>
+        <button type="button" data-i18n="service_provider">مزود خدمة</button>
+        <button type="button" class="active" data-i18n="customer">عميل</button>
       </div>
-      <h2 class="section-title" data-i18n="login_title"></h2>
-      <p class="section-subtitle" data-i18n="login_sub"></p>
+      <h2 class="section-title" data-i18n="login_title">مرحباً بعودتك</h2>
+      <p class="section-subtitle" data-i18n="login_sub">قم بتسجيل الدخول للمتابعة في أوتو كونيكت</p>
       <form id="login-form">
         <div class="form-group">
-          <label for="email" data-i18n="email"></label>
+          <label for="email" data-i18n="email">البريد الإلكتروني</label>
           <input class="form-control" type="email" id="email" placeholder="name@example.com" required>
         </div>
         <div class="form-group">
-          <label for="password" data-i18n="password"></label>
+          <label for="password" data-i18n="password">كلمة المرور</label>
           <input class="form-control" type="password" id="password" placeholder="********" required>
-          <a href="#" style="font-size:0.8rem;color:var(--accent-yellow);float:inline-end" data-i18n="forgot_password"></a>
+          <a href="#" style="font-size:0.8rem;color:var(--accent-yellow);float:inline-end"
+            data-i18n="forgot_password">نسيت كلمة المرور؟</a>
         </div>
-        <button type="submit" class="btn btn-primary btn-block" data-i18n="login_btn"></button>
+        <button type="submit" class="btn btn-primary btn-block" data-i18n="login_btn">تسجيل الدخول</button>
       </form>
-      <p class="auth-divider" data-i18n="or"></p>
-      <a href="services.html" class="btn btn-ghost btn-block" data-i18n="guest_btn"></a>
+      <p class="auth-divider" data-i18n="or">أو</p>
+      <a href="services.html" class="btn btn-ghost btn-block" data-i18n="guest_btn">المتابعة كضيف</a>
       <p class="auth-footer-text">
-        <span data-i18n="no_account"></span>
-        <a href="register.html" data-i18n="signup_link"></a>
+        <span data-i18n="no_account">ليس لديك حساب؟</span>
+        <a href="register.html" data-i18n="signup_link">سجل الآن</a>
       </p>
       <p id="demo-hint" style="margin-top:1rem;font-size:0.75rem;color:var(--text-muted);text-align:center"></p>
     </div>
@@ -45,19 +48,15 @@
 
   <div class="provider-cta container">
     <span>🤝</span>
-    <p data-i18n="cta_join_sub"></p>
-    <a href="provider-register.html" class="btn btn-ghost btn-sm" data-i18n="partner_btn"></a>
+    <p data-i18n="cta_join_sub">هل أنت مزود خدمة؟ انضم لشبكتنا واستقبل الطلبات.</p>
+    <a href="provider-register.html" class="btn btn-ghost btn-sm" data-i18n="partner_btn">انضم إلينا</a>
   </div>
 
   <div id="site-footer"></div>
 
-  <script src="../js/config.js"></script>
-  <script src="../js/i18n.js"></script>
-  <script src="../js/utils.js"></script>
-  <script src="../js/mock-handlers.js"></script>
-  <script src="../js/api.js"></script>
-  <script src="../js/layout.js"></script>
-  <script src="../js/app.js"></script>
-  <script src="../js/auth.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/pages.js"></script>
+  <script src="js/translat.js"></script>
 </body>
+
 </html>
