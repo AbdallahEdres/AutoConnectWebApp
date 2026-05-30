@@ -1,9 +1,5 @@
 <?php
-// ============================================================
-// api/edit_provider.php — POST /autoconnect/api/edit_provider.php
-// Updates an existing provider and its related sub-tables.
-// ============================================================
-
+// api/edit_provider.php — POST: update an existing provider
 require_once '../config/db.php';
 
 header('Content-Type: application/json');
@@ -15,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// ── 0. Authentication ────────────────────────────────────────
+// Authentication
 $headers = getallheaders();
 $token   = str_replace('Bearer ', '', isset($headers['Authorization']) ? $headers['Authorization'] : '');
 $payload = verifyToken($token);
@@ -33,15 +29,11 @@ if (empty($data['id'])) {
     echo json_encode(['success' => false, 'message' => 'Provider ID is required.']);
     exit;
 }
+$provider_id = (int)$data['id'];
 
-$provider_id = (int) $data['id'];
-
-// ── 1. Check provider exists and is owned by the requester ───
-$check_stmt = mysqli_prepare($conn, "SELECT id, user_id FROM providers WHERE id = ?");
-mysqli_stmt_bind_param($check_stmt, "i", $provider_id);
-mysqli_stmt_execute($check_stmt);
-$check_row = mysqli_fetch_assoc(mysqli_stmt_get_result($check_stmt));
-mysqli_stmt_close($check_stmt);
+// Check provider exists and belongs to this user
+$check = mysqli_query($conn, "SELECT id, user_id FROM providers WHERE id = $provider_id");
+$check_row = mysqli_fetch_assoc($check);
 
 if (!$check_row) {
     http_response_code(404);
@@ -54,124 +46,83 @@ if ((int)$check_row['user_id'] !== $auth_user_id) {
     exit;
 }
 
-// ── 2. Collect Dynamic Fields for Providers Table ───────────
-$fields_to_update = [];
-$bind_types       = '';
-$bind_values      = [];
-
-$possible_fields = [
-    'name'        => 's',
-    'phone'       => 's',
-    'address'     => 's',
-    'bio'         => 's',
-    'city'        => 's',
-    'category_id' => 'i',
-    'status'      => 's',
-    'lat'         => 'd',
-    'lng'         => 'd',
-    'long'        => 'd' // Alias for lng
-];
-
-foreach ($possible_fields as $field => $type) {
-    if (isset($data[$field])) {
-        $db_field = ($field === 'long') ? 'lng' : $field;
-        $fields_to_update[] = "$db_field = ?";
-        $bind_types        .= $type;
-        $bind_values[]      = ($type === 'i') ? (int)$data[$field] : (($type === 'd') ? (float)$data[$field] : trim($data[$field]));
-    }
-}
-
-// ── 3. Start Database Transaction ──────────────────────────
 mysqli_begin_transaction($conn);
 
-try {
-    // A. Update Providers table if fields were sent
-    if (!empty($fields_to_update)) {
-        $sql = "UPDATE providers SET " . implode(", ", $fields_to_update) . " WHERE id = ?";
-        $bind_types .= "i";
-        $bind_values[] = $provider_id;
-        
-        $stmt = mysqli_prepare($conn, $sql);
-        $stmt->bind_param($bind_types, ...$bind_values);
-        
-        if (!mysqli_stmt_execute($stmt)) {
-            throw new Exception("Failed to update provider core data.");
-        }
-        mysqli_stmt_close($stmt);
+// A. Update provider fields (only the ones sent in the request)
+$updates = [];
+if (isset($data['name_en']))     $updates[] = "name_en = '"     . mysqli_real_escape_string($conn, trim($data['name_en']))    . "'";
+if (isset($data['name_ar']))     $updates[] = "name_ar = '"     . mysqli_real_escape_string($conn, trim($data['name_ar']))    . "'";
+if (isset($data['phone']))       $updates[] = "phone = '"       . mysqli_real_escape_string($conn, trim($data['phone']))      . "'";
+if (isset($data['address_en']))  $updates[] = "address_en = '"  . mysqli_real_escape_string($conn, trim($data['address_en'])) . "'";
+if (isset($data['address_ar']))  $updates[] = "address_ar = '"  . mysqli_real_escape_string($conn, trim($data['address_ar'])) . "'";
+if (isset($data['bio_en']))      $updates[] = "bio_en = '"      . mysqli_real_escape_string($conn, trim($data['bio_en']))     . "'";
+if (isset($data['bio_ar']))      $updates[] = "bio_ar = '"      . mysqli_real_escape_string($conn, trim($data['bio_ar']))     . "'";
+if (isset($data['city_en']))     $updates[] = "city_en = '"     . mysqli_real_escape_string($conn, trim($data['city_en']))    . "'";
+if (isset($data['city_ar']))     $updates[] = "city_ar = '"     . mysqli_real_escape_string($conn, trim($data['city_ar']))    . "'";
+if (isset($data['status']))      $updates[] = "status = '"      . mysqli_real_escape_string($conn, $data['status'])           . "'";
+if (isset($data['category_id'])) $updates[] = "category_id = " . (int)$data['category_id'];
+if (isset($data['lat']))         $updates[] = "lat = "          . (float)$data['lat'];
+if (isset($data['lng']))         $updates[] = "lng = "          . (float)$data['lng'];
+
+if (!empty($updates)) {
+    $ok = mysqli_query($conn, "UPDATE providers SET " . implode(', ', $updates) . " WHERE id = $provider_id");
+    if (!$ok) {
+        mysqli_rollback($conn);
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Failed to update provider.']);
+        exit;
     }
-
-    // B. Update Working Hours (Replace entire list)
-    if (isset($data['working_hours'])) {
-        $working_hours = $data['working_hours'];
-        if (!is_array($working_hours)) $working_hours = json_decode($working_hours, true);
-
-        $del_wh = mysqli_prepare($conn, "DELETE FROM working_hours WHERE provider_id = ?");
-        mysqli_stmt_bind_param($del_wh, "i", $provider_id);
-        mysqli_stmt_execute($del_wh);
-        mysqli_stmt_close($del_wh);
-
-        if ($working_hours) {
-            $wh_sql = "INSERT INTO working_hours (provider_id, day, open_time, close_time, is_close) VALUES (?, ?, ?, ?, ?)";
-            $wh_stmt = mysqli_prepare($conn, $wh_sql);
-            foreach ($working_hours as $hour) {
-                mysqli_stmt_bind_param($wh_stmt, "isssi", $provider_id, $hour['day'], $hour['open_time'], $hour['close_time'], $hour['is_close']);
-                mysqli_stmt_execute($wh_stmt);
-            }
-            mysqli_stmt_close($wh_stmt);
-        }
-    }
-
-    // C. Update Vehicle Types (Replace entire list)
-    if (isset($data['vehicle_types'])) {
-        $vehicle_types = $data['vehicle_types'];
-        if (!is_array($vehicle_types)) $vehicle_types = json_decode($vehicle_types, true);
-
-        $del_tw = mysqli_prepare($conn, "DELETE FROM tagged_with WHERE provider_id = ?");
-        mysqli_stmt_bind_param($del_tw, "i", $provider_id);
-        mysqli_stmt_execute($del_tw);
-        mysqli_stmt_close($del_tw);
-
-        if ($vehicle_types) {
-            $tw_sql = "INSERT INTO tagged_with (provider_id, vehicle_type_id) VALUES (?, ?)";
-            $tw_stmt = mysqli_prepare($conn, $tw_sql);
-            foreach ($vehicle_types as $vt_id) {
-                $vt_id = (int)$vt_id;
-                mysqli_stmt_bind_param($tw_stmt, "ii", $provider_id, $vt_id);
-                mysqli_stmt_execute($tw_stmt);
-            }
-            mysqli_stmt_close($tw_stmt);
-        }
-    }
-
-    // D. Update Photos (Replace entire list)
-    if (isset($data['photos'])) {
-        $photos = $data['photos'];
-        if (!is_array($photos)) $photos = json_decode($photos, true);
-
-        $del_ph = mysqli_prepare($conn, "DELETE FROM provider_photos WHERE provider_id = ?");
-        mysqli_stmt_bind_param($del_ph, "i", $provider_id);
-        mysqli_stmt_execute($del_ph);
-        mysqli_stmt_close($del_ph);
-
-        if ($photos) {
-            $ph_sql = "INSERT INTO provider_photos (provider_id, photo_url, sort_order) VALUES (?, ?, ?)";
-            $ph_stmt = mysqli_prepare($conn, $ph_sql);
-            foreach ($photos as $index => $url) {
-                $sort_order = $index + 1;
-                mysqli_stmt_bind_param($ph_stmt, "isi", $provider_id, $url, $sort_order);
-                mysqli_stmt_execute($ph_stmt);
-            }
-            mysqli_stmt_close($ph_stmt);
-        }
-    }
-
-    mysqli_commit($conn);
-    echo json_encode(["success" => true, "message" => "Provider updated successfully."]);
-
-} catch (Exception $e) {
-    mysqli_rollback($conn);
-    http_response_code(500);
-    echo json_encode(["success" => false, "message" => $e->getMessage()]);
 }
-?>
 
+// B. Replace working hours (delete old, insert new)
+if (isset($data['working_hours'])) {
+    $working_hours = is_array($data['working_hours']) ? $data['working_hours'] : json_decode($data['working_hours'], true);
+
+    mysqli_query($conn, "DELETE FROM working_hours WHERE provider_id = $provider_id");
+
+    if ($working_hours) {
+        foreach ($working_hours as $hour) {
+            $day        = mysqli_real_escape_string($conn, $hour['day']);
+            $open_time  = mysqli_real_escape_string($conn, $hour['open_time'] ?? '');
+            $close_time = mysqli_real_escape_string($conn, $hour['close_time'] ?? '');
+            $is_close   = (int)($hour['is_close'] ?? 0);
+            $open_sql   = $open_time  ? "'$open_time'"  : 'NULL';
+            $close_sql  = $close_time ? "'$close_time'" : 'NULL';
+            mysqli_query($conn, "INSERT INTO working_hours (provider_id, day, open_time, close_time, is_close)
+                VALUES ($provider_id, '$day', $open_sql, $close_sql, $is_close)");
+        }
+    }
+}
+
+// C. Replace vehicle types (delete old, insert new)
+if (isset($data['vehicle_types'])) {
+    $vehicle_types = is_array($data['vehicle_types']) ? $data['vehicle_types'] : json_decode($data['vehicle_types'], true);
+
+    mysqli_query($conn, "DELETE FROM tagged_with WHERE provider_id = $provider_id");
+
+    if ($vehicle_types) {
+        foreach ($vehicle_types as $vt_id) {
+            $vt_id = (int)$vt_id;
+            mysqli_query($conn, "INSERT INTO tagged_with (provider_id, vehicle_type_id) VALUES ($provider_id, $vt_id)");
+        }
+    }
+}
+
+// D. Replace photos (delete old, insert new)
+if (isset($data['photos'])) {
+    $photos = is_array($data['photos']) ? $data['photos'] : json_decode($data['photos'], true);
+
+    mysqli_query($conn, "DELETE FROM provider_photos WHERE provider_id = $provider_id");
+
+    if ($photos) {
+        foreach ($photos as $index => $url) {
+            $url        = mysqli_real_escape_string($conn, $url);
+            $sort_order = $index + 1;
+            mysqli_query($conn, "INSERT INTO provider_photos (provider_id, photo_url, sort_order) VALUES ($provider_id, '$url', $sort_order)");
+        }
+    }
+}
+
+mysqli_commit($conn);
+echo json_encode(['success' => true, 'message' => 'Provider updated successfully.']);
+?>

@@ -137,7 +137,7 @@
 .cta-banner {
   background: var(--accent-yellow);
   border-radius: var(--radius-lg);
-  padding: 2rem;
+  overflow: hidden;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;

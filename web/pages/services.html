@@ -22,7 +22,7 @@
     <div class="filter-bar">
       <div class="form-group">
         <label data-i18n="search_services">ابحث عن خدمة</label>
-        <input class="form-control" type="search" id="filter-search">
+        <input class="form-control" type="search" id="filter-search" data-i18n-placeholder="search_services">
       </div>
       <div class="form-group">
         <label data-i18n="type">النوع</label>
@@ -31,14 +31,6 @@
       <div class="form-group">
         <label data-i18n="region">المنطقة</label>
         <select class="form-control" id="filter-region"></select>
-      </div>
-      <div class="form-group">
-        <label data-i18n="status">الحالة</label>
-        <select class="form-control" id="filter-status">
-          <option value=""></option>
-          <option value="open" data-i18n="status_open">مفتوح الآن</option>
-          <option value="closed" data-i18n="status_closed">مغلق</option>
-        </select>
       </div>
       <div class="form-group">
         <label data-i18n="sort_by">ترتيب حسب</label>
@@ -57,18 +49,12 @@
 
     <div class="grid-3" id="providers-grid"></div>
 
-    <nav class="pagination" aria-label="Pagination">
-      <button type="button" class="active">1</button>
-      <button type="button">2</button>
-      <button type="button">3</button>
-    </nav>
   </main>
 
   <div id="site-footer"></div>
 
   <script src="../js/main.js"></script>
   <script src="../js/pages.js"></script>
-  <script src="js/translat.js"></script>
 </body>
 
 </html>

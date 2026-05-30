@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 // Fetch unique cities from providers table to serve as "regions"
-$sql = "SELECT DISTINCT city FROM providers WHERE city IS NOT NULL AND city != '' ORDER BY city ASC";
+$sql = "SELECT DISTINCT city_en, city_ar FROM providers WHERE city_en IS NOT NULL AND city_en != '' ORDER BY city_en ASC";
 $result = mysqli_query($conn, $sql);
 
 if (!$result) {
@@ -28,8 +28,9 @@ if (!$result) {
 $regions = [];
 while ($row = mysqli_fetch_assoc($result)) {
     $regions[] = [
-        'id' => $row['city'], // Using city name as ID for simplicity
-        'name' => $row['city']
+        'id'      => $row['city_en'],
+        'name_en' => $row['city_en'],
+        'name_ar' => $row['city_ar']
     ];
 }
 

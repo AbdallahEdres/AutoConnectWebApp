@@ -15,10 +15,10 @@
   <div class="layout-with-sidebar container page-main" style="padding-top:1.5rem">
     <aside class="sidebar">
       <p class="logo" style="font-size:1rem;margin-bottom:0.25rem">AUTO CONNECT</p>
-      <p style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:1rem">مخطط الميكانيكي الحديث</p>
+      <p style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:1rem" data-i18n="mechanic_tagline"></p>
       <nav class="sidebar-nav">
         <a href="profile.html" class="active">📊 <span data-i18n="nav_dashboard"></span></a>
-        <a href="services.html">🕐 سجل الخدمة</a>
+        <a href="services.html">🕐 <span data-i18n="service_history"></span></a>
         <a href="favorites.html">🔖 <span data-i18n="nav_favorites"></span></a>
         <a href="settings.html">⚙ <span data-i18n="settings_title"></span></a>
       </nav>
@@ -86,7 +86,7 @@
               <a href="#" data-i18n="notification_prefs"></a>
             </li>
             <li style="padding:0.65rem 0">
-              <button type="button" class="lang-toggle" onclick="toggleLanguage()" style="width:100%">EN</button>
+              <button type="button" id="lang-toggle" class="lang-toggle" onclick="toggleLanguage()" style="width:100%">EN</button>
             </li>
           </ul>
         </article>
@@ -98,7 +98,6 @@
 
   <script src="../js/main.js"></script>
   <script src="../js/pages.js"></script>
-  <script src="js/translat.js"></script>
 </body>
 
 </html>

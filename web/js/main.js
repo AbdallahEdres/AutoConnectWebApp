@@ -1,6 +1,6 @@
 /**
  * =============================================================================
- * main.js — Shared logic for AutoConnect (Config, i18n, utils, mock-handlers, api, ui, layout, auth, app)
+ * main.js — Shared logic for AutoConnect (config, i18n, utils, api, ui, layout, auth)
  * =============================================================================
  */
 
@@ -8,19 +8,8 @@
 // 1. config.js
 // =============================================================================
 
-// Main switch: true = fake data from JSON files, false = real PHP requests
-var API_CONFIG = {
-  baseUrl: "/AutoConnectWebApp/backend/api",
-  useMock: false,
-  mockDelayMs: 350,
-  logMockCalls: false
-};
+var API_BASE = "/AutoConnectWebApp/backend/api";
 
-/**
- * Maps a short name we use in JavaScript → the real PHP file name.
- * Example: getProviders() uses key "providers" → fetches providers.php
- * Do not rename these keys in api.js; only change the PHP file names here if needed.
- */
 var API_ENDPOINTS = {
   providers: "/providers.php",
   providerById: "/provider.php",
@@ -30,20 +19,9 @@ var API_ENDPOINTS = {
   login: "/login.php",
   register: "/register.php",
   addProvider: "/add_provider.php",
-  editProvider: "/edit_provider.php",
   updatePassword: "/update_password.php",
   reviews: "/reviews.php",
-  favorites: "/favorites.php",
   toggleFavorite: "/toggle_favorite.php"
-};
-
-/**
- * Test account for demo / graduation presentation.
- * Used on login page when useMock is true (see auth.js → prefillDemoLogin).
- */
-var MOCK_DEMO_AUTH = {
-  email: "demo@autoconnect.com",
-  password: "demo1234"
 };
 
 // =============================================================================
@@ -60,6 +38,8 @@ var TRANSLATIONS = {
     nav_login: "تسجيل الدخول",
     nav_signup: "سجل الآن",
     nav_profile: "الملف الشخصي",
+    nav_dashboard: "لوحة التحكم",
+    nav_favorites: "المفضلة",
     hero_title_1: "عطلان؟",
     hero_title_2: "متقلقش هنا هتلاقي الي محتاجه",
     hero_sub: "أدخل موقعك واعثر على أقرب ميكانيكي أو قطع غيار أو ونش في دقائق.",
@@ -74,6 +54,20 @@ var TRANSLATIONS = {
     discover_more: "اكتشف المزيد",
     shop_now: "تسوق الآن",
     order_now: "اطلب الآن",
+    reviews_title: "التقييمات",
+    map_placeholder: "📍 حدد الموقع على الخريطة",
+    tires: "إطارات",
+    service_history: "سجل الخدمة",
+    mechanic_tagline: "مخطط الميكانيكي الحديث",
+    certified_experts: "خبراء معتمدون",
+    mechanic_sub: "صيانة وإصلاح مع فنيين معتمدين",
+    certified_techs: "فنيون معتمدون",
+    spare_parts_sub: "قطع أصلية وتوصيل للمنزل",
+    original_parts: "قطع أصلية",
+    home_delivery: "توصيل للمنزل",
+    towing_sub: "ونش طوارئ سريع",
+    response_15_min: "استجابة 15 دقيقة",
+    gps_tracking: "تتبع GPS",
     cta_join_title: "انضم إلى نخبة خبراء السيارات في مصر",
     cta_join_sub: "هل أنت مزود خدمة؟ انضم لشبكتنا واستقبل الطلبات.",
     partner_btn: "انضم إلينا",
@@ -215,6 +209,8 @@ var TRANSLATIONS = {
     nav_login: "Login",
     nav_signup: "Sign Up",
     nav_profile: "Profile",
+    nav_dashboard: "Dashboard",
+    nav_favorites: "Favorites",
     hero_title_1: "Broken down?",
     hero_title_2: "Don't worry — find what you need here",
     hero_sub: "Enter your location to find the nearest mechanic, spare parts shop, or tow truck in minutes.",
@@ -229,6 +225,20 @@ var TRANSLATIONS = {
     discover_more: "Discover more",
     shop_now: "Shop now",
     order_now: "Order now",
+    reviews_title: "Reviews",
+    map_placeholder: "📍 Set location on map",
+    tires: "Tires",
+    service_history: "Service History",
+    mechanic_tagline: "The Modern Mechanic's Planner",
+    certified_experts: "Certified Experts",
+    mechanic_sub: "Maintenance & repair with certified technicians",
+    certified_techs: "Certified technicians",
+    spare_parts_sub: "Original parts with home delivery",
+    original_parts: "Original parts",
+    home_delivery: "Home delivery",
+    towing_sub: "Fast emergency tow truck",
+    response_15_min: "15-min response",
+    gps_tracking: "GPS tracking",
     cta_join_title: "Join Egypt's elite automotive experts",
     cta_join_sub: "Are you a service provider? Join our network and receive orders.",
     partner_btn: "Partner with us",
@@ -398,53 +408,43 @@ function setLanguage(lang) {
     toggle.textContent = lang === "ar" ? "EN" : "AR";
   }
 
-  if (typeof onLanguageChange === "function") {
-    onLanguageChange(lang);
-  }
 }
 
 /** Flip AR ↔ EN (header button calls this) */
 function toggleLanguage() {
   setLanguage(currentLang === "ar" ? "en" : "ar");
+  if (typeof onLanguageChange === "function") {
+    onLanguageChange(currentLang);
+  }
 }
 
 /**
  * Pick Arabic or English field from API data.
- * Example: getLocalizedField(provider, "name") → name or name_en
+ * Example: getLocalizedField(provider, "name") → name_ar or name_en
  */
 function getLocalizedField(obj, field) {
   if (!obj) return "";
-  if (currentLang === "en" && obj[field + "_en"]) {
-    return obj[field + "_en"];
+  if (currentLang === "en") {
+    return obj[field + "_en"] || obj[field + "_ar"] || "";
   }
-  return obj[field] || "";
+  return obj[field + "_ar"] || obj[field + "_en"] || "";
 }
 
 // =============================================================================
 // 3. utils.js
 // =============================================================================
 
-/** Convert degrees to radians for distance formula */
-function toRad(deg) {
-  return (deg * Math.PI) / 180;
-}
-
-/**
- * Distance between two GPS points in kilometers (Haversine formula).
- * Used to show "1.2 km away" on provider cards.
- */
 function getDistanceKm(lat1, lon1, lat2, lon2) {
-  var R = 6371; // Earth radius in km
-  var dLat = toRad(lat2 - lat1);
-  var dLon = toRad(lon2 - lon1);
+  var R = 6371;
+  var dLat = (lat2 - lat1) * Math.PI / 180;
+  var dLon = (lon2 - lon1) * Math.PI / 180;
   var a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) *
-    Math.cos(toRad(lat2)) *
+    Math.cos(lat1 * Math.PI / 180) *
+    Math.cos(lat2 * Math.PI / 180) *
     Math.sin(dLon / 2) *
     Math.sin(dLon / 2);
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 /** Human-readable distance for UI */
@@ -500,457 +500,22 @@ function saveLocation(loc) {
   localStorage.setItem("autoconnect_location", JSON.stringify(loc));
 }
 
+function setEl(id, value) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
 /** Add distance_km property to each provider object */
 function addDistanceToProviders(providers, userLat, userLong) {
   return providers.map(function (p) {
     var copy = Object.assign({}, p);
-    copy.distance_km = getDistanceKm(userLat, userLong, p.lat, p.long);
+    copy.distance_km = getDistanceKm(userLat, userLong, p.lat, p.lng);
     return copy;
   });
 }
 
-/** Sort list by nearest first or highest rating */
-function sortProviders(list, sortBy) {
-  var arr = list.slice();
-  if (sortBy === "rating") {
-    arr.sort(function (a, b) {
-      return b.rating - a.rating;
-    });
-  } else {
-    arr.sort(function (a, b) {
-      return (a.distance_km || 999) - (b.distance_km || 999);
-    });
-  }
-  return arr;
-}
-
-function getCategoryName(categoryId, categories) {
-  var cat = categories.find(function (c) {
-    return c.id === categoryId;
-  });
-  if (!cat) return "";
-  return getLocalizedField(cat, "name");
-}
-
-/** Prevent XSS when building HTML from user text */
-function escapeHtml(text) {
-  var div = document.createElement("div");
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-/**
- * Filter provider array — same rules mock and PHP should support.
- * filters examples: { category_slug: "towing", city: "القاهرة", lat, long, sort, emergency: true }
- */
-function filterProviders(providers, filters) {
-  var list = providers.slice();
-  filters = filters || {};
-
-  if (filters.category_slug) {
-    list = list.filter(function (p) {
-      return p.category_slug === filters.category_slug;
-    });
-  }
-  if (filters.category_id) {
-    list = list.filter(function (p) {
-      return p.category_id === Number(filters.category_id);
-    });
-  }
-  if (filters.city) {
-    list = list.filter(function (p) {
-      return getLocalizedField(p, "city").indexOf(filters.city) !== -1;
-    });
-  }
-  if (filters.status === "open") {
-    list = list.filter(function (p) {
-      return p.status === "open";
-    });
-  } else if (filters.status === "closed") {
-    list = list.filter(function (p) {
-      return p.status === "closed";
-    });
-  }
-  if (filters.search) {
-    var q = filters.search.toLowerCase();
-    list = list.filter(function (p) {
-      return getLocalizedField(p, "name").toLowerCase().indexOf(q) !== -1;
-    });
-  }
-  // Emergency page: only tow trucks
-  if (filters.emergency) {
-    list = list.filter(function (p) {
-      return p.category_slug === "towing";
-    });
-  }
-  if (filters.lat != null && filters.long != null) {
-    list = addDistanceToProviders(list, Number(filters.lat), Number(filters.long));
-    list = sortProviders(list, filters.sort === "rating" ? "rating" : "nearest");
-  }
-  if (filters.favorite_ids && filters.favorite_ids.length) {
-    list = list.filter(function (p) {
-      return filters.favorite_ids.indexOf(p.id) !== -1;
-    });
-  }
-  return list;
-}
-
 // =============================================================================
-// 4. mock-handlers.js
-// =============================================================================
-
-/**
- * In-memory cache so we do not re-fetch providers.json on every click.
- * null = not loaded yet; after load we keep the array/object here.
- */
-var MockStore = {
-  providers: null,
-  categories: null,
-  regions: null,
-  reviews: null,
-  user: null,
-  auth: null,
-  favorites: null
-};
-
-/** Print to console when logMockCalls is true in config.js */
-function mockLog(label, payload) {
-  if (API_CONFIG.logMockCalls) {
-    console.log("[Mock API]", label, payload || "");
-  }
-}
-
-/** Promise that resolves after a short delay (feels like real API) */
-function mockDelay() {
-  return new Promise(function (resolve) {
-    setTimeout(resolve, API_CONFIG.mockDelayMs);
-  });
-}
-
-/** Fetch one file from web/data/ folder */
-function loadJson(file) {
-  return fetch(getDataBasePath() + "data/" + file).then(function (res) {
-    if (!res.ok) throw new Error("Mock data missing: " + file);
-    return res.json();
-  });
-}
-
-// --- Each ensure* loads JSON once and saves it in MockStore ---
-
-function ensureProviders() {
-  if (MockStore.providers) return Promise.resolve(MockStore.providers);
-  return loadJson("providers.json").then(function (data) {
-    MockStore.providers = data;
-    return data;
-  });
-}
-
-function ensureCategories() {
-  if (MockStore.categories) return Promise.resolve(MockStore.categories);
-  return loadJson("categories.json").then(function (data) {
-    MockStore.categories = data;
-    return data;
-  });
-}
-
-function ensureRegions() {
-  if (MockStore.regions) return Promise.resolve(MockStore.regions);
-  return loadJson("regions.json").then(function (data) {
-    MockStore.regions = data;
-    return data;
-  });
-}
-
-function ensureReviews() {
-  if (MockStore.reviews) return Promise.resolve(MockStore.reviews);
-  return loadJson("reviews.json").then(function (data) {
-    MockStore.reviews = data;
-    return data;
-  });
-}
-
-function ensureUser() {
-  if (MockStore.user) return Promise.resolve(MockStore.user);
-  return loadJson("user.json").then(function (data) {
-    MockStore.user = data;
-    return data;
-  });
-}
-
-function ensureAuth() {
-  if (MockStore.auth) return Promise.resolve(MockStore.auth);
-  return loadJson("auth.json").then(function (data) {
-    MockStore.auth = data;
-    return data;
-  });
-}
-
-function ensureFavorites() {
-  if (MockStore.favorites) return Promise.resolve(MockStore.favorites);
-  return loadJson("favorites.json").then(function (data) {
-    MockStore.favorites = data;
-    return data;
-  });
-}
-
-/** Successful API response wrapper — PHP should return the same shape */
-function mockOk(data, message) {
-  return {
-    success: true,
-    message: message || "OK",
-    data: data
-  };
-}
-
-/** Failed API response wrapper */
-function mockFail(message) {
-  return {
-    success: false,
-    message: message || "Error",
-    data: null
-  };
-}
-
-/**
- * Router: api.js passes endpointKey (e.g. "providers") and we call the right handler.
- */
-function runMockHandler(endpointKey, options) {
-  options = options || {};
-  mockLog(endpointKey, options.params || options.body);
-
-  switch (endpointKey) {
-    case "providers":
-      return mockGetProviders(options.params);
-    case "providerById":
-      return mockGetProviderById(options.params.id);
-    case "categories":
-      return mockDelay().then(function () {
-        return ensureCategories().then(function (cats) {
-          return mockOk(cats);
-        });
-      });
-    case "regions":
-      return mockDelay().then(function () {
-        return ensureRegions().then(function (regions) {
-          return mockOk(regions);
-        });
-      });
-    case "user":
-      return mockDelay().then(function () {
-        return ensureUser().then(function (user) {
-          return mockOk(user);
-        });
-      });
-    case "reviews":
-      return mockGetReviews(options.params.provider_id);
-    case "favorites":
-      return mockGetFavorites();
-    case "login":
-      return mockLogin(options.body);
-    case "register":
-      return mockRegister(options.body);
-    case "addProvider":
-      return mockAddProvider(options.body);
-    case "updatePassword":
-      return mockUpdatePassword(options.body);
-    case "toggleFavorite":
-      return mockToggleFavorite(options.body);
-    default:
-      return Promise.resolve(mockFail("Unknown endpoint: " + endpointKey));
-  }
-}
-
-/** GET providers list — uses filterProviders() from utils.js */
-function mockGetProviders(filters) {
-  filters = filters || {};
-  return ensureProviders().then(function (providers) {
-    return mockDelay().then(function () {
-      var list = filterProviders(providers, filters);
-      return mockOk(list);
-    });
-  });
-}
-
-/** GET one provider by id from URL ?id= */
-function mockGetProviderById(id) {
-  return ensureProviders().then(function (providers) {
-    return mockDelay().then(function () {
-      var found = providers.find(function (p) {
-        return String(p.id) === String(id);
-      });
-      if (!found) return mockFail("Provider not found");
-      return mockOk(found);
-    });
-  });
-}
-
-/** GET reviews for service detail page */
-function mockGetReviews(providerId) {
-  return ensureReviews().then(function (reviews) {
-    return mockDelay().then(function () {
-      var list = reviews.filter(function (r) {
-        return String(r.provider_id) === String(providerId);
-      });
-      return mockOk(list);
-    });
-  });
-}
-
-/** GET user's favorite providers (join favorites.json + providers.json) */
-function mockGetFavorites() {
-  return Promise.all([ensureFavorites(), ensureProviders()]).then(function (res) {
-    var fav = res[0];
-    var providers = res[1];
-    return mockDelay().then(function () {
-      var list = providers.filter(function (p) {
-        return fav.provider_ids.indexOf(p.id) !== -1;
-      });
-      return mockOk({ provider_ids: fav.provider_ids, providers: list });
-    });
-  });
-}
-
-/**
- * POST login — checks email/password against data/auth.json
- * On success saves token in localStorage (PHP would return a real JWT later)
- */
-function mockLogin(body) {
-  body = body || {};
-  return ensureAuth().then(function (auth) {
-    return mockDelay().then(function () {
-      var user = auth.users.find(function (u) {
-        return u.email === body.email && u.password === body.password;
-      });
-      if (!user) {
-        return mockFail("Invalid email or password");
-      }
-      localStorage.setItem("autoconnect_token", "mock-token-" + user.id);
-      localStorage.setItem("autoconnect_user_id", String(user.id));
-      return mockOk(
-        { id: user.id, email: user.email, role: user.role, fname: user.fname, lname: user.lname },
-        t("login_success")
-      );
-    });
-  });
-}
-
-/**
- * POST register from register.html
- * - role "client" → only saves user info (mock message)
- * - role "provider" → also calls mockAddProvider to add workshop to list
- */
-function mockRegister(body) {
-  body = body || {};
-
-  if (body.role === "provider") {
-    return mockAddProvider({
-      name: body.workshop_name || body.name,
-      phone: body.mobile || body.phone,
-      city: body.city,
-      address: body.address || body.city,
-      description: body.description,
-      category_id: body.category_id,
-      category_slug: body.category_slug,
-      lat: body.lat,
-      long: body.long,
-      status: body.status || "open",
-      working_hours: body.working_hours,
-      owner_email: body.email
-    }).then(function (providerRes) {
-      if (!providerRes.success) return providerRes;
-      return mockOk(
-        {
-          email: body.email,
-          role: "provider",
-          provider: providerRes.data
-        },
-        t("register_success")
-      );
-    });
-  }
-
-  return mockDelay().then(function () {
-    return mockOk(
-      { email: body.email, name: body.name, role: "client" },
-      t("register_success")
-    );
-  });
-}
-
-/** POST new workshop — pushes into MockStore.providers (visible on services page until refresh) */
-function mockAddProvider(body) {
-  body = body || {};
-  return ensureProviders().then(function (providers) {
-    return mockDelay().then(function () {
-      var newId = providers.length + 1;
-      var item = {
-        id: newId,
-        name: body.name,
-        name_en: body.name,
-        phone: body.phone,
-        address: body.address || body.city || "",
-        address_en: body.address || body.city || "",
-        city: body.city || "",
-        city_en: body.city || "",
-        lat: body.lat || DEFAULT_LOCATION.lat,
-        long: body.long || DEFAULT_LOCATION.long,
-        status: body.status || "open",
-        category_id: Number(body.category_id) || 1,
-        category_slug: body.category_slug || "mechanic",
-        category_name: "ميكانيكي",
-        category_name_en: "Mechanic",
-        rating: 0,
-        review_count: 0,
-        price_from: 0,
-        description: body.description || "",
-        description_en: body.description || "",
-        vehicle_types: ["car"],
-        image: "assets/images/مزود الخدمه.png",
-        waiting_minutes: 0,
-        capacity: 0,
-        max_capacity: 0,
-        working_hours: body.working_hours || "",
-        owner_email: body.owner_email || ""
-      };
-      providers.push(item);
-      MockStore.providers = providers;
-      return mockOk(item, "Provider added successfully");
-    });
-  });
-}
-
-function mockUpdatePassword(body) {
-  return mockDelay().then(function () {
-    if (!body || !body.current || !body.new) {
-      return mockFail("Missing fields");
-    }
-    return mockOk(null, t("password_updated"));
-  });
-}
-
-/** POST add/remove provider id from favorites.json in memory */
-function mockToggleFavorite(body) {
-  body = body || {};
-  var providerId = Number(body.provider_id);
-  return ensureFavorites().then(function (fav) {
-    return mockDelay().then(function () {
-      var idx = fav.provider_ids.indexOf(providerId);
-      if (idx === -1) {
-        fav.provider_ids.push(providerId);
-      } else {
-        fav.provider_ids.splice(idx, 1);
-      }
-      MockStore.favorites = fav;
-      if (MockStore.user) {
-        MockStore.user.favorite_provider_ids = fav.provider_ids.slice();
-      }
-      return mockOk({ provider_ids: fav.provider_ids, added: idx === -1 });
-    });
-  });
-}
-
-// =============================================================================
-// 5. api.js
+// 4. api.js
 // =============================================================================
 
 /**
@@ -964,18 +529,12 @@ function apiRequest(endpointKey, options) {
   options = options || {};
   var method = (options.method || "GET").toUpperCase();
 
-  // --- MOCK PATH: use JSON files + fake logic in mock-handlers.js ---
-  if (API_CONFIG.useMock) {
-    return runMockHandler(endpointKey, options);
-  }
-
-  // --- REAL PATH: call PHP with fetch() ---
   var path = API_ENDPOINTS[endpointKey];
   if (!path) {
     return Promise.reject(new Error("Unknown endpoint: " + endpointKey));
   }
 
-  var url = API_CONFIG.baseUrl + path;
+  var url = API_BASE + path;
   var fetchOptions = {
     method: method,
     headers: { "Content-Type": "application/json" }
@@ -1014,17 +573,6 @@ function unwrap(response) {
     throw err;
   }
   return response.data !== undefined ? response.data : response;
-}
-
-/**
- * Returns "../" when we are inside /pages/ folder, else "./"
- * Used to load data/providers.json with the correct relative path.
- */
-function getDataBasePath() {
-  if (window.location.pathname.indexOf("/pages/") !== -1) {
-    return "../";
-  }
-  return "./";
 }
 
 // ---------------------------------------------------------------------------
@@ -1107,10 +655,6 @@ function getReviews(providerId) {
   }).then(unwrap);
 }
 
-function getFavorites() {
-  return apiRequest("favorites", { method: "GET" }).then(unwrap);
-}
-
 function toggleFavorite(providerId) {
   return apiRequest("toggleFavorite", {
     method: "POST",
@@ -1118,26 +662,10 @@ function toggleFavorite(providerId) {
   });
 }
 
-/** Optional: load all JSON into memory at once (open console and call preloadMockData()) */
-function preloadMockData() {
-  if (!API_CONFIG.useMock) return Promise.resolve();
-  return Promise.all([
-    ensureProviders(),
-    ensureCategories(),
-    ensureRegions(),
-    ensureReviews(),
-    ensureUser(),
-    ensureFavorites()
-  ]);
-}
-
 // =============================================================================
 // 6. ui.js
 // =============================================================================
 
-/**
- * Returns HTML string for one provider card (used in services, favorites, similar list).
- */
 function renderProviderCard(provider, options) {
   options = options || {};
   var base = options.basePath || getBasePath();
@@ -1150,47 +678,27 @@ function renderProviderCard(provider, options) {
   var img = provider.image ? base + provider.image : "";
   var detailUrl = base + "pages/service-detail.html?id=" + provider.id;
   var phone = provider.phone || "";
+  var badge = provider.category_slug || "";
 
-  var categoryLabel = provider.category_slug || "";
-
-  return (
-    '<article class="provider-card">' +
-    '<div class="provider-card__image">' +
-    (img ? '<img src="' + img + '" alt="' + name + '">' : "") +
-    (categoryLabel
-      ? '<span class="provider-card__badge">' + categoryLabel + "</span>"
-      : "") +
-    "</div>" +
-    '<div class="provider-card__body">' +
-    '<p class="provider-card__rating">★ ' + provider.rating + "</p>" +
-    "<h3>" + name + "</h3>" +
-    '<p class="provider-card__meta">' +
-    '<span class="status-dot ' +
-    statusClass +
-    '"></span> ' +
-    statusText +
-    "</p>" +
-    (address
-      ? '<p class="provider-card__meta">📍 ' + address + "</p>"
-      : "") +
-    (distText
-      ? '<p class="provider-card__meta">↗ ' + distText + "</p>"
-      : "") +
-    (phone ? '<p class="provider-card__meta">📞 ' + phone + "</p>" : "") +
-    '<div class="provider-card__actions">' +
-    '<a href="' +
-    detailUrl +
-    '" class="btn btn-ghost btn-sm">' +
-    (options.detailsLabel || t("view_details")) +
-    "</a>" +
-    '<a href="tel:' +
-    phone +
-    '" class="btn btn-primary btn-sm">' +
-    t("call_now") +
-    "</a>" +
-    "</div>" +
-    "</article>"
-  );
+  return `
+    <article class="provider-card">
+      <div class="provider-card__image">
+        ${img ? `<img src="${img}" alt="${name}">` : ""}
+        ${badge ? `<span class="provider-card__badge">${badge}</span>` : ""}
+      </div>
+      <div class="provider-card__body">
+        <p class="provider-card__rating">★ ${provider.rating}</p>
+        <h3>${name}</h3>
+        <p class="provider-card__meta"><span class="status-dot ${statusClass}"></span> ${statusText}</p>
+        ${address ? `<p class="provider-card__meta">📍 ${address}</p>` : ""}
+        ${distText ? `<p class="provider-card__meta">↗ ${distText}</p>` : ""}
+        ${phone ? `<p class="provider-card__meta">📞 ${phone}</p>` : ""}
+        <div class="provider-card__actions">
+          <a href="${detailUrl}" class="btn btn-ghost btn-sm">${options.detailsLabel || t("view_details")}</a>
+          <a href="tel:${phone}" class="btn btn-primary btn-sm">${t("call_now")}</a>
+        </div>
+      </div>
+    </article>`;
 }
 
 /** Loop providers and put all cards inside element #containerId */
@@ -1213,52 +721,34 @@ function renderProviderList(containerId, providers, options) {
   container.innerHTML = html;
 }
 
-/** Wider row layout for emergency page (image left, call button right) */
 function renderHorizontalProviderCard(provider, options) {
   options = options || {};
   var base = options.basePath || getBasePath();
   var name = getLocalizedField(provider, "name");
   var isOpen = provider.status === "open";
   var statusText = isOpen ? t("open_now") : t("closed");
+  var statusClass = isOpen ? "open" : "closed";
   var distText = provider.distance_km != null ? formatDistance(provider.distance_km) : "";
   var img = provider.image ? base + provider.image : "";
   var phone = provider.phone || "";
 
-  return (
-    '<article class="card" style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center">' +
-    '<div style="width:120px;height:90px;border-radius:8px;overflow:hidden;flex-shrink:0;background:#1a2230">' +
-    (img ? '<img src="' + img + '" alt="" style="width:100%;height:100%;object-fit:cover">' : "") +
-    "</div>" +
-    '<div style="flex:1;min-width:180px">' +
-    "<h3>" +
-    name +
-    "</h3>" +
-    '<p class="provider-card__meta"><span class="status-dot ' +
-    (isOpen ? "open" : "closed") +
-    '"></span> ' +
-    statusText +
-    " · ★ " +
-    provider.rating +
-    (distText ? " · " + distText : "") +
-    "</p>" +
-    '<p class="provider-card__meta">📞 ' +
-    phone +
-    "</p>" +
-    "</div>" +
-    '<div style="display:flex;gap:0.5rem">' +
-    '<button type="button" class="btn btn-outline btn-sm" data-map="' +
-    provider.id +
-    '">' +
-    t("view_map") +
-    "</button>" +
-    '<a href="tel:' +
-    phone +
-    '" class="btn btn-danger btn-sm">' +
-    t("call_now") +
-    "</a>" +
-    "</div>" +
-    "</article>"
-  );
+  return `
+    <article class="card" style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center">
+      <div style="width:120px;height:90px;border-radius:8px;overflow:hidden;flex-shrink:0;background:#1a2230">
+        ${img ? `<img src="${img}" alt="" style="width:100%;height:100%;object-fit:cover">` : ""}
+      </div>
+      <div style="flex:1;min-width:180px">
+        <h3>${name}</h3>
+        <p class="provider-card__meta">
+          <span class="status-dot ${statusClass}"></span> ${statusText} · ★ ${provider.rating}${distText ? " · " + distText : ""}
+        </p>
+        <p class="provider-card__meta">📞 ${phone}</p>
+      </div>
+      <div style="display:flex;gap:0.5rem">
+        <button type="button" class="btn btn-outline btn-sm" data-map="${provider.id}">${t("view_map")}</button>
+        <a href="tel:${phone}" class="btn btn-danger btn-sm">${t("call_now")}</a>
+      </div>
+    </article>`;
 }
 
 // =============================================================================
@@ -1282,7 +772,6 @@ function getPageName() {
   return parts[parts.length - 1] || "index.html";
 }
 
-/** Build header HTML string and insert into #site-header */
 function renderHeader() {
   var el = document.getElementById("site-header");
   if (!el) return;
@@ -1292,50 +781,33 @@ function renderHeader() {
   var linksHtml = "";
 
   NAV_ITEMS.forEach(function (item) {
-    var href = item.href.indexOf("pages/") === 0 && base === "../" ? item.href.replace("pages/", "") : base + item.href.replace(/^\//, "");
-    if (base === "../" && item.href === "index.html") {
-      href = "../index.html";
-    } else if (base === "" && item.href.indexOf("pages/") === 0) {
+    var href;
+    if (base === "../") {
+      href = item.href === "index.html" ? "../index.html" : item.href.replace("pages/", "");
+    } else {
       href = item.href;
     }
     var isActive = item.pages.indexOf(page) !== -1;
-    var cls = isActive ? " active" : "";
-    var extra = item.highlight ? ' style="color:var(--accent-yellow)"' : "";
-    linksHtml +=
-      '<a href="' +
-      href +
-      '" class="' +
-      cls.trim() +
-      '" data-i18n="' +
-      item.key +
-      '"' +
-      extra +
-      "></a>";
+    var cls = isActive ? "active" : "";
+    var style = item.highlight ? ' style="color:var(--accent-yellow)"' : "";
+    linksHtml += `<a href="${href}" class="${cls}" data-i18n="${item.key}"${style}></a>`;
   });
 
-  el.innerHTML =
-    '<header class="site-header">' +
-    '<div class="container header-inner">' +
-    '<button class="menu-toggle" id="menu-toggle" aria-label="Menu">' +
-    "<span></span><span></span><span></span>" +
-    "</button>" +
-    '<a href="' +
-    base +
-    'index.html" class="logo">Auto<span>Connect</span></a>' +
-    '<nav class="nav-links" id="nav-links">' +
-    linksHtml +
-    "</nav>" +
-    '<div class="header-actions">' +
-    '<button type="button" class="lang-toggle" id="lang-toggle">EN</button>' +
-    '<a href="' +
-    base +
-    'pages/login.html" class="btn btn-sm btn-ghost" data-i18n="nav_login"></a>' +
-    '<a href="' +
-    base +
-    'pages/register.html" class="btn btn-sm btn-primary" data-i18n="nav_signup"></a>' +
-    "</div>" +
-    "</div>" +
-    "</header>";
+  el.innerHTML = `
+    <header class="site-header">
+      <div class="container header-inner">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+        <a href="${base}index.html" class="logo">Auto<span>Connect</span></a>
+        <nav class="nav-links" id="nav-links">${linksHtml}</nav>
+        <div class="header-actions">
+          <button type="button" class="lang-toggle" id="lang-toggle">EN</button>
+          <a href="${base}pages/login.html" class="btn btn-sm btn-ghost" data-i18n="nav_login"></a>
+          <a href="${base}pages/register.html" class="btn btn-sm btn-primary" data-i18n="nav_signup"></a>
+        </div>
+      </div>
+    </header>`;
 
   var toggle = document.getElementById("menu-toggle");
   var nav = document.getElementById("nav-links");
@@ -1349,23 +821,19 @@ function renderHeader() {
 function renderFooter() {
   var el = document.getElementById("site-footer");
   if (!el) return;
-
   var base = getBasePath();
-
-  el.innerHTML =
-    '<footer class="site-footer">' +
-    '<div class="container footer-inner">' +
-    '<a href="' +
-    base +
-    'index.html" class="logo">AutoConnect</a>' +
-    '<div class="footer-links">' +
-    '<a href="#" data-i18n="privacy"></a>' +
-    '<a href="#" data-i18n="terms"></a>' +
-    '<a href="#" data-i18n="contact"></a>' +
-    "</div>" +
-    '<p class="footer-copy" data-i18n="copyright"></p>' +
-    "</div>" +
-    "</footer>";
+  el.innerHTML = `
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <a href="${base}index.html" class="logo">AutoConnect</a>
+        <div class="footer-links">
+          <a href="#" data-i18n="privacy"></a>
+          <a href="#" data-i18n="terms"></a>
+          <a href="#" data-i18n="contact"></a>
+        </div>
+        <p class="footer-copy" data-i18n="copyright"></p>
+      </div>
+    </footer>`;
 }
 
 // =============================================================================
@@ -1519,23 +987,6 @@ function handleRegisterSubmit(e) {
   });
 }
 
-/** Fill login form with demo@autoconnect.com when using mock API */
-function prefillDemoLogin() {
-  if (!API_CONFIG.useMock) return;
-  var emailEl = document.getElementById("email");
-  var passEl = document.getElementById("password");
-  var hint = document.getElementById("demo-hint");
-  if (emailEl && typeof MOCK_DEMO_AUTH !== "undefined") {
-    emailEl.value = MOCK_DEMO_AUTH.email;
-  }
-  if (passEl && typeof MOCK_DEMO_AUTH !== "undefined") {
-    passEl.value = MOCK_DEMO_AUTH.password;
-  }
-  if (hint && typeof MOCK_DEMO_AUTH !== "undefined") {
-    hint.textContent =
-      "Demo: " + MOCK_DEMO_AUTH.email + " / " + MOCK_DEMO_AUTH.password;
-  }
-}
 
 /** Wire عميل / مزود خدمة buttons on register (and login role toggle if present) */
 function setupRoleToggle() {
@@ -1586,7 +1037,6 @@ document.addEventListener("DOMContentLoaded", function () {
   // Auth pages initialization:
   if (window.location.pathname.includes("login.html") || window.location.pathname.includes("register.html")) {
     setupRoleToggle();
-    prefillDemoLogin();
     initRegisterPage();
 
     var loginForm = document.getElementById("login-form");
