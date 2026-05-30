@@ -363,6 +363,56 @@
   border: 1px dashed var(--border-color);
 }
 
+#detail-map {
+  height: 200px;
+  border-radius: var(--radius-md);
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.gallery-thumb {
+  aspect-ratio: 4/3;
+  border-radius: var(--radius-sm);
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg-input);
+  cursor: pointer;
+}
+
+.wh-list {
+  list-style: none;
+  margin-top: 0.75rem;
+}
+
+.wh-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.9rem;
+}
+
+.wh-item:last-child {
+  border-bottom: none;
+}
+
+.wh-day {
+  color: var(--text-primary);
+}
+
+.wh-time {
+  color: var(--text-secondary);
+}
+
+.wh-time.wh-closed {
+  color: var(--text-muted);
+}
+
 /* ----- PROFILE DASHBOARD (profile.html) ----- */
 .profile-header-card {
   display: grid;

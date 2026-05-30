@@ -21,6 +21,7 @@ var API_ENDPOINTS = {
   login: "/login.php",
   register: "/register.php",
   addProvider: "/add_provider.php",
+  uploadPhotos: "/upload_photos.php",
   updatePassword: "/update_password.php",
   reviews: "/reviews.php",
   toggleFavorite: "/toggle_favorite.php"
@@ -82,6 +83,37 @@ function getUserLocation() {
 
 /** Fallback when user denies location permission — center of Cairo */
 var DEFAULT_LOCATION = { lat: 30.0444, long: 31.2357 };
+
+/** All Egyptian governorates — used to populate city selects on the register form */
+var EGYPT_CITIES = [
+  { ar: "القاهرة",        en: "Cairo" },
+  { ar: "الجيزة",         en: "Giza" },
+  { ar: "الإسكندرية",     en: "Alexandria" },
+  { ar: "الشرقية",        en: "Sharqia" },
+  { ar: "الدقهلية",       en: "Dakahlia" },
+  { ar: "البحيرة",        en: "Beheira" },
+  { ar: "المنوفية",       en: "Monufia" },
+  { ar: "الغربية",        en: "Gharbia" },
+  { ar: "القليوبية",      en: "Qalyubia" },
+  { ar: "كفر الشيخ",      en: "Kafr El-Sheikh" },
+  { ar: "دمياط",          en: "Damietta" },
+  { ar: "بورسعيد",        en: "Port Said" },
+  { ar: "الإسماعيلية",    en: "Ismailia" },
+  { ar: "السويس",         en: "Suez" },
+  { ar: "شمال سيناء",     en: "North Sinai" },
+  { ar: "جنوب سيناء",     en: "South Sinai" },
+  { ar: "الفيوم",         en: "Faiyum" },
+  { ar: "بني سويف",       en: "Beni Suef" },
+  { ar: "المنيا",         en: "Minya" },
+  { ar: "أسيوط",          en: "Asyut" },
+  { ar: "سوهاج",          en: "Sohag" },
+  { ar: "قنا",            en: "Qena" },
+  { ar: "الأقصر",         en: "Luxor" },
+  { ar: "أسوان",          en: "Aswan" },
+  { ar: "البحر الأحمر",   en: "Red Sea" },
+  { ar: "الوادي الجديد",  en: "New Valley" },
+  { ar: "مطروح",          en: "Matrouh" }
+];
 
 /** Read last saved GPS from localStorage (set on emergency page) */
 function getStoredLocation() {
@@ -443,30 +475,310 @@ function renderFooter() {
 /** Which tab is selected on register page: "customer" or "provider" */
 var registerRole = "customer";
 
+/** Files staged for upload — populated by the photo picker, cleared on successful submit */
+var selectedPhotos = [];
+
+// ---------------------------------------------------------------------------
+// Form error helpers — show/clear red border + message under a field
+// ---------------------------------------------------------------------------
+
+function showFieldError(inputId, message) {
+  var input = document.getElementById(inputId);
+  if (input) input.classList.add("is-invalid");
+  var errEl = document.getElementById("err-" + inputId);
+  if (errEl) errEl.textContent = message;
+}
+
+function clearFieldError(inputId) {
+  var input = document.getElementById(inputId);
+  if (input) input.classList.remove("is-invalid");
+  var errEl = document.getElementById("err-" + inputId);
+  if (errEl) errEl.textContent = "";
+}
+
+function clearAllErrors() {
+  document.querySelectorAll("#register-form .form-control.is-invalid").forEach(function (el) {
+    el.classList.remove("is-invalid");
+  });
+  document.querySelectorAll("#register-form .form-error").forEach(function (el) {
+    el.textContent = "";
+  });
+}
+
+function showFormError(message) {
+  var el = document.getElementById("form-general-error");
+  if (el) el.textContent = message;
+}
+
+/**
+ * Reads HTML5 validity state of every [required] input and shows
+ * an inline message for each invalid one. Returns true when all pass.
+ */
+function validateRegisterForm() {
+  clearAllErrors();
+  var form = document.getElementById("register-form");
+  var isValid = true;
+
+  form.querySelectorAll("[required]").forEach(function (input) {
+    if (!input.checkValidity()) {
+      var msg;
+      if (input.validity.valueMissing) {
+        msg = currentLang === "ar" ? "هذا الحقل مطلوب" : "This field is required";
+      } else if (input.validity.typeMismatch) {
+        msg = currentLang === "ar" ? "صيغة البريد الإلكتروني غير صحيحة" : "Invalid email format";
+      } else {
+        msg = currentLang === "ar" ? "تحقق من القيمة المدخلة" : "Please check this field";
+      }
+      showFieldError(input.id, msg);
+      isValid = false;
+    }
+  });
+
+  // Password match — checked separately because HTML5 has no rule for it
+  var pw  = document.getElementById("reg-password");
+  var cpw = document.getElementById("confirm-password");
+  if (pw && cpw && pw.value && cpw.value && pw.value !== cpw.value) {
+    showFieldError("confirm-password", currentLang === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match");
+    isValid = false;
+  }
+
+  return isValid;
+}
+
+/** Clear login-specific errors and wire real-time clearing on inputs */
+function initLoginPage() {
+  var loginForm = document.getElementById("login-form");
+  if (!loginForm) return;
+  ["email", "password"].forEach(function (id) {
+    var input = document.getElementById(id);
+    if (!input) return;
+    input.addEventListener("input",  function () { clearFieldError(this.id); });
+    input.addEventListener("change", function () { clearFieldError(this.id); });
+  });
+}
+
 /** Send email + password to API; go to profile if success */
 function handleLoginSubmit(e) {
   e.preventDefault();
-  var email = document.getElementById("email").value;
-  var password = document.getElementById("password").value;
-  loginUser(email, password)
+
+  // Clear previous errors
+  clearFieldError("email");
+  clearFieldError("password");
+  var generalErr = document.getElementById("form-login-error");
+  if (generalErr) generalErr.textContent = "";
+
+  var emailInput    = document.getElementById("email");
+  var passwordInput = document.getElementById("password");
+  var isValid = true;
+
+  if (!emailInput.checkValidity()) {
+    var msg = emailInput.validity.valueMissing
+      ? (currentLang === "ar" ? "هذا الحقل مطلوب" : "This field is required")
+      : (currentLang === "ar" ? "صيغة البريد الإلكتروني غير صحيحة" : "Invalid email format");
+    showFieldError("email", msg);
+    isValid = false;
+  }
+
+  if (!passwordInput.value) {
+    showFieldError("password", currentLang === "ar" ? "هذا الحقل مطلوب" : "This field is required");
+    isValid = false;
+  }
+
+  if (!isValid) return;
+
+  var submitBtn = document.querySelector("#login-form [type='submit']");
+  if (submitBtn) submitBtn.disabled = true;
+
+  loginUser(emailInput.value.trim(), passwordInput.value)
     .then(function (res) {
       if (!res.success) {
-        alert(res.message);
+        if (generalErr) generalErr.textContent = res.message;
+        if (submitBtn) submitBtn.disabled = false;
         return;
       }
-      alert(res.message);
       window.location.href = "profile.html";
     })
     .catch(function (err) {
-      alert(err.message || "Login failed");
+      if (generalErr) generalErr.textContent = err.message || (currentLang === "ar" ? "حدث خطأ، حاول مرة أخرى" : "Something went wrong, try again");
+      if (submitBtn) submitBtn.disabled = false;
     });
+}
+
+// ---------------------------------------------------------------------------
+// Provider photo picker
+// ---------------------------------------------------------------------------
+
+/** Upload staged files to the server; returns Promise → { success, urls } */
+function uploadProviderPhotos(files) {
+  var formData = new FormData();
+  for (var i = 0; i < files.length; i++) {
+    formData.append("photos[]", files[i]);
+  }
+  return fetch(API_BASE + "/upload_photos.php", {
+    method: "POST",
+    body: formData  // browser sets Content-Type + boundary automatically
+  }).then(function (res) { return res.json(); });
+}
+
+/** Re-render the thumbnail grid and update the add-button counter */
+function renderPhotoPreview() {
+  var grid   = document.getElementById("photo-preview-grid");
+  var addBtn = document.getElementById("photo-add-btn");
+  var label  = document.getElementById("photo-add-label");
+  if (!grid) return;
+
+  grid.innerHTML = "";
+
+  selectedPhotos.forEach(function (file, idx) {
+    var thumb = document.createElement("div");
+    thumb.className = "photo-thumb";
+
+    var img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    img.alt = file.name;
+
+    var removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "photo-thumb-remove";
+    removeBtn.textContent = "×";
+    removeBtn.addEventListener("click", function () {
+      URL.revokeObjectURL(img.src);
+      selectedPhotos.splice(idx, 1);
+      renderPhotoPreview();
+    });
+
+    thumb.appendChild(img);
+    thumb.appendChild(removeBtn);
+    grid.appendChild(thumb);
+  });
+
+  // Show count and hide add button when limit reached
+  var count = selectedPhotos.length;
+  if (label) label.textContent = count > 0
+    ? (currentLang === "ar" ? "إضافة المزيد (" + count + "/10)" : "Add more (" + count + "/10)")
+    : t("add_photos");
+  if (addBtn) addBtn.style.display = count >= 10 ? "none" : "inline-flex";
+}
+
+/** Wire the file input and click events for the photo upload area */
+function setupPhotoPreview() {
+  var input      = document.getElementById("photo-input");
+  var addBtn     = document.getElementById("photo-add-btn");
+  var uploadArea = document.getElementById("photo-upload-area");
+  if (!input || !addBtn) return;
+
+  // Clicking the area or button opens the file browser
+  addBtn.addEventListener("click", function () { input.click(); });
+  uploadArea.addEventListener("click", function (e) {
+    if (e.target === this) input.click();
+  });
+
+  input.addEventListener("change", function () {
+    var remaining = 10 - selectedPhotos.length;
+    Array.from(this.files).slice(0, remaining).forEach(function (file) {
+      if (file.type.startsWith("image/")) selectedPhotos.push(file);
+    });
+    renderPhotoPreview();
+    this.value = ""; // reset so the same file can be picked again if removed
+  });
 }
 
 /** Setup register page on first load */
 function initRegisterPage() {
   if (!document.getElementById("register-form")) return;
   loadRegisterCategories();
+  loadCitySelect();
   setRegisterRole("customer");
+  setupPhotoPreview();
+
+  // Toggle open/close time inputs when a day is marked as day-off
+  document.querySelectorAll(".wh-closed").forEach(function (cb) {
+    cb.addEventListener("change", function () {
+      var row = this.closest(".wh-row");
+      row.querySelector(".wh-open").disabled  = this.checked;
+      row.querySelector(".wh-close").disabled = this.checked;
+    });
+  });
+
+  // Clear inline error for a field as soon as the user starts correcting it
+  document.getElementById("register-form").querySelectorAll(".form-control").forEach(function (input) {
+    input.addEventListener("input",  function () { clearFieldError(this.id); });
+    input.addEventListener("change", function () { clearFieldError(this.id); });
+  });
+}
+
+/** Populate the single city select in the current page language */
+function loadCitySelect() {
+  var sel = document.getElementById("city-select");
+  if (!sel) return;
+  var saved = sel.value;
+  sel.innerHTML = "";
+
+  var empty = document.createElement("option");
+  empty.value = "";
+  empty.textContent = currentLang === "ar" ? "— اختر المدينة —" : "— Select city —";
+  sel.appendChild(empty);
+
+  EGYPT_CITIES.forEach(function (city, idx) {
+    var opt = document.createElement("option");
+    opt.value = idx;
+    opt.textContent = currentLang === "ar" ? city.ar : city.en;
+    sel.appendChild(opt);
+  });
+
+  if (saved !== "") sel.value = saved; // restore selection after language switch
+}
+
+/** Re-render city select labels when the page language changes */
+function refreshCitySelect() {
+  loadCitySelect();
+}
+
+// ---------------------------------------------------------------------------
+// Map (Leaflet) — provider register form
+// ---------------------------------------------------------------------------
+
+var registerMapInitialized = false;
+var registerLat = DEFAULT_LOCATION.lat;
+var registerLng = DEFAULT_LOCATION.long;
+
+/** Init Leaflet map inside #register-map, detect browser location as default pin */
+function initRegisterMap() {
+  var mapEl = document.getElementById("register-map");
+  if (!mapEl || typeof L === "undefined") return;
+
+  var map = L.map("register-map").setView([registerLat, registerLng], 12);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+
+  var marker = L.marker([registerLat, registerLng], { draggable: true }).addTo(map);
+
+  function updatePin(latlng) {
+    registerLat = latlng.lat;
+    registerLng = latlng.lng;
+  }
+
+  // Drag marker to update coords
+  marker.on("dragend", function (e) { updatePin(e.target.getLatLng()); });
+
+  // Click anywhere on map to move pin
+  map.on("click", function (e) {
+    marker.setLatLng(e.latlng);
+    updatePin(e.latlng);
+  });
+
+  // Detect browser location and use as default pin
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      var lat = pos.coords.latitude;
+      var lng = pos.coords.longitude;
+      updatePin({ lat: lat, lng: lng });
+      map.setView([lat, lng], 15);
+      marker.setLatLng([lat, lng]);
+    });
+  }
 }
 
 /** Fill service type dropdown from getCategories() API */
@@ -494,27 +806,15 @@ function setRegisterRole(role) {
   registerRole = role;
   var customerFields = document.getElementById("customer-fields");
   var providerFields = document.getElementById("provider-fields");
-  var card = document.getElementById("register-card");
-  var subtitle = document.getElementById("register-subtitle");
-  var submitBtn = document.getElementById("register-submit");
-  var fullName = document.getElementById("full-name");
-  var phone = document.getElementById("phone");
-  var workshop = document.getElementById("workshop-name");
-  var mobile = document.getElementById("mobile");
-  var category = document.getElementById("provider-category");
-  var cityArea = document.getElementById("city-area");
+  var card           = document.getElementById("register-card");
+  var subtitle       = document.getElementById("register-subtitle");
+  var submitBtn      = document.getElementById("register-submit");
 
   var isProvider = role === "provider";
 
-  if (customerFields) {
-    customerFields.classList.toggle("register-fields-hidden", isProvider);
-  }
-  if (providerFields) {
-    providerFields.classList.toggle("register-fields-hidden", !isProvider);
-  }
-  if (card) {
-    card.classList.toggle("auth-card--provider", isProvider);
-  }
+  if (customerFields) customerFields.classList.toggle("register-fields-hidden", isProvider);
+  if (providerFields) providerFields.classList.toggle("register-fields-hidden", !isProvider);
+  if (card) card.classList.toggle("auth-card--provider", isProvider);
   if (subtitle) {
     subtitle.textContent = isProvider ? t("register_provider_sub") : t("register_sub");
     subtitle.classList.toggle("provider-mode", isProvider);
@@ -523,67 +823,127 @@ function setRegisterRole(role) {
     submitBtn.textContent = isProvider ? t("register_workshop") : t("create_account");
   }
 
-  // HTML5 required attribute on the right fields only
-  if (fullName) fullName.required = !isProvider;
-  if (phone) phone.required = !isProvider;
-  if (workshop) workshop.required = isProvider;
-  if (mobile) mobile.required = isProvider;
-  if (category) category.required = isProvider;
-  if (cityArea) cityArea.required = isProvider;
+  // Required only on the fields that belong to the active role
+  var providerRequiredIds = ["name-en", "name-ar", "mobile", "provider-category", "city-select", "address-en"];
+  providerRequiredIds.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.required = isProvider;
+  });
+
+  // Init map the first time provider tab is selected (needs the container visible)
+  if (isProvider && !registerMapInitialized) {
+    registerMapInitialized = true;
+    setTimeout(initRegisterMap, 50);
+  }
 }
 
-/** Build JSON body and call registerUser() — different fields per role */
+/** Build JSON body and call registerUser(); if provider, follow up with addProvider() */
 function handleRegisterSubmit(e) {
   e.preventDefault();
 
-  var email = document.getElementById("reg-email").value.trim();
-  var password = document.getElementById("reg-password").value;
-  var confirm = document.getElementById("confirm-password").value;
+  if (!validateRegisterForm()) return;
 
-  if (password !== confirm) {
-    alert(currentLang === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match");
-    return;
-  }
+  var isProvider = registerRole === "provider";
 
-  var data = {
-    role: registerRole,
-    email: email,
-    password: password
+  var userData = {
+    role:     registerRole,   // PHP converts "customer" → "client"
+    email:    document.getElementById("reg-email").value.trim(),
+    password: document.getElementById("reg-password").value,
+    fname:    document.getElementById("fname").value.trim(),
+    lname:    document.getElementById("lname").value.trim(),
+    phone:    isProvider
+              ? document.getElementById("mobile").value.trim()
+              : document.getElementById("phone").value.trim()
   };
 
-  if (registerRole === "customer") {
-    data.name = document.getElementById("full-name").value.trim();
-    data.phone = document.getElementById("phone").value.trim();
-  } else {
-    var catSel = document.getElementById("provider-category");
-    var opt = catSel.options[catSel.selectedIndex];
-    data.name = document.getElementById("workshop-name").value.trim();
-    data.phone = document.getElementById("mobile").value.trim();
-    data.workshop_name = data.name;
-    data.mobile = data.phone;
-    data.category_id = catSel.value;
-    data.category_slug = opt ? opt.getAttribute("data-slug") : "mechanic";
-    data.availability = document.getElementById("availability").value;
-    data.working_hours = document.getElementById("working-hours").value.trim();
-    data.city = document.getElementById("city-area").value.trim();
-    data.address = data.city;
-    data.description = document.getElementById("service-desc").value.trim();
-    data.lat = DEFAULT_LOCATION.lat;
-    data.long = DEFAULT_LOCATION.long;
-    data.status = data.availability === "closed" ? "closed" : "open";
-  }
+  var submitBtn = document.getElementById("register-submit");
+  if (submitBtn) submitBtn.disabled = true;
 
-  registerUser(data).then(function (res) {
+  registerUser(userData).then(function (res) {
     if (!res.success) {
-      alert(res.message);
+      // Email-specific error goes under the email field; everything else at the bottom
+      if (res.message && res.message.toLowerCase().indexOf("email") !== -1) {
+        showFieldError("reg-email", res.message);
+      } else {
+        showFormError(res.message);
+      }
+      if (submitBtn) submitBtn.disabled = false;
       return;
     }
-    alert(res.message);
-    if (registerRole === "provider") {
-      window.location.href = "services.html";
-    } else {
+
+    // Customer: redirect straight to login
+    if (!isProvider) {
       window.location.href = "login.html";
+      return;
     }
+
+    // Provider — Step 2: call add_provider with the new user_id
+    var userId = res.data && res.data.id;
+
+    var wh = [];
+    document.querySelectorAll(".wh-row").forEach(function (row) {
+      var isClosed = row.querySelector(".wh-closed").checked;
+      wh.push({
+        day:        row.getAttribute("data-day"),
+        open_time:  isClosed ? null : (row.querySelector(".wh-open").value  || null),
+        close_time: isClosed ? null : (row.querySelector(".wh-close").value || null),
+        is_close:   isClosed ? 1 : 0
+      });
+    });
+
+    var catSel = document.getElementById("provider-category");
+
+    var citySel = document.getElementById("city-select");
+    var cityIdx = citySel ? parseInt(citySel.value) : -1;
+    var cityData = (cityIdx >= 0 && EGYPT_CITIES[cityIdx]) ? EGYPT_CITIES[cityIdx] : { ar: "", en: "" };
+
+    // Upload photos first (if any), then save the provider record
+    var photoPromise = selectedPhotos.length > 0
+      ? uploadProviderPhotos(selectedPhotos)
+      : Promise.resolve({ success: true, urls: [] });
+
+    photoPromise.then(function (uploadRes) {
+      if (!uploadRes.success) {
+        showFormError(uploadRes.message || (currentLang === "ar" ? "فشل في رفع الصور" : "Photo upload failed"));
+        if (submitBtn) submitBtn.disabled = false;
+        return;
+      }
+
+      addProvider({
+        user_id:       userId,
+        name_en:       document.getElementById("name-en").value.trim(),
+        name_ar:       document.getElementById("name-ar").value.trim(),
+        phone:         document.getElementById("mobile").value.trim(),
+        address_en:    document.getElementById("address-en").value.trim(),
+        address_ar:    document.getElementById("address-ar").value.trim(),
+        city_en:       cityData.en,
+        city_ar:       cityData.ar,
+        bio_en:        document.getElementById("bio-en").value.trim(),
+        bio_ar:        document.getElementById("bio-ar").value.trim(),
+        category_id:   catSel ? catSel.value : "",
+        working_hours: wh,
+        photos:        uploadRes.urls,
+        lat:           registerLat,
+        lng:           registerLng
+      }).then(function (provRes) {
+        if (!provRes.success) {
+          showFormError(provRes.message);
+          if (submitBtn) submitBtn.disabled = false;
+          return;
+        }
+        selectedPhotos = []; // clear staged files
+        window.location.href = "services.html";
+      }).catch(function (err) {
+        showFormError(err.message || (currentLang === "ar" ? "فشل في حفظ بيانات الورشة" : "Provider setup failed"));
+        if (submitBtn) submitBtn.disabled = false;
+      });
+    }).catch(function (err) {
+      showFormError(err.message || (currentLang === "ar" ? "فشل في رفع الصور" : "Photo upload failed"));
+      if (submitBtn) submitBtn.disabled = false;
+    });
+  }).catch(function (err) {
+    showFormError(err.message || (currentLang === "ar" ? "حدث خطأ، حاول مرة أخرى" : "Something went wrong, try again"));
+    if (submitBtn) submitBtn.disabled = false;
   });
 }
 
@@ -617,6 +977,7 @@ function setupRoleToggle() {
 /** Called when language shifts on login/register pages */
 function authOnLanguageChange() {
   loadRegisterCategories();
+  refreshCitySelect();
   setRegisterRole(registerRole);
 }
 
@@ -637,6 +998,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Auth pages initialization:
   if (window.location.pathname.includes("login.html") || window.location.pathname.includes("register.html")) {
     setupRoleToggle();
+    initLoginPage();
     initRegisterPage();
 
     var loginForm = document.getElementById("login-form");

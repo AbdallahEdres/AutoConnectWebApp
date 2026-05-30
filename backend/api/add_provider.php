@@ -45,8 +45,8 @@ $photos        = $data['photos'] ?? [];
 mysqli_begin_transaction($conn);
 
 // A. Insert provider
-$ok = mysqli_query($conn, "INSERT INTO providers (name_en, name_ar, phone, address_en, address_ar, bio_en, bio_ar, city_en, city_ar, lat, lng, user_id, category_id)
-    VALUES ('$name_en', '$name_ar', '$phone', '$address_en', '$address_ar', '$bio_en', '$bio_ar', '$city_en', '$city_ar', $lat_sql, $lng_sql, $user_id, $category_id)");
+$ok = mysqli_query($conn, "INSERT INTO providers (name_en, name_ar, phone, address_en, address_ar, bio_en, bio_ar, city_en, city_ar, lat, lng, status, user_id, category_id)
+    VALUES ('$name_en', '$name_ar', '$phone', '$address_en', '$address_ar', '$bio_en', '$bio_ar', '$city_en', '$city_ar', $lat_sql, $lng_sql, 'active', $user_id, $category_id)");
 
 if (!$ok) {
     mysqli_rollback($conn);

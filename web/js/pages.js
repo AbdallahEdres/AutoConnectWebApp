@@ -1,6 +1,12 @@
 // pages.js — Page-specific logic for each HTML page
 
 var activeCategory = "";
+var detailMapInstance = null;
+
+var DAY_KEY_MAP = {
+  Monday: "day_mon", Tuesday: "day_tue", Wednesday: "day_wed",
+  Thursday: "day_thu", Friday: "day_fri", Saturday: "day_sat", Sunday: "day_sun"
+};
 
 document.addEventListener("DOMContentLoaded", function () {
   var path = window.location.pathname;
@@ -362,17 +368,60 @@ function renderDetail(p) {
   setEl("detail-address", getLocalizedField(p, "address"));
   setEl("detail-phone",   p.phone);
   setEl("detail-desc",    getLocalizedField(p, "bio"));
-  setEl("live-status",    p.status === "open" ? t("online_now") : t("closed"));
-  setEl("wait-time",      "~" + (p.waiting_minutes || 0) + " min");
-  setEl("capacity",       (p.capacity || 0) + " / " + (p.max_capacity || 0));
+  setEl("live-status",    p.is_open_now ? t("online_now") : t("closed"));
 
   var callBtn = document.getElementById("call-btn");
   if (callBtn) callBtn.href = "tel:" + p.phone;
 
+  var heroImg = (p.photos && p.photos.length) ? p.photos[0].photo_url : "assets/images/provider_default.png";
   var hero = document.getElementById("detail-hero");
-  if (hero && p.image) {
-    hero.style.backgroundImage = "linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,.5)), url('" + base + p.image + "')";
+  if (hero) {
+    hero.style.backgroundImage = "linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,.5)), url('" + base + heroImg + "')";
   }
+
+  renderPhotoGallery(p.photos || [], base);
+  renderWorkingHours(p.working_hours || []);
+
+  if (p.lat && p.lng) initDetailMap(p.lat, p.lng, getLocalizedField(p, "name"));
+}
+
+function renderPhotoGallery(photos, base) {
+  var section = document.getElementById("photos-section");
+  if (!section) return;
+  if (!photos.length) { section.style.display = "none"; return; }
+  section.style.display = "";
+  var grid = document.getElementById("photos-grid");
+  if (!grid) return;
+  grid.innerHTML = photos.map(function (ph) {
+    return '<div class="gallery-thumb" style="background-image:url(\'' + base + ph.photo_url + '\')"></div>';
+  }).join("");
+}
+
+function renderWorkingHours(hours) {
+  var section = document.getElementById("hours-section");
+  if (!section) return;
+  if (!hours.length) { section.style.display = "none"; return; }
+  section.style.display = "";
+  var listEl = document.getElementById("hours-list");
+  if (!listEl) return;
+  listEl.innerHTML = hours.map(function (wh) {
+    var key  = DAY_KEY_MAP[wh.day] || wh.day;
+    var time = wh.is_close
+      ? '<span class="wh-time wh-closed">' + t("day_off") + '</span>'
+      : '<span class="wh-time">' + wh.open_time + ' – ' + wh.close_time + '</span>';
+    return '<li class="wh-item"><span class="wh-day">' + t(key) + '</span>' + time + '</li>';
+  }).join("");
+}
+
+function initDetailMap(lat, lng, title) {
+  var mapEl = document.getElementById("detail-map");
+  if (!mapEl || typeof L === "undefined") return;
+  if (detailMapInstance) { detailMapInstance.remove(); detailMapInstance = null; }
+  detailMapInstance = L.map("detail-map", { zoomControl: true, scrollWheelZoom: false }).setView([lat, lng], 15);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap"
+  }).addTo(detailMapInstance);
+  L.marker([lat, lng]).addTo(detailMapInstance).bindPopup(title).openPopup();
 }
 
 function loadReviews(providerId) {

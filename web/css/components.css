@@ -210,6 +210,18 @@
   border-color: var(--accent-yellow);
 }
 
+.form-control.is-invalid {
+  border-color: var(--accent-yellow);
+}
+
+.form-error {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--accent-yellow);
+  margin-top: 0.2rem;
+  min-height: 1em;
+}
+
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -22,7 +22,7 @@ $user_id     = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0;
 
 // 1. Main provider data
 $result = mysqli_query($conn, "SELECT p.*,
-        c.name_en AS category_name_en, c.name_ar AS category_name_ar,
+        c.name_en AS category_name_en, c.name_ar AS category_name_ar, c.slug AS category_slug,
         EXISTS (
             SELECT 1 FROM working_hours wh
             WHERE wh.provider_id = p.id
