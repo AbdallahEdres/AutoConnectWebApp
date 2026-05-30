@@ -26,11 +26,10 @@ var API_ENDPOINTS = {
   toggleFavorite: "/toggle_favorite.php"
 };
 
-// =============================================================================
-// 2. i18n.js
-// =============================================================================
+// ============================================================================
+// TRANSLATIONS (i18n.js content simplified)
+// ============================================================================
 
-/** All UI strings — keys must exist in ar and en */
 var TRANSLATIONS = {
   ar: {
     app_name: "AutoConnect",
@@ -141,72 +140,35 @@ var TRANSLATIONS = {
     language_settings: "إعدادات اللغة",
     settings_title: "الإعدادات",
     settings_sub: "قم بتهيئة أمان حسابك وتفضيلاتك",
-    account_mgmt: "إدارة الحساب",
-    account_mgmt_sub: "إدارة بيانات السيارات الخاصة بك",
-    profile_details: "تفاصيل الملف الشخصي",
-    security: "الأمان",
-    notifications: "الإشعارات",
-    upgrade_plan: "ترقية الخطة",
-    security_tips: "أفضل ممارسات الأمان",
-    tip1: "استخدم 12 حرفاً على الأقل بما في ذلك الرموز.",
-    tip2: "قم بتفعيل المصادقة الثنائية (2FA).",
-    tip3: "تجنب إعادة استخدام كلمات المرور من منصات أخرى.",
     current_password: "كلمة المرور الحالية",
     new_password: "كلمة المرور الجديدة",
-    confirm_new_password: "تأكيد كلمة المرور الجديدة",
-    update_password: "تحديث كلمة المرور",
     delete_account: "حذف الحساب",
-    delete_account_desc: "حذف الحساب نهائي وسيمحو كل بيانات الأسطول والتشخيص والمخزون من السحابة.",
-    delete_my_account: "حذف حسابي",
-    provider_reg_title: "انضم لأكبر شبكة خدمات النقل في مصر",
-    provider_reg_sub: "سجّل ورشتك وابدأ في استقبال طلبات العملاء القريبين منك.",
-    provider_form_title: "بيانات مقدم الخدمة",
-    workshop_name: "اسم الورشة / المركز",
-    mobile: "رقم الموبايل",
-    service_type: "نوع الخدمة",
-    availability: "التوفر",
-    working_hours: "مواعيد العمل",
-    city_area: "المدينة / المنطقة",
-    service_desc: "وصف الخدمة (نبذة سريعة)",
-    pin_on_map: "حدد مكانك بدقة على الخريطة",
-    register_workshop: "سجل ورشتك الآن",
-    save_later: "حفظ وإكمال لاحقاً",
-    quality_note: "جميع الطلبات يتم مراجعتها لضمان الجودة",
-    tech_support: "دعم فني",
-    geo_expand: "توسع جغرافي",
-    quick_response: "استجابة سريعة",
-    live_status: "الحالة المباشرة",
-    online_now: "متوفر الآن",
-    waiting_time: "وقت الانتظار",
-    capacity: "السعة",
-    similar_nearby: "خدمات مشابهة قريبة",
-    our_location: "موقعنا على الخريطة",
-    favorite: "مفضلة",
-    privacy: "سياسة الخصوصية",
-    terms: "الشروط والأحكام",
     contact: "اتصل بنا",
     copyright: "© 2024 AutoConnect. جميع الحقوق محفوظة.",
-    days_ago: "منذ",
-    days: "يوم",
-    connected: "متصل",
-    system_status: "حالة النظام",
-    all_types: "الكل",
-    status_open: "مفتوح الآن",
-    status_closed: "مغلق",
-    sort_nearest: "الأقرب",
-    sort_rating: "التقييم",
-    km_away: "كم",
-    loading: "جاري التحميل...",
     no_results: "لا توجد نتائج",
-    location_error: "تعذر الحصول على موقعك. اختر المنطقة يدوياً.",
-    login_success: "تم تسجيل الدخول (تجريبي)",
-    register_success: "تم إنشاء الحساب (تجريبي)",
-    password_updated: "تم تحديث كلمة المرور (تجريبي)"
+    loading: "جاري التحميل...",
+    location_error: "حدث خطأ في الحصول على موقعك",
+    online_now: "متصل الآن",
+    password_updated: "تم تحديث كلمة المرور",
+    register_success: "تم التسجيل بنجاح",
+    register_workshop: "تسجيل الورشة",
+    login_success: "تم تسجيل الدخول بنجاح",
+    km_away: "كم",
+    workshop_name: "اسم الورشة",
+    mobile: "رقم الجوال",
+    provider_category: "نوع الخدمة",
+    city_area: "المنطقة / المدينة",
+    service_desc: "وصف الخدمة",
+    availability: "التوفر",
+    working_hours: "ساعات العمل",
+    favorite: "المفضلة",
+    privacy: "الخصوصية",
+    terms: "الشروط والأحكام"
   },
   en: {
     app_name: "AutoConnect",
     nav_home: "Home",
-    nav_services: "Our Services",
+    nav_services: "Services",
     nav_emergency: "Emergency",
     nav_login: "Login",
     nav_signup: "Sign Up",
@@ -243,152 +205,122 @@ var TRANSLATIONS = {
     gps_tracking: "GPS tracking",
     cta_join_title: "Join Egypt's elite automotive experts",
     cta_join_sub: "Are you a service provider? Join our network and receive orders.",
-    partner_btn: "Partner with us",
-    learn_more: "Learn more",
-    login_title: "Welcome back",
+    partner_btn: "Join Us",
+    learn_more: "Learn More",
+    login_title: "Welcome Back",
     login_sub: "Sign in to continue with AutoConnect",
     email: "Email",
     password: "Password",
     forgot_password: "Forgot password?",
-    login_btn: "Sign in",
-    or: "or",
-    guest_btn: "Continue as guest",
+    login_btn: "Sign In",
+    or: "Or",
+    guest_btn: "Continue as Guest",
     no_account: "Don't have an account?",
-    signup_link: "Sign up now",
+    signup_link: "Sign Up",
     customer: "Customer",
     service_provider: "Service Provider",
-    register_title: "Create a new account",
-    register_sub: "Join AutoConnect and access our saved services",
-    register_provider_sub: "Register your workshop and complete your provider portfolio",
-    full_name: "Full name",
-    phone: "Phone number",
-    confirm_password: "Confirm password",
-    create_account: "Create account",
+    register_title: "Create New Account",
+    register_sub: "Join AutoConnect and benefit from our saved services",
+    register_provider_sub: "Register your workshop and complete service provider portfolio data",
+    full_name: "Full Name",
+    phone: "Phone Number",
+    confirm_password: "Confirm Password",
+    create_account: "Create Account",
     have_account: "Already have an account?",
-    continue_guest: "Continue as guest",
-    emergency_title: "Emergency assistance 🚨",
+    continue_guest: "Continue as Guest",
+    emergency_title: "Emergency Help 🚨",
     emergency_sub: "Need help now? Find the nearest tow truck and call immediately.",
-    use_location: "Use my current location",
+    use_location: "Use My Current Location",
     or_choose_area: "Or choose your area manually",
     choose_area: "Choose your area",
-    nearest_providers: "Nearest service providers",
+    nearest_providers: "Nearest Service Providers",
     results_by_location: "Results based on your location",
-    open_now: "Open now",
+    open_now: "Open Now",
     closed: "Closed",
-    call_now: "Call now",
-    view_map: "View location",
-    emergency_footer: "If you are in immediate danger, call local emergency services (15088). Your safety is our top priority.",
-    filtered_services: "Filtered services",
-    filtered_sub: "Showing results based on your selection",
-    search_services: "Search for services",
+    call_now: "Call Now",
+    view_map: "View Map",
+    emergency_footer: "If you are in imminent danger, please call local emergency services immediately (15088). Your safety is our top priority.",
+    filtered_services: "Filtered Services",
+    filtered_sub: "Show results based on your selection",
+    search_services: "Search Services",
     type: "Type",
     region: "Region",
     status: "Status",
-    sort_by: "Sort by",
-    apply_filter: "Apply filter",
+    sort_by: "Sort By",
+    apply_filter: "Apply Filter",
     showing_results: "Showing",
-    results: "results",
-    near_you: "Near your location",
-    show_map: "Show on map",
+    results: "Results",
+    near_you: "Near You",
+    show_map: "Show Map",
     favorites_title: "Favorites",
     favorites_sub: "Service providers you saved for quick access",
-    all_providers: "All providers",
-    view_details: "View details",
-    explore_directory: "Explore directory",
+    all_providers: "All Providers",
+    view_details: "View Details",
+    explore_directory: "Explore Directory",
     more_services: "Looking for more services?",
-    profile_title: "Customer profile",
-    edit_profile: "Edit profile",
-    service_summary: "Service summary",
-    total_visits: "Total visits",
-    last_visit: "Last visit",
-    next_maintenance: "Next maintenance",
-    favorite_providers: "Favorite providers",
-    view_all: "View all",
-    add_provider: "Add new provider",
-    saved_location: "Saved location",
-    account_settings: "Account settings",
-    change_password: "Change password",
-    notification_prefs: "Notification preferences",
-    language_settings: "Language settings",
+    profile_title: "Customer Profile",
+    edit_profile: "Edit Profile",
+    service_summary: "Service Summary",
+    total_visits: "Total Visits",
+    last_visit: "Last Visit",
+    next_maintenance: "Next Maintenance",
+    favorite_providers: "Favorite Providers",
+    view_all: "View All",
+    add_provider: "Add New Provider",
+    saved_location: "Saved Location",
+    account_settings: "Account Settings",
+    change_password: "Change Password",
+    notification_prefs: "Notification Preferences",
+    language_settings: "Language Settings",
     settings_title: "Settings",
     settings_sub: "Configure your account security and preferences",
-    account_mgmt: "Account management",
-    account_mgmt_sub: "Manage your vehicle data",
-    profile_details: "Profile details",
-    security: "Security",
-    notifications: "Notifications",
-    upgrade_plan: "Upgrade plan",
-    security_tips: "Security best practices",
-    tip1: "Use at least 12 characters including symbols.",
-    tip2: "Enable two-factor authentication (2FA).",
-    tip3: "Avoid reusing passwords from other platforms.",
-    current_password: "Current password",
-    new_password: "New password",
-    confirm_new_password: "Confirm new password",
-    update_password: "Update password",
-    delete_account: "Delete account",
-    delete_account_desc: "Deleting your account is permanent and will erase all fleet, diagnostic, and inventory data from the cloud.",
-    delete_my_account: "Delete my account",
-    provider_reg_title: "Join Egypt's largest transport services network",
-    provider_reg_sub: "Register your workshop and start receiving nearby customer requests.",
-    provider_form_title: "Service provider information",
-    workshop_name: "Workshop / center name",
-    mobile: "Mobile number",
-    service_type: "Service type",
-    availability: "Availability",
-    working_hours: "Working hours",
-    city_area: "City / area",
-    service_desc: "Service description (brief)",
-    pin_on_map: "Pin your location on the map",
-    register_workshop: "Register your workshop",
-    save_later: "Save and complete later",
-    quality_note: "All requests are reviewed to ensure quality",
-    tech_support: "Technical support",
-    geo_expand: "Geographic expansion",
-    quick_response: "Quick response",
-    live_status: "Live status",
-    online_now: "Available now",
-    waiting_time: "Waiting time",
-    capacity: "Capacity",
-    similar_nearby: "Similar services nearby",
-    our_location: "Our location on map",
-    favorite: "Favorite",
-    privacy: "Privacy Policy",
-    terms: "Terms & Conditions",
-    contact: "Contact us",
+    current_password: "Current Password",
+    new_password: "New Password",
+    delete_account: "Delete Account",
+    contact: "Contact Us",
     copyright: "© 2024 AutoConnect. All rights reserved.",
-    days_ago: "",
-    days: "days ago",
-    connected: "Connected",
-    system_status: "System status",
-    all_types: "All",
-    status_open: "Open now",
-    status_closed: "Closed",
-    sort_nearest: "Nearest",
-    sort_rating: "Rating",
-    km_away: "km away",
-    loading: "Loading...",
     no_results: "No results found",
-    location_error: "Could not get your location. Please choose your area manually.",
-    login_success: "Logged in (demo)",
-    register_success: "Account created (demo)",
-    password_updated: "Password updated (demo)"
+    loading: "Loading...",
+    location_error: "Error getting your location",
+    online_now: "Online Now",
+    password_updated: "Password updated",
+    register_success: "Registration successful",
+    register_workshop: "Register Workshop",
+    login_success: "Login successful",
+    km_away: "km away",
+    workshop_name: "Workshop Name",
+    mobile: "Mobile Number",
+    provider_category: "Service Type",
+    city_area: "Area / City",
+    service_desc: "Service Description",
+    availability: "Availability",
+    working_hours: "Working Hours",
+    favorite: "Favorite",
+    privacy: "Privacy",
+    terms: "Terms & Conditions"
   }
 };
 
-/** Active language: "ar" (default) or "en" */
-var currentLang = localStorage.getItem("autoconnect_lang") || "ar";
+// ============================================================================
+// CONFIG AND STATE
+// ============================================================================
 
-/** Get one translated string by key, e.g. t("login_btn") */
+var currentLang = localStorage.getItem("autoconnect_lang") || "ar";
+var registerRole = "customer";
+var allProviders = [];
+var categories = [];
+
+var DEFAULT_LOCATION = { lat: 30.0444, long: 31.2357 };
+
+// ============================================================================
+// TRANSLATION FUNCTIONS (DO NOT MODIFY)
+// ============================================================================
+
 function t(key) {
   var pack = TRANSLATIONS[currentLang];
   return (pack && pack[key]) || TRANSLATIONS.ar[key] || key;
 }
 
-/**
- * Switch language: updates body dir (rtl/ltr), all data-i18n elements, and calls
- * onLanguageChange() on the current page if that function exists (e.g. services.js).
- */
 function setLanguage(lang) {
   if (!TRANSLATIONS[lang]) return;
   currentLang = lang;
@@ -412,7 +344,6 @@ function setLanguage(lang) {
 
 }
 
-/** Flip AR ↔ EN (header button calls this) */
 function toggleLanguage() {
   setLanguage(currentLang === "ar" ? "en" : "ar");
   if (typeof onLanguageChange === "function") {
@@ -449,18 +380,10 @@ function getDistanceKm(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-/** Human-readable distance for UI */
 function formatDistance(km) {
-  if (km < 1) {
-    return Math.round(km * 1000) + " m";
-  }
-  return km.toFixed(1) + " " + t("km_away");
+  return km < 1 ? Math.round(km * 1000) + " m" : km.toFixed(1) + " " + t("km_away");
 }
 
-/**
- * Ask browser for user's GPS position (requires HTTPS or localhost).
- * Returns Promise with { lat, long }.
- */
 function getUserLocation() {
   return new Promise(function (resolve, reject) {
     if (!navigator.geolocation) {
@@ -469,33 +392,21 @@ function getUserLocation() {
     }
     navigator.geolocation.getCurrentPosition(
       function (pos) {
-        resolve({
-          lat: pos.coords.latitude,
-          long: pos.coords.longitude
-        });
+        resolve({ lat: pos.coords.latitude, long: pos.coords.longitude });
       },
-      function (err) {
-        reject(err);
-      },
+      function (err) { reject(err); },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   });
 }
 
-/** Fallback when user denies location permission — center of Cairo */
-var DEFAULT_LOCATION = { lat: 30.0444, long: 31.2357 };
-
-/** Read last saved GPS from localStorage (set on emergency page) */
 function getStoredLocation() {
-  var raw = localStorage.getItem("autoconnect_location");
-  if (raw) {
-    try {
-      return JSON.parse(raw);
-    } catch (e) {
-      return null;
-    }
+  try {
+    var raw = localStorage.getItem("autoconnect_location");
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
   }
-  return null;
 }
 
 function saveLocation(loc) {
@@ -703,24 +614,11 @@ function renderProviderCard(provider, options) {
     </article>`;
 }
 
-/** Loop providers and put all cards inside element #containerId */
-function renderProviderList(containerId, providers, options) {
-  var container = document.getElementById(containerId);
-  if (!container) return;
-
-  if (!providers.length) {
-    container.innerHTML =
-      '<p class="section-subtitle" style="grid-column:1/-1">' +
-      t("no_results") +
-      "</p>";
-    return;
-  }
-
-  var html = "";
-  providers.forEach(function (p) {
-    html += renderProviderCard(p, options);
-  });
-  container.innerHTML = html;
+function renderProviderList(id, list, opts) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = !list.length ? '<p class="section-subtitle">' + t("no_results") + "</p>" :
+    list.map(function (p) { return renderProviderCard(p, opts); }).join("");
 }
 
 function renderHorizontalProviderCard(provider, options) {
@@ -777,7 +675,6 @@ function getPageName() {
 function renderHeader() {
   var el = document.getElementById("site-header");
   if (!el) return;
-
   var base = getBasePath();
   var page = getPageName();
   var linksHtml = "";
@@ -814,9 +711,7 @@ function renderHeader() {
   var toggle = document.getElementById("menu-toggle");
   var nav = document.getElementById("nav-links");
   if (toggle && nav) {
-    toggle.addEventListener("click", function () {
-      nav.classList.toggle("open");
-    });
+    toggle.addEventListener("click", function () { nav.classList.toggle("open"); });
   }
 }
 
@@ -838,119 +733,33 @@ function renderFooter() {
     </footer>`;
 }
 
-// =============================================================================
-// 8. auth.js
-// =============================================================================
+// ============================================================================
+// AUTHENTICATION
+// ============================================================================
 
-/** Which tab is selected on register page: "customer" or "provider" */
-var registerRole = "customer";
-
-/** Send email + password to API; go to profile if success */
 function handleLoginSubmit(e) {
   e.preventDefault();
-  var email = document.getElementById("email").value;
-  var password = document.getElementById("password").value;
-  loginUser(email, password)
+  loginUser(document.getElementById("email").value, document.getElementById("password").value)
     .then(function (res) {
-      if (!res.success) {
-        alert(res.message);
-        return;
-      }
       alert(res.message);
-      window.location.href = "profile.html";
+      if (res.success) window.location.href = "profile.html";
     })
-    .catch(function (err) {
-      alert(err.message || "Login failed");
-    });
+    .catch(function (err) { alert(err.message || "Login failed"); });
 }
 
-/** Setup register page on first load */
-function initRegisterPage() {
-  if (!document.getElementById("register-form")) return;
-  loadRegisterCategories();
-  setRegisterRole("customer");
-}
-
-/** Fill service type dropdown from getCategories() API */
-function loadRegisterCategories() {
-  var sel = document.getElementById("provider-category");
-  if (!sel) return;
-  getCategories().then(function (cats) {
-    sel.innerHTML = "";
-    cats.forEach(function (c) {
-      if (c.parent_id) return; // skip sub-categories in dropdown
-      var opt = document.createElement("option");
-      opt.value = c.id;
-      opt.setAttribute("data-slug", c.slug);
-      opt.textContent = getLocalizedField(c, "name");
-      sel.appendChild(opt);
-    });
-  });
-}
-
-/**
- * Show/hide customer vs provider fields when user clicks role toggle.
- * Also updates card width, subtitle text, and submit button label.
- */
-function setRegisterRole(role) {
-  registerRole = role;
-  var customerFields = document.getElementById("customer-fields");
-  var providerFields = document.getElementById("provider-fields");
-  var card = document.getElementById("register-card");
-  var subtitle = document.getElementById("register-subtitle");
-  var submitBtn = document.getElementById("register-submit");
-  var fullName = document.getElementById("full-name");
-  var phone = document.getElementById("phone");
-  var workshop = document.getElementById("workshop-name");
-  var mobile = document.getElementById("mobile");
-  var category = document.getElementById("provider-category");
-  var cityArea = document.getElementById("city-area");
-
-  var isProvider = role === "provider";
-
-  if (customerFields) {
-    customerFields.classList.toggle("register-fields-hidden", isProvider);
-  }
-  if (providerFields) {
-    providerFields.classList.toggle("register-fields-hidden", !isProvider);
-  }
-  if (card) {
-    card.classList.toggle("auth-card--provider", isProvider);
-  }
-  if (subtitle) {
-    subtitle.textContent = isProvider ? t("register_provider_sub") : t("register_sub");
-    subtitle.classList.toggle("provider-mode", isProvider);
-  }
-  if (submitBtn) {
-    submitBtn.textContent = isProvider ? t("register_workshop") : t("create_account");
-  }
-
-  // HTML5 required attribute on the right fields only
-  if (fullName) fullName.required = !isProvider;
-  if (phone) phone.required = !isProvider;
-  if (workshop) workshop.required = isProvider;
-  if (mobile) mobile.required = isProvider;
-  if (category) category.required = isProvider;
-  if (cityArea) cityArea.required = isProvider;
-}
-
-/** Build JSON body and call registerUser() — different fields per role */
 function handleRegisterSubmit(e) {
   e.preventDefault();
-
-  var email = document.getElementById("reg-email").value.trim();
-  var password = document.getElementById("reg-password").value;
-  var confirm = document.getElementById("confirm-password").value;
-
-  if (password !== confirm) {
+  var pass = document.getElementById("reg-password").value;
+  var conf = document.getElementById("confirm-password").value;
+  if (pass !== conf) {
     alert(currentLang === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match");
     return;
   }
 
   var data = {
     role: registerRole,
-    email: email,
-    password: password
+    email: document.getElementById("reg-email").value.trim(),
+    password: pass
   };
 
   if (registerRole === "customer") {
@@ -959,16 +768,13 @@ function handleRegisterSubmit(e) {
   } else {
     var catSel = document.getElementById("provider-category");
     var opt = catSel.options[catSel.selectedIndex];
-    data.name = document.getElementById("workshop-name").value.trim();
-    data.phone = document.getElementById("mobile").value.trim();
-    data.workshop_name = data.name;
-    data.mobile = data.phone;
+    data.workshop_name = document.getElementById("workshop-name").value.trim();
+    data.mobile = document.getElementById("mobile").value.trim();
     data.category_id = catSel.value;
     data.category_slug = opt ? opt.getAttribute("data-slug") : "mechanic";
     data.availability = document.getElementById("availability").value;
     data.working_hours = document.getElementById("working-hours").value.trim();
     data.city = document.getElementById("city-area").value.trim();
-    data.address = data.city;
     data.description = document.getElementById("service-desc").value.trim();
     data.lat = DEFAULT_LOCATION.lat;
     data.long = DEFAULT_LOCATION.long;
@@ -976,15 +782,9 @@ function handleRegisterSubmit(e) {
   }
 
   registerUser(data).then(function (res) {
-    if (!res.success) {
-      alert(res.message);
-      return;
-    }
     alert(res.message);
-    if (registerRole === "provider") {
-      window.location.href = "services.html";
-    } else {
-      window.location.href = "login.html";
+    if (res.success) {
+      window.location.href = registerRole === "provider" ? "services.html" : "login.html";
     }
   });
 }
@@ -996,9 +796,7 @@ function setupRoleToggle() {
   if (!toggle) {
     document.querySelectorAll(".role-toggle button").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        document.querySelectorAll(".role-toggle button").forEach(function (b) {
-          b.classList.remove("active");
-        });
+        document.querySelectorAll(".role-toggle button").forEach(function (b) { b.classList.remove("active"); });
         btn.classList.add("active");
       });
     });
@@ -1007,24 +805,25 @@ function setupRoleToggle() {
 
   toggle.querySelectorAll("button").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      toggle.querySelectorAll("button").forEach(function (b) {
-        b.classList.remove("active");
-      });
+      toggle.querySelectorAll("button").forEach(function (b) { b.classList.remove("active"); });
       btn.classList.add("active");
       setRegisterRole(btn.getAttribute("data-role") || "customer");
     });
   });
 }
 
-/** Called when language shifts on login/register pages */
-function authOnLanguageChange() {
-  loadRegisterCategories();
-  setRegisterRole(registerRole);
+function prefillDemoLogin() {
+  var emailEl = document.getElementById("email");
+  var passEl = document.getElementById("password");
+  var hint = document.getElementById("demo-hint");
+  if (emailEl) emailEl.value = "demo@autoconnect.com";
+  if (passEl) passEl.value = "demo1234";
+  if (hint) hint.textContent = "Demo: demo@autoconnect.com / demo1234";
 }
 
-// =============================================================================
-// 9. app.js & Initialization
-// =============================================================================
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
 
 document.addEventListener("DOMContentLoaded", function () {
   renderHeader();
@@ -1032,37 +831,20 @@ document.addEventListener("DOMContentLoaded", function () {
   setLanguage(currentLang);
 
   var langBtn = document.getElementById("lang-toggle");
-  if (langBtn) {
-    langBtn.addEventListener("click", toggleLanguage);
-  }
+  if (langBtn) langBtn.addEventListener("click", toggleLanguage);
 
-  // Auth pages initialization:
-  if (window.location.pathname.includes("login.html") || window.location.pathname.includes("register.html")) {
+  var path = window.location.pathname;
+  if (path.includes("login.html") || path.includes("register.html")) {
     setupRoleToggle();
     initRegisterPage();
 
     var loginForm = document.getElementById("login-form");
-    if (loginForm) {
-      loginForm.addEventListener("submit", handleLoginSubmit);
-    }
-
+    if (loginForm) loginForm.addEventListener("submit", handleLoginSubmit);
     var registerForm = document.getElementById("register-form");
-    if (registerForm) {
-      registerForm.addEventListener("submit", handleRegisterSubmit);
-    }
+    if (registerForm) registerForm.addEventListener("submit", handleRegisterSubmit);
   }
 });
 
-// Global language change dispatcher called by setLanguage()
 function onLanguageChange(lang) {
-  // If we are on login/register pages, call auth language change
-  if (window.location.pathname.includes("login.html") || window.location.pathname.includes("register.html")) {
-    if (typeof authOnLanguageChange === "function") {
-      authOnLanguageChange(lang);
-    }
-  }
-  // Page-specific handlers defined in pages.js will override/be called by this
-  if (typeof pageOnLanguageChange === "function") {
-    pageOnLanguageChange(lang);
-  }
+  loadRegisterCategories();
 }

@@ -65,6 +65,7 @@
   overflow: hidden;
   aspect-ratio: 4/3;
   background: linear-gradient(145deg, #1e3a5f, #0f172a);
+  width: 100%;
 }
 
 .hero-badge {
@@ -465,6 +466,7 @@
 
 /* ----- RESPONSIVE: stack multi-column layouts on tablet/phone ----- */
 @media (max-width: 900px) {
+
   .hero-grid,
   .cta-banner,
   .provider-hero,
