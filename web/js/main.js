@@ -8,7 +8,9 @@
 // 1. config.js
 // =============================================================================
 
-var API_BASE = "/AutoConnectWebApp/backend/api";
+var API_BASE = window.location.pathname.indexOf("/pages/") !== -1
+  ? "../../backend/api"
+  : "../backend/api";
 
 var API_ENDPOINTS = {
   providers: "/providers.php",
