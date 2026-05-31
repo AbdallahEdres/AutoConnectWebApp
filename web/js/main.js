@@ -346,6 +346,10 @@ function renderProviderCard(provider, options) {
     ? `<a href="tel:${phone}" class="btn btn-primary btn-sm" onclick="createBooking(${provider.id})">${t("call_now")}</a>`
     : `<a href="${loginUrl}" class="btn btn-primary btn-sm">${t("show_phone")}</a>`;
 
+  var ratingHtml = provider.review_count > 0
+    ? '★ ' + provider.rating + ' <span class="provider-card__review-count">(' + provider.review_count + ')</span>'
+    : '<span class="provider-card__review-count">' + t("no_reviews_yet") + '</span>';
+
   return `
     <article class="provider-card">
       <div class="provider-card__image">
@@ -353,7 +357,7 @@ function renderProviderCard(provider, options) {
         ${badge ? `<span class="provider-card__badge">${badge}</span>` : ""}
       </div>
       <div class="provider-card__body">
-        <p class="provider-card__rating">${provider.review_count > 0 ? "★ " + provider.rating + " <span class=\"provider-card__review-count\">(" + provider.review_count + ")</span>" : "<span class=\"provider-card__review-count\">" + t("no_reviews_yet") + "</span>"}</p>
+        <p class="provider-card__rating">${ratingHtml}</p>
         <h3>${name}</h3>
         <p class="provider-card__meta"><span class="status-dot ${statusClass}"></span> ${statusText}</p>
         ${address ? `<p class="provider-card__meta">📍 ${address}</p>` : ""}
@@ -467,6 +471,21 @@ function renderHeader() {
     linksHtml += `<a href="${href}" class="${cls}" data-i18n="${item.key}"${style}></a>`;
   });
 
+  var token = localStorage.getItem("autoconnect_token");
+  var user  = JSON.parse(localStorage.getItem("autoconnect_user") || "null");
+  var authHtml;
+  if (token && user) {
+    authHtml =
+      '<a href="' + base + 'pages/profile.html" class="btn btn-sm btn-ghost" style="display:flex;align-items:center;gap:0.4rem">' +
+      '<img src="' + base + 'assets/images/Container.png" style="width:24px;height:24px;border-radius:50%;object-fit:cover"> ' +
+      user.fname + '</a> ' +
+      '<a href="#" onclick="logoutUser();return false;" class="btn btn-sm btn-primary" data-i18n="logout"></a>';
+  } else {
+    authHtml =
+      '<a href="' + base + 'pages/login.html" class="btn btn-sm btn-ghost" data-i18n="nav_login"></a> ' +
+      '<a href="' + base + 'pages/register.html" class="btn btn-sm btn-primary" data-i18n="nav_signup"></a>';
+  }
+
   el.innerHTML = `
     <header class="site-header">
       <div class="container header-inner">
@@ -477,16 +496,7 @@ function renderHeader() {
         <nav class="nav-links" id="nav-links">${linksHtml}</nav>
         <div class="header-actions">
           <button type="button" class="lang-toggle" id="lang-toggle">EN</button>
-          ${(function () {
-            var token = localStorage.getItem("autoconnect_token");
-            var user  = JSON.parse(localStorage.getItem("autoconnect_user") || "null");
-            if (token && user) {
-              return `<a href="${base}pages/profile.html" class="btn btn-sm btn-ghost" style="display:flex;align-items:center;gap:0.4rem"><img src="${base}assets/images/Container.png" style="width:24px;height:24px;border-radius:50%;object-fit:cover"> ${user.fname}</a>
-                      <a href="#" onclick="logoutUser();return false;" class="btn btn-sm btn-primary" data-i18n="logout"></a>`;
-            }
-            return `<a href="${base}pages/login.html" class="btn btn-sm btn-ghost" data-i18n="nav_login"></a>
-                    <a href="${base}pages/register.html" class="btn btn-sm btn-primary" data-i18n="nav_signup"></a>`;
-          })()}
+          ${authHtml}
         </div>
       </div>
     </header>`;
@@ -891,7 +901,7 @@ function setRegisterRole(role) {
   }
 }
 
-/** Build JSON body and call registerUser(); if provider, follow up with addProvider() */
+/** Build JSON body and call registerUser(); if provider, continue with saveProviderProfile() */
 function handleRegisterSubmit(e) {
   e.preventDefault();
 
@@ -900,7 +910,7 @@ function handleRegisterSubmit(e) {
   var isProvider = registerRole === "provider";
 
   var userData = {
-    role:     registerRole,   // PHP converts "customer" → "client"
+    role:     registerRole,
     email:    document.getElementById("reg-email").value.trim(),
     password: document.getElementById("reg-password").value,
     fname:    document.getElementById("fname").value.trim(),
@@ -915,7 +925,6 @@ function handleRegisterSubmit(e) {
 
   registerUser(userData).then(function (res) {
     if (!res.success) {
-      // Email-specific error goes under the email field; everything else at the bottom
       if (res.message && res.message.toLowerCase().indexOf("email") !== -1) {
         showFieldError("reg-email", res.message);
       } else {
@@ -925,78 +934,79 @@ function handleRegisterSubmit(e) {
       return;
     }
 
-    // Customer: redirect straight to login
     if (!isProvider) {
       window.location.href = "login.html";
       return;
     }
 
-    // Provider — Step 2: call add_provider with the new user_id
-    var userId = res.data && res.data.id;
+    saveProviderProfile(res.data && res.data.id, submitBtn);
+  }).catch(function (err) {
+    showFormError(err.message || (currentLang === "ar" ? "حدث خطأ، حاول مرة أخرى" : "Something went wrong, try again"));
+    if (submitBtn) submitBtn.disabled = false;
+  });
+}
 
-    var wh = [];
-    document.querySelectorAll(".wh-row").forEach(function (row) {
-      var isClosed = row.querySelector(".wh-closed").checked;
-      wh.push({
-        day:        row.getAttribute("data-day"),
-        open_time:  isClosed ? null : (row.querySelector(".wh-open").value  || null),
-        close_time: isClosed ? null : (row.querySelector(".wh-close").value || null),
-        is_close:   isClosed ? 1 : 0
-      });
+/** Step 2 of provider registration: upload photos then save provider record */
+function saveProviderProfile(userId, submitBtn) {
+  var wh = [];
+  document.querySelectorAll(".wh-row").forEach(function (row) {
+    var isClosed = row.querySelector(".wh-closed").checked;
+    wh.push({
+      day:        row.getAttribute("data-day"),
+      open_time:  isClosed ? null : (row.querySelector(".wh-open").value  || null),
+      close_time: isClosed ? null : (row.querySelector(".wh-close").value || null),
+      is_close:   isClosed ? 1 : 0
     });
+  });
 
-    var catSel = document.getElementById("provider-category");
+  var catSel  = document.getElementById("provider-category");
+  var citySel = document.getElementById("city-select");
+  var cityEn  = citySel ? citySel.value : "";
+  var cityAr  = (citySel && citySel.options[citySel.selectedIndex])
+    ? citySel.options[citySel.selectedIndex].getAttribute("data-ar") || ""
+    : "";
 
-    var citySel = document.getElementById("city-select");
-    var cityEn = citySel ? citySel.value : "";
-    var cityAr = (citySel && citySel.options[citySel.selectedIndex]) ? citySel.options[citySel.selectedIndex].getAttribute("data-ar") || "" : "";
+  var photoPromise = selectedPhotos.length > 0
+    ? uploadProviderPhotos(selectedPhotos)
+    : Promise.resolve({ success: true, urls: [] });
 
-    // Upload photos first (if any), then save the provider record
-    var photoPromise = selectedPhotos.length > 0
-      ? uploadProviderPhotos(selectedPhotos)
-      : Promise.resolve({ success: true, urls: [] });
+  photoPromise.then(function (uploadRes) {
+    if (!uploadRes.success) {
+      showFormError(uploadRes.message || (currentLang === "ar" ? "فشل في رفع الصور" : "Photo upload failed"));
+      if (submitBtn) submitBtn.disabled = false;
+      return;
+    }
 
-    photoPromise.then(function (uploadRes) {
-      if (!uploadRes.success) {
-        showFormError(uploadRes.message || (currentLang === "ar" ? "فشل في رفع الصور" : "Photo upload failed"));
+    addProvider({
+      user_id:       userId,
+      name_en:       document.getElementById("name-en").value.trim(),
+      name_ar:       document.getElementById("name-ar").value.trim(),
+      phone:         document.getElementById("mobile").value.trim(),
+      address_en:    document.getElementById("address-en").value.trim(),
+      address_ar:    document.getElementById("address-ar").value.trim(),
+      city_en:       cityEn,
+      city_ar:       cityAr,
+      bio_en:        document.getElementById("bio-en").value.trim(),
+      bio_ar:        document.getElementById("bio-ar").value.trim(),
+      category_id:   catSel ? catSel.value : "",
+      working_hours: wh,
+      photos:        uploadRes.urls,
+      lat:           registerLat,
+      lng:           registerLng
+    }).then(function (provRes) {
+      if (!provRes.success) {
+        showFormError(provRes.message);
         if (submitBtn) submitBtn.disabled = false;
         return;
       }
-
-      addProvider({
-        user_id:       userId,
-        name_en:       document.getElementById("name-en").value.trim(),
-        name_ar:       document.getElementById("name-ar").value.trim(),
-        phone:         document.getElementById("mobile").value.trim(),
-        address_en:    document.getElementById("address-en").value.trim(),
-        address_ar:    document.getElementById("address-ar").value.trim(),
-        city_en:       cityEn,
-        city_ar:       cityAr,
-        bio_en:        document.getElementById("bio-en").value.trim(),
-        bio_ar:        document.getElementById("bio-ar").value.trim(),
-        category_id:   catSel ? catSel.value : "",
-        working_hours: wh,
-        photos:        uploadRes.urls,
-        lat:           registerLat,
-        lng:           registerLng
-      }).then(function (provRes) {
-        if (!provRes.success) {
-          showFormError(provRes.message);
-          if (submitBtn) submitBtn.disabled = false;
-          return;
-        }
-        selectedPhotos = []; // clear staged files
-        window.location.href = "login.html";
-      }).catch(function (err) {
-        showFormError(err.message || (currentLang === "ar" ? "فشل في حفظ بيانات الورشة" : "Provider setup failed"));
-        if (submitBtn) submitBtn.disabled = false;
-      });
+      selectedPhotos = [];
+      window.location.href = "login.html";
     }).catch(function (err) {
-      showFormError(err.message || (currentLang === "ar" ? "فشل في رفع الصور" : "Photo upload failed"));
+      showFormError(err.message || (currentLang === "ar" ? "فشل في حفظ بيانات الورشة" : "Provider setup failed"));
       if (submitBtn) submitBtn.disabled = false;
     });
   }).catch(function (err) {
-    showFormError(err.message || (currentLang === "ar" ? "حدث خطأ، حاول مرة أخرى" : "Something went wrong, try again"));
+    showFormError(err.message || (currentLang === "ar" ? "فشل في رفع الصور" : "Photo upload failed"));
     if (submitBtn) submitBtn.disabled = false;
   });
 }
