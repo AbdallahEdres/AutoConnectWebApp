@@ -136,6 +136,36 @@ All other fields are optional. Sending `working_hours`, `vehicle_types`, or `pho
 
 ---
 
+### Upload Photos
+**`POST /api/upload_photos.php`** — *Protected*
+
+Accepts multipart/form-data with `photos[]` (image files) and `provider_id`.
+
+**Response:** `{ success, data: [{ url }] }`
+
+---
+
+## Bookings
+
+### List / Create Bookings
+**`GET /api/bookings.php`** — *Protected*
+
+Returns all bookings made by the logged-in user, newest first.
+
+**Response:** `{ success, data: [{ id, provider_id, provider_name, created_at, ... }] }`
+
+---
+
+**`POST /api/bookings.php`** — *Protected*
+
+**Body:** `{ provider_id }`
+
+Creates a booking record (service history entry) for the logged-in user.
+
+**Response:** `{ success, message, data: { id } }`
+
+---
+
 ## Favorites
 
 ### Get Favorites

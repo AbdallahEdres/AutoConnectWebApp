@@ -40,7 +40,7 @@ Later files can override earlier ones if selectors are equally specific.
 | **profile.html** | `.layout-with-sidebar`, `.sidebar`, `.profile-stats` | pages + components |
 | **settings.html** | `.settings-grid`, `.tips-list`, `.delete-account-card` | pages + components |
 | **provider-register.html** | `.provider-hero`, `.provider-form-card`, `.trust-features` | pages + components |
-| **All pages** | `#site-header` → `.site-header`, `.btn-primary`, `.section-title` | components (injected by layout.js) |
+| **All pages** | `#site-header` → `.site-header`, `.btn-primary`, `.section-title` | components (injected by main.js) |
 
 ---
 
@@ -101,8 +101,8 @@ Defined at the bottom of **components.css** and **pages.css**:
 ## How HTML connects to CSS
 
 1. **Static HTML** uses class names: `<button class="btn btn-primary">`
-2. **layout.js** injects header/footer with classes `.site-header`, `.footer-inner`
-3. **ui.js** builds strings with `.provider-card`, `.provider-card__image`, etc.
+2. **main.js** injects header/footer with classes `.site-header`, `.footer-inner`
+3. **main.js** (`renderProviderCard`) builds strings with `.provider-card`, `.provider-card__image`, etc.
 
 If something looks unstyled, check the class name in HTML matches a rule in components.css or pages.css.
 

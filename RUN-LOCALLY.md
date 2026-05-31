@@ -1,51 +1,43 @@
 # How to Run AutoConnect Locally
 
-Mock data is loaded with `fetch()`, so the project **must** be opened via a local server. Double-clicking `index.html` in your browser will cause errors because browsers block local file access for security.
-
-## Option 1: Using Python (Recommended)
-
-Python is usually pre-installed on Mac/Linux. Windows users may need to install it.
-
-### Windows Setup Guide
-1.  **Download Python:** Go to [python.org/downloads](https://www.python.org/downloads/windows/) and download the latest version for Windows.
-2.  **Install:** Run the installer. **IMPORTANT:** Check the box that says **"Add Python to PATH"** at the bottom of the first screen. If you miss this, the commands won't work.
-3.  **Verify:** Open Command Prompt (`cmd`) or PowerShell and type:
-    ```cmd
-    python --version
-    ```
-    You should see "Python 3.x.x".
-
-### Starting the Server
-1.  Open your terminal/command prompt.
-2.  Navigate to the project's `web` directory:
-    ```cmd
-    # Example (adjust path to where you saved the folder)
-    cd "C:\Users\Name\Desktop\AutoConnect\web"
-    ```
-3.  Run the server:
-    ```cmd
-    # Windows
-    python -m http.server 8080
-
-    # Mac/Linux
-    python3 -m http.server 8080
-    ```
-4.  Open your browser and visit: [http://localhost:8080](http://localhost:8080)
+The project uses a real PHP/MySQL backend. You need **XAMPP** (or another Apache + MySQL stack) to run it.
 
 ---
 
-## Option 2: VS Code "Live Server" (Easiest)
+## Option 1: XAMPP (Required for full functionality)
 
-If you use Visual Studio Code, this is the most convenient method:
+### First-time setup
+1. Download and install [XAMPP](https://www.apachefriends.org/download.html) for Windows.
+2. Place the `AutoConnectWebApp` folder inside `C:\xampp\htdocs\` so the path becomes:
+   ```
+   C:\xampp\htdocs\AutoConnectWebApp\
+   ```
+3. Open the **XAMPP Control Panel** and start **Apache** and **MySQL**.
+4. Open your browser and go to **phpMyAdmin**: [http://localhost/phpmyadmin](http://localhost/phpmyadmin)
+5. Create a new database named `autoconnect`.
+6. Click the **Import** tab and import `backend/database.sql`.
 
-1.  Open the **Extensions** view in VS Code (`Ctrl+Shift+X`).
-2.  Search for and install **"Live Server"** (by Ritwick Dey).
-3.  Open the `web` folder in VS Code.
-4.  Right-click `index.html` in the file explorer and select **"Open with Live Server"**.
-5.  Your browser will open automatically at `http://127.0.0.1:5500`.
+### Running the app
+After the first-time setup, just:
+1. Start **Apache** and **MySQL** in the XAMPP Control Panel.
+2. Visit: [http://localhost/AutoConnectWebApp/web/](http://localhost/AutoConnectWebApp/web/)
 
 ---
 
-## Why is a server needed?
+## Option 2: VS Code "Live Server" (Frontend only — no backend)
 
-Modern browsers have a security feature called **CORS** (Cross-Origin Resource Sharing). When JavaScript tries to `fetch()` data from a JSON file while you are viewing the page via `file://`, the browser blocks it. Running a local server makes the browser treat the files as if they are coming from a real website, allowing the data to load correctly.
+Use this only if you want to preview the HTML/CSS without the PHP backend.
+
+1. Open the **Extensions** view in VS Code (`Ctrl+Shift+X`).
+2. Search for and install **"Live Server"** (by Ritwick Dey).
+3. Open the `web` folder in VS Code.
+4. Right-click `index.html` and select **"Open with Live Server"**.
+5. Your browser will open at `http://127.0.0.1:5500`.
+
+> API calls will fail without a running Apache/MySQL server. Use XAMPP (Option 1) for the full experience.
+
+---
+
+## Why XAMPP?
+
+The project calls PHP scripts in `backend/api/` via `fetch()`. Those scripts connect to MySQL to read and write real data. Apache must be running to execute PHP; MySQL must be running for the database queries. Without them, every API call returns an error.

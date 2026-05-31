@@ -2,35 +2,47 @@
 
 > **CSS:** see [`../css/HOW-TO-READ-THE-CSS.md`](../css/HOW-TO-READ-THE-CSS.md) for colors, classes, and which page uses which styles.
 
-There are only **two JS files**. Read them in this order.
+There are **three JS files**. Read them in this order.
 
 ## 1. Script load order (every HTML page)
 
 ```
-main.js    → shared everything: config, translations, API calls, card HTML, header/footer, auth
+i18n.js    → translations only: TRANSLATIONS object, t(), setLanguage(), getLocalizedField()
+main.js    → config, utils, API calls, card HTML, header/footer, auth handlers
 pages.js   → page-specific logic (one init function per page)
 ```
 
-Both files are loaded on every page. `main.js` always comes first.
+All three are loaded on every page. `i18n.js` must come first because `main.js` and `pages.js` call `t()`.
 
 ---
 
-## 2. What lives inside main.js
+## 2. What lives inside i18n.js
+
+| Item | What it does |
+|------|-------------|
+| `TRANSLATIONS` | Object with `ar` and `en` keys — every UI string in both languages |
+| `t("key")` | Returns the translated string for the current language |
+| `setLanguage(lang)` | Sets `currentLang`, updates `body` classes, rewrites all `[data-i18n]` elements |
+| `toggleLanguage()` | Flips between `"ar"` and `"en"`, then calls `onLanguageChange()` if defined |
+| `getLocalizedField(obj, "name")` | Returns `obj.name_ar` or `obj.name_en` depending on language |
+
+---
+
+## 3. What lives inside main.js
 
 | Section | What it does |
 |---------|-------------|
-| **Config** (top of file) | `API_BASE` and `API_ENDPOINTS` — the URLs for every PHP file |
-| **i18n** | `TRANSLATIONS` object with every Arabic/English string. `t("key")` gets a string. `setLanguage()` / `toggleLanguage()` switch AR ↔ EN |
-| **Utils** | `getDistanceKm()`, `formatDistance()`, `getUserLocation()`, `getStoredLocation()`, `saveLocation()`, `setEl()` |
-| **API** | `apiRequest()` → sends fetch to PHP. Helper functions: `getProviders()`, `getProviderById()`, `getCategories()`, `getRegions()`, `getUser()`, `loginUser()`, `registerUser()`, `updatePassword()`, `addProvider()`, `getReviews()`, `toggleFavorite()` |
-| **UI** | `renderProviderCard()` and `renderProviderList()` — builds provider card HTML. `renderHorizontalProviderCard()` — wider card for the emergency page |
-| **Layout** | `renderHeader()` and `renderFooter()` — writes the shared header/footer into `#site-header` / `#site-footer` |
-| **Auth** | `handleLoginSubmit()`, `handleRegisterSubmit()`, `setRegisterRole()`, `initRegisterPage()` — login and register page logic |
-| **Init** | `DOMContentLoaded` at the bottom — calls `renderHeader()`, `renderFooter()`, `setLanguage()`, and wires up auth forms |
+| **Config** (top of file) | `API_BASE` (path to `backend/api/`) and `API_ENDPOINTS` — a key-to-filename map for every PHP endpoint |
+| **Utils** | `getDistanceKm()`, `formatDistance()`, `getUserLocation()`, `getStoredLocation()`, `saveLocation()`, `setEl()`, `addDistanceToProviders()` |
+| **API** | `apiRequest()` → single fetch gate. Helper wrappers: `getProviders()`, `getProviderById()`, `getCategories()`, `getRegions()`, `getUser()`, `getBookings()`, `createBooking()`, `loginUser()`, `registerUser()`, `updatePassword()`, `addProvider()`, `getReviews()`, `toggleFavorite()` |
+| **UI** | `renderProviderCard()` / `renderProviderList()` — builds provider card HTML. `renderHorizontalProviderCard()` — wider card for the emergency page |
+| **Layout** | `renderHeader()` / `renderFooter()` — writes shared header/footer into `#site-header` / `#site-footer` |
+| **Auth** | `handleLoginSubmit()`, `handleRegisterSubmit()`, `setRegisterRole()` — login and register form logic |
+| **Init** | `DOMContentLoaded` — calls `renderHeader()`, `renderFooter()`, `setLanguage()`, wires up auth forms |
 
 ---
 
-## 3. What lives inside pages.js
+## 4. What lives inside pages.js
 
 Each page has one `init` function that runs on `DOMContentLoaded`:
 
@@ -44,15 +56,16 @@ Each page has one `init` function that runs on `DOMContentLoaded`:
 | `initProviderRegisterPage()` | `provider-register.html` — workshop signup |
 | `initServiceDetailPage()` | `service-detail.html` — one provider + reviews |
 | `initSettingsPage()` | `settings.html` — change password |
+| `initHistoryPage()` | `history.html` — service booking history |
 
-`pageOnLanguageChange()` at the bottom re-runs the relevant init when the user switches AR ↔ EN.
+`onLanguageChange()` at the bottom re-runs the relevant init when the user switches AR ↔ EN.
 
 ---
 
-## 4. Data flow example (services page)
+## 5. Data flow example (services page)
 
 1. `pages.js` → `initServicesPage()` runs on page load
-2. Calls `fillServicesDropdowns()` → `getCategories()` + `getRegions()` from `main.js`
+2. Calls `fillCategorySelect()` + `fillCitySelect()` → `getCategories()` + `getRegions()` from `main.js`
 3. Then calls `runSearch()` → `getProviders(filters)` from `main.js`
 4. `getProviders` → `apiRequest("providers")` → fetch to `/backend/api/providers.php`
 5. PHP returns `{ success: true, data: [...] }`
@@ -62,13 +75,12 @@ Each page has one `init` function that runs on `DOMContentLoaded`:
 
 ---
 
-## 5. Useful helper functions to know
+## 6. Useful helper functions to know
 
 | Function | Where | What it does |
 |----------|-------|-------------|
-| `t("key")` | main.js | Get translated string for current language |
-| `getLocalizedField(obj, "name")` | main.js | Returns `obj.name_ar` or `obj.name_en` based on language |
+| `t("key")` | i18n.js | Get translated string for current language |
+| `getLocalizedField(obj, "name")` | i18n.js | Returns `obj.name_ar` or `obj.name_en` based on language |
 | `setEl("id", value)` | main.js | Shortcut for `document.getElementById("id").textContent = value` |
-| `getBasePath()` | main.js | Returns `"../"` when inside `/pages/`, else `""` |
 | `getStoredLocation()` | main.js | Reads last GPS position from localStorage |
-| `getFavoriteIds()` | pages.js | Returns array of saved provider IDs from localStorage |
+| `apiRequest(key, options)` | main.js | Single fetch gate — all API calls go through this |
