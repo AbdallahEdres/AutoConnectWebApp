@@ -11,10 +11,10 @@ var DAY_KEY_MAP = {
 document.addEventListener("DOMContentLoaded", function () {
   var path = window.location.pathname;
   if (path.indexOf("/pages/") === -1 || path.includes("index.html")) initHomePage();
-  if (path.includes("services.html"))          initServicesPage();
-  if (path.includes("emergency.html"))         initEmergencyPage();
-  if (path.includes("favorites.html"))         initFavoritesPage();
-  if (path.includes("profile.html"))           initProfilePage();
+  if (path.includes("services.html")) initServicesPage();
+  if (path.includes("emergency.html")) initEmergencyPage();
+  if (path.includes("favorites.html")) initFavoritesPage();
+  if (path.includes("profile.html")) initProfilePage();
   if (path.includes("provider-register.html")) initProviderRegisterPage();
   if (path.includes("service-detail.html"))    initServiceDetailPage();
   if (path.includes("settings.html"))          initSettingsPage();
@@ -38,8 +38,8 @@ function initHomePage() {
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     var type = document.getElementById("search-type").value;
-    var loc  = document.getElementById("search-location").value;
-    var url  = "pages/services.html?category_slug=" + encodeURIComponent(type);
+    var loc = document.getElementById("search-location").value;
+    var url = "pages/services.html?category_slug=" + encodeURIComponent(type);
     if (loc) url += "&city=" + encodeURIComponent(loc);
     window.location.href = url;
   });
@@ -103,7 +103,7 @@ function fillServicesDropdowns(params) {
   params = params || new URLSearchParams();
 
   Promise.all([getCategories(), getRegions()]).then(function (res) {
-    var cats    = res[0];
+    var cats = res[0];
     var regions = res[1];
 
     var typeSel = document.getElementById("filter-type");
@@ -140,9 +140,9 @@ function runSearch() {
   var loc = getStoredLocation() || DEFAULT_LOCATION;
   var filters = {
     category_slug: document.getElementById("filter-type").value,
-    city:          document.getElementById("filter-region").value,
-    q:             document.getElementById("filter-search").value,
-    sort:          document.getElementById("filter-sort").value
+    city: document.getElementById("filter-region").value,
+    q: document.getElementById("filter-search").value,
+    sort: document.getElementById("filter-sort").value
   };
 
   getProviders(filters).then(function (list) {
@@ -229,7 +229,6 @@ function loadEmergencyList(loc) {
     list.slice(0, 6).forEach(function (p) {
       html += renderHorizontalProviderCard(p, { basePath: getBasePath() });
     });
-    html += "</div>";
     container.innerHTML = html;
   });
 }
@@ -379,22 +378,22 @@ function initProviderRegisterPage() {
     e.preventDefault();
     var catSel = document.getElementById("provider-category");
     var workshopName = document.getElementById("workshop-name").value;
-    var cityValue    = document.getElementById("city-area").value;
-    var bioValue     = document.getElementById("service-desc").value;
+    var cityValue = document.getElementById("city-area").value;
+    var bioValue = document.getElementById("service-desc").value;
     addProvider({
-      name_en:       workshopName,
-      name_ar:       workshopName,
-      phone:         document.getElementById("mobile").value,
-      city_en:       cityValue,
-      city_ar:       cityValue,
-      address_en:    cityValue,
-      address_ar:    cityValue,
-      bio_en:        bioValue,
-      bio_ar:        bioValue,
-      category_id:   catSel.value,
+      name_en: workshopName,
+      name_ar: workshopName,
+      phone: document.getElementById("mobile").value,
+      city_en: cityValue,
+      city_ar: cityValue,
+      address_en: cityValue,
+      address_ar: cityValue,
+      bio_en: bioValue,
+      bio_ar: bioValue,
+      category_id: catSel.value,
       working_hours: document.getElementById("working-hours").value,
-      lat:           DEFAULT_LOCATION.lat,
-      lng:           DEFAULT_LOCATION.long
+      lat: DEFAULT_LOCATION.lat,
+      lng: DEFAULT_LOCATION.long
     }).then(function (res) {
       alert(res.message || t("register_success"));
       window.location.href = "services.html";
@@ -408,7 +407,7 @@ function initProviderRegisterPage() {
 
 function initServiceDetailPage() {
   var params = new URLSearchParams(window.location.search);
-  var id  = params.get("id") || "1";
+  var id = params.get("id") || "1";
   var loc = getStoredLocation() || DEFAULT_LOCATION;
 
   getProviderById(id).then(function (provider) {
@@ -540,7 +539,7 @@ function loadReviews(providerId) {
     }
     listEl.innerHTML = reviews.map(function (r) {
       return "<li style='margin-bottom:0.65rem'><strong>★ " + r.rate + "</strong> " +
-             (r.user_name || "") + " — " + (r.comment || "") + "</li>";
+        (r.user_name || "") + " — " + (r.comment || "") + "</li>";
     }).join("");
   });
 }

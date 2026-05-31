@@ -50,18 +50,10 @@ function getDistanceKm(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-/** Human-readable distance for UI */
 function formatDistance(km) {
-  if (km < 1) {
-    return Math.round(km * 1000) + " m";
-  }
-  return km.toFixed(1) + " " + t("km_away");
+  return km < 1 ? Math.round(km * 1000) + " m" : km.toFixed(1) + " " + t("km_away");
 }
 
-/**
- * Ask browser for user's GPS position (requires HTTPS or localhost).
- * Returns Promise with { lat, long }.
- */
 function getUserLocation() {
   return new Promise(function (resolve, reject) {
     if (!navigator.geolocation) {
@@ -70,14 +62,9 @@ function getUserLocation() {
     }
     navigator.geolocation.getCurrentPosition(
       function (pos) {
-        resolve({
-          lat: pos.coords.latitude,
-          long: pos.coords.longitude
-        });
+        resolve({ lat: pos.coords.latitude, long: pos.coords.longitude });
       },
-      function (err) {
-        reject(err);
-      },
+      function (err) { reject(err); },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   });
@@ -119,15 +106,12 @@ var EGYPT_CITIES = [
 
 /** Read last saved GPS from localStorage (set on emergency page) */
 function getStoredLocation() {
-  var raw = localStorage.getItem("autoconnect_location");
-  if (raw) {
-    try {
-      return JSON.parse(raw);
-    } catch (e) {
-      return null;
-    }
+  try {
+    var raw = localStorage.getItem("autoconnect_location");
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
   }
-  return null;
 }
 
 function saveLocation(loc) {
@@ -372,24 +356,11 @@ function renderProviderCard(provider, options) {
     </article>`;
 }
 
-/** Loop providers and put all cards inside element #containerId */
-function renderProviderList(containerId, providers, options) {
-  var container = document.getElementById(containerId);
-  if (!container) return;
-
-  if (!providers.length) {
-    container.innerHTML =
-      '<p class="section-subtitle" style="grid-column:1/-1">' +
-      t("no_results") +
-      "</p>";
-    return;
-  }
-
-  var html = "";
-  providers.forEach(function (p) {
-    html += renderProviderCard(p, options);
-  });
-  container.innerHTML = html;
+function renderProviderList(id, list, opts) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = !list.length ? '<p class="section-subtitle">' + t("no_results") + "</p>" :
+    list.map(function (p) { return renderProviderCard(p, opts); }).join("");
 }
 
 function renderHorizontalProviderCard(provider, options) {
@@ -453,7 +424,6 @@ function getPageName() {
 function renderHeader() {
   var el = document.getElementById("site-header");
   if (!el) return;
-
   var base = getBasePath();
   var page = getPageName();
   var linksHtml = "";
@@ -504,9 +474,7 @@ function renderHeader() {
   var toggle = document.getElementById("menu-toggle");
   var nav = document.getElementById("nav-links");
   if (toggle && nav) {
-    toggle.addEventListener("click", function () {
-      nav.classList.toggle("open");
-    });
+    toggle.addEventListener("click", function () { nav.classList.toggle("open"); });
   }
 }
 
@@ -1018,9 +986,7 @@ function setupRoleToggle() {
   if (!toggle) {
     document.querySelectorAll(".role-toggle button").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        document.querySelectorAll(".role-toggle button").forEach(function (b) {
-          b.classList.remove("active");
-        });
+        document.querySelectorAll(".role-toggle button").forEach(function (b) { b.classList.remove("active"); });
         btn.classList.add("active");
       });
     });
@@ -1029,9 +995,7 @@ function setupRoleToggle() {
 
   toggle.querySelectorAll("button").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      toggle.querySelectorAll("button").forEach(function (b) {
-        b.classList.remove("active");
-      });
+      toggle.querySelectorAll("button").forEach(function (b) { b.classList.remove("active"); });
       btn.classList.add("active");
       setRegisterRole(btn.getAttribute("data-role") || "customer");
     });
@@ -1045,9 +1009,9 @@ function authOnLanguageChange() {
   setRegisterRole(registerRole);
 }
 
-// =============================================================================
-// 9. app.js & Initialization
-// =============================================================================
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
 
 document.addEventListener("DOMContentLoaded", function () {
   renderHeader();
@@ -1055,38 +1019,21 @@ document.addEventListener("DOMContentLoaded", function () {
   setLanguage(currentLang);
 
   var langBtn = document.getElementById("lang-toggle");
-  if (langBtn) {
-    langBtn.addEventListener("click", toggleLanguage);
-  }
+  if (langBtn) langBtn.addEventListener("click", toggleLanguage);
 
-  // Auth pages initialization:
-  if (window.location.pathname.includes("login.html") || window.location.pathname.includes("register.html")) {
+  var path = window.location.pathname;
+  if (path.includes("login.html") || path.includes("register.html")) {
     setupRoleToggle();
     initLoginPage();
     initRegisterPage();
 
     var loginForm = document.getElementById("login-form");
-    if (loginForm) {
-      loginForm.addEventListener("submit", handleLoginSubmit);
-    }
-
+    if (loginForm) loginForm.addEventListener("submit", handleLoginSubmit);
     var registerForm = document.getElementById("register-form");
-    if (registerForm) {
-      registerForm.addEventListener("submit", handleRegisterSubmit);
-    }
+    if (registerForm) registerForm.addEventListener("submit", handleRegisterSubmit);
   }
 });
 
-// Global language change dispatcher called by setLanguage()
 function onLanguageChange(lang) {
-  // If we are on login/register pages, call auth language change
-  if (window.location.pathname.includes("login.html") || window.location.pathname.includes("register.html")) {
-    if (typeof authOnLanguageChange === "function") {
-      authOnLanguageChange(lang);
-    }
-  }
-  // Page-specific handlers defined in pages.js will override/be called by this
-  if (typeof pageOnLanguageChange === "function") {
-    pageOnLanguageChange(lang);
-  }
+  loadRegisterCategories();
 }
