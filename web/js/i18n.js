@@ -197,7 +197,16 @@ var TRANSLATIONS = {
     day_off: "إجازة",
     photos_label: "صور الورشة",
     photos_hint: " — اختياري، حتى 10 صور",
-    add_photos: "إضافة صور"
+    add_photos: "إضافة صور",
+    review_add_title: "أضف تقييمك",
+    review_comment_ph: "تعليقك (اختياري)...",
+    review_submit: "إرسال التقييم",
+    review_login_prompt: "سجّل الدخول لإضافة تقييم",
+    review_success: "تم إرسال تقييمك بنجاح ✓",
+    review_duplicate: "لقد قيّمت هذا المزود من قبل",
+    review_error: "حدث خطأ، حاول مجدداً",
+    review_pick_star: "الرجاء اختيار تقييم",
+    no_reviews_yet: "لا يوجد تقييم بعد"
   },
   en: {
     app_name: "AutoConnect",
@@ -395,7 +404,16 @@ var TRANSLATIONS = {
     day_off: "Day off",
     photos_label: "Workshop photos",
     photos_hint: " — optional, up to 10 images",
-    add_photos: "Add photos"
+    add_photos: "Add photos",
+    review_add_title: "Add your review",
+    review_comment_ph: "Your comment (optional)...",
+    review_submit: "Submit review",
+    review_login_prompt: "Log in to add a review",
+    review_success: "Review submitted successfully ✓",
+    review_duplicate: "You have already reviewed this provider",
+    review_error: "Something went wrong, please try again",
+    review_pick_star: "Please select a rating",
+    no_reviews_yet: "No reviews yet"
   }
 };
 

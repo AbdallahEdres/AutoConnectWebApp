@@ -17,6 +17,7 @@ $sql = "SELECT
             p.lat, p.lng, p.status,
             c.name_en AS category_name_en, c.name_ar AS category_name_ar, c.slug AS category_slug,
             ROUND(COALESCE((SELECT AVG(rate) FROM reviews WHERE provider_id = p.id), 0), 1) AS rating,
+            (SELECT COUNT(*) FROM reviews WHERE provider_id = p.id) AS review_count,
             (SELECT photo_url FROM provider_photos WHERE provider_id = p.id ORDER BY sort_order ASC LIMIT 1) AS image
         FROM providers p
         INNER JOIN categories c ON p.category_id = c.id

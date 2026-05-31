@@ -321,7 +321,7 @@ function initProfilePage() {
     });
   }).catch(function (err) {
     if (err && err.response) {
-      window.location.href = "login.html";
+      window.location.href = "login.html?from=" + encodeURIComponent(window.location.href);
     }
   });
 }
@@ -351,7 +351,7 @@ function initHistoryPage() {
       "</tr>";
     }).join("");
   }).catch(function () {
-    window.location.href = "login.html";
+    window.location.href = "login.html?from=" + encodeURIComponent(window.location.href);
   });
 }
 
@@ -415,6 +415,7 @@ function initServiceDetailPage() {
     var p = addDistanceToProviders([provider], loc.lat, loc.long)[0];
     renderDetail(p);
     loadReviews(id);
+    renderReviewForm(id);
     setupFavoriteButton(id);
     loadSimilar(p, loc);
   });
@@ -423,7 +424,15 @@ function initServiceDetailPage() {
 function renderDetail(p) {
   var base = getBasePath();
   setEl("detail-title",   getLocalizedField(p, "name"));
-  setEl("detail-rating",  "★ " + p.avg_rating);
+  var ratingEl = document.getElementById("detail-rating");
+  if (ratingEl) {
+    if (p.review_count > 0) {
+      ratingEl.innerHTML = "★ " + p.avg_rating + " <span style='color:var(--text-secondary);font-size:0.9rem'>(" + p.review_count + ")</span>";
+    } else {
+      ratingEl.style.color = "var(--text-secondary)";
+      ratingEl.textContent = t("no_reviews_yet");
+    }
+  }
   setEl("detail-address", getLocalizedField(p, "address"));
   setEl("detail-phone",   p.phone);
   setEl("detail-desc",    getLocalizedField(p, "bio"));
@@ -439,10 +448,11 @@ function renderDetail(p) {
       });
     } else {
       callBtn.removeAttribute("href");
+      callBtn.style.cursor = "pointer";
       callBtn.textContent = t("show_phone");
       document.getElementById("detail-phone").style.display = "none";
       callBtn.addEventListener("click", function () {
-        window.location.href = "login.html";
+        window.location.href = "login.html?from=" + encodeURIComponent(window.location.href);
       });
     }
   }
@@ -457,6 +467,14 @@ function renderDetail(p) {
   renderWorkingHours(p.working_hours || []);
 
   if (p.lat && p.lng) initDetailMap(p.lat, p.lng, getLocalizedField(p, "name"));
+
+  var locationBtn = document.getElementById("location-btn");
+  if (locationBtn) {
+    locationBtn.addEventListener("click", function () {
+      var mapEl = document.getElementById("detail-map");
+      if (mapEl) mapEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }
 }
 
 function renderPhotoGallery(photos, base) {
@@ -542,7 +560,7 @@ function setupFavoriteButton(providerId) {
 
   btn.addEventListener("click", function () {
     if (!localStorage.getItem("autoconnect_token")) {
-      window.location.href = "login.html";
+      window.location.href = "login.html?from=" + encodeURIComponent(window.location.href);
       return;
     }
 
@@ -552,6 +570,89 @@ function setupFavoriteButton(providerId) {
         btn.textContent = (res.is_saved ? "♥ " : "♡ ") + t("favorite");
       }
     }).finally(function () {
+      btn.disabled = false;
+    });
+  });
+}
+
+function renderReviewForm(providerId) {
+  var section = document.getElementById("reviews-section");
+  if (!section) return;
+
+  var wrapper = document.createElement("div");
+  wrapper.style.cssText = "margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)";
+
+  if (!localStorage.getItem("autoconnect_token")) {
+    wrapper.innerHTML = '<a href="login.html?from=' + encodeURIComponent(window.location.href) + '" class="btn btn-primary btn-sm">' + t("review_login_prompt") + '</a>';
+    section.appendChild(wrapper);
+    return;
+  }
+
+  var selectedRate = 0;
+
+  wrapper.innerHTML =
+    '<h4 style="margin-bottom:0.5rem">' + t("review_add_title") + '</h4>' +
+    '<div class="review-stars" id="review-stars">' +
+      '<span class="star" data-val="1">★</span>' +
+      '<span class="star" data-val="2">★</span>' +
+      '<span class="star" data-val="3">★</span>' +
+      '<span class="star" data-val="4">★</span>' +
+      '<span class="star" data-val="5">★</span>' +
+    '</div>' +
+    '<textarea id="review-comment" class="form-control" rows="3" ' +
+      'placeholder="' + t("review_comment_ph") + '" ' +
+      'style="margin-bottom:0.75rem;resize:vertical"></textarea>' +
+    '<button id="review-submit" class="btn btn-primary btn-sm">' + t("review_submit") + '</button>' +
+    '<p id="review-msg" style="margin-top:0.5rem;font-size:0.875rem"></p>';
+
+  section.appendChild(wrapper);
+
+  var stars = wrapper.querySelectorAll(".star");
+
+  function highlight(n) {
+    stars.forEach(function (s) {
+      s.classList.toggle("active", Number(s.getAttribute("data-val")) <= n);
+    });
+  }
+
+  stars.forEach(function (s) {
+    s.addEventListener("mouseenter", function () { highlight(Number(s.getAttribute("data-val"))); });
+    s.addEventListener("mouseleave", function () { highlight(selectedRate); });
+    s.addEventListener("click", function () {
+      selectedRate = Number(s.getAttribute("data-val"));
+      highlight(selectedRate);
+    });
+  });
+
+  document.getElementById("review-submit").addEventListener("click", function () {
+    var msg = document.getElementById("review-msg");
+    if (!selectedRate) {
+      msg.textContent = t("review_pick_star");
+      msg.style.color = "var(--danger, #e53e3e)";
+      return;
+    }
+    var comment = document.getElementById("review-comment").value.trim();
+    var btn = document.getElementById("review-submit");
+    btn.disabled = true;
+
+    postReview(providerId, selectedRate, comment).then(function (res) {
+      if (res && res.success) {
+        msg.textContent = t("review_success");
+        msg.style.color = "var(--success, #38a169)";
+        wrapper.querySelector(".review-stars").style.pointerEvents = "none";
+        document.getElementById("review-comment").disabled = true;
+        btn.style.display = "none";
+        loadReviews(providerId);
+      } else {
+        var isDuplicate = res && res.message && res.message.toLowerCase().indexOf("already") >= 0;
+        msg.textContent = isDuplicate ? t("review_duplicate") : t("review_error");
+        msg.style.color = "var(--danger, #e53e3e)";
+        btn.disabled = false;
+      }
+    }).catch(function () {
+      var msg2 = document.getElementById("review-msg");
+      msg2.textContent = t("review_error");
+      msg2.style.color = "var(--danger, #e53e3e)";
       btn.disabled = false;
     });
   });
@@ -571,7 +672,7 @@ function loadSimilar(current, loc) {
 
 function initSettingsPage() {
   if (!localStorage.getItem("autoconnect_token")) {
-    window.location.href = "login.html";
+    window.location.href = "login.html?from=" + encodeURIComponent(window.location.href);
     return;
   }
 

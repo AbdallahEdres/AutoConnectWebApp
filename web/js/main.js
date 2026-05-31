@@ -303,6 +303,13 @@ function getReviews(providerId) {
   }).then(unwrap);
 }
 
+function postReview(providerId, rate, comment) {
+  return apiRequest("reviews", {
+    method: "POST",
+    body: { provider_id: Number(providerId), rate: rate, comment: comment }
+  });
+}
+
 function getFavorites() {
   return apiRequest("favorites", { method: "GET" }).then(unwrap);
 }
@@ -332,7 +339,7 @@ function renderProviderCard(provider, options) {
   var phone = provider.phone || "";
   var badge = provider.category_slug || "";
   var isLoggedIn = !!localStorage.getItem("autoconnect_token");
-  var loginUrl = base + "pages/login.html";
+  var loginUrl = base + "pages/login.html?from=" + encodeURIComponent(window.location.href);
 
   var phoneRow   = isLoggedIn && phone ? `<p class="provider-card__meta">📞 ${phone}</p>` : "";
   var callBtn    = isLoggedIn
@@ -346,7 +353,7 @@ function renderProviderCard(provider, options) {
         ${badge ? `<span class="provider-card__badge">${badge}</span>` : ""}
       </div>
       <div class="provider-card__body">
-        <p class="provider-card__rating">★ ${provider.rating}</p>
+        <p class="provider-card__rating">${provider.review_count > 0 ? "★ " + provider.rating + " <span class=\"provider-card__review-count\">(" + provider.review_count + ")</span>" : "<span class=\"provider-card__review-count\">" + t("no_reviews_yet") + "</span>"}</p>
         <h3>${name}</h3>
         <p class="provider-card__meta"><span class="status-dot ${statusClass}"></span> ${statusText}</p>
         ${address ? `<p class="provider-card__meta">📍 ${address}</p>` : ""}
@@ -392,7 +399,7 @@ function renderHorizontalProviderCard(provider, options) {
   var img = provider.image ? base + provider.image : "";
   var phone = provider.phone || "";
   var isLoggedIn = !!localStorage.getItem("autoconnect_token");
-  var loginUrl = base + "pages/login.html";
+  var loginUrl = base + "pages/login.html?from=" + encodeURIComponent(window.location.href);
 
   var phoneRow = isLoggedIn && phone ? `<p class="provider-card__meta">📞 ${phone}</p>` : "";
   var callBtn  = isLoggedIn
@@ -641,7 +648,8 @@ function handleLoginSubmit(e) {
       }
       localStorage.setItem("autoconnect_token", res.token);
       localStorage.setItem("autoconnect_user", JSON.stringify(res.data));
-      window.location.href = "profile.html";
+      var from = new URLSearchParams(window.location.search).get("from");
+      window.location.href = from ? decodeURIComponent(from) : "profile.html";
     })
     .catch(function (err) {
       if (generalErr) generalErr.textContent = err.message || (currentLang === "ar" ? "حدث خطأ، حاول مرة أخرى" : "Something went wrong, try again");

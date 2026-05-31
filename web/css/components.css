@@ -281,6 +281,11 @@
   font-size: 0.85rem;
 }
 
+.provider-card__review-count {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
 .provider-card__meta {
   font-size: 0.85rem;
   color: var(--text-secondary);

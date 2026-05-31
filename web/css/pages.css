@@ -352,6 +352,25 @@
   margin-top: 1rem;
 }
 
+.review-stars {
+  display: flex;
+  gap: 0.3rem;
+  margin-bottom: 0.75rem;
+}
+
+.review-stars .star {
+  font-size: 1.75rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: color 0.15s;
+  user-select: none;
+  line-height: 1;
+}
+
+.review-stars .star.active {
+  color: var(--accent-yellow);
+}
+
 .map-placeholder {
   height: 180px;
   background: #1a2230;
