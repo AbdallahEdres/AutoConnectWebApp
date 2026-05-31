@@ -147,6 +147,9 @@ function runSearch() {
 
   getProviders(filters).then(function (list) {
     list = addDistanceToProviders(list, loc.lat, loc.long);
+    if (filters.sort === "nearest") {
+      list.sort(function (a, b) { return a.distance_km - b.distance_km; });
+    }
     var countEl = document.getElementById("results-count");
     if (countEl) {
       countEl.textContent = t("showing_results") + " " + list.length + " " + t("results");

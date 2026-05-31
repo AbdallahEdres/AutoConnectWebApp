@@ -354,6 +354,7 @@ function renderProviderCard(provider, options) {
         ${phoneRow}
         <div class="provider-card__actions">
           <a href="${detailUrl}" class="btn btn-ghost btn-sm">${options.detailsLabel || t("view_details")}</a>
+          ${provider.lat && provider.lng ? `<a href="https://www.google.com/maps?q=${provider.lat},${provider.lng}" target="_blank" class="btn btn-ghost btn-sm">${t("view_map")}</a>` : ""}
           ${callBtn}
         </div>
       </div>
@@ -411,7 +412,7 @@ function renderHorizontalProviderCard(provider, options) {
         ${phoneRow}
       </div>
       <div style="display:flex;gap:0.5rem">
-        <button type="button" class="btn btn-outline btn-sm" data-map="${provider.id}">${t("view_map")}</button>
+        ${provider.lat && provider.lng ? `<a href="https://www.google.com/maps?q=${provider.lat},${provider.lng}" target="_blank" class="btn btn-outline btn-sm">${t("view_map")}</a>` : ""}
         ${callBtn}
       </div>
     </article>`;
