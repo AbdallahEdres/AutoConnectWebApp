@@ -24,6 +24,8 @@ var API_ENDPOINTS = {
   uploadPhotos: "/upload_photos.php",
   updatePassword: "/update_password.php",
   reviews: "/reviews.php",
+  bookings: "/bookings.php",
+  favorites: "/favorites.php",
   toggleFavorite: "/toggle_favorite.php"
 };
 
@@ -244,6 +246,20 @@ function getUser() {
   return apiRequest("user", { method: "GET" }).then(unwrap);
 }
 
+function getBookings() {
+  return apiRequest("bookings", { method: "GET" }).then(unwrap);
+}
+
+function createBooking(provider_id) {
+  return apiRequest("bookings", { method: "POST", body: { provider_id: provider_id } });
+}
+
+function logoutUser() {
+  localStorage.removeItem("autoconnect_token");
+  localStorage.removeItem("autoconnect_user");
+  window.location.reload();
+}
+
 /** Returns full response — check res.success before redirecting */
 function loginUser(email, password) {
   return apiRequest("login", {
@@ -287,6 +303,10 @@ function getReviews(providerId) {
   }).then(unwrap);
 }
 
+function getFavorites() {
+  return apiRequest("favorites", { method: "GET" }).then(unwrap);
+}
+
 function toggleFavorite(providerId) {
   return apiRequest("toggleFavorite", {
     method: "POST",
@@ -311,6 +331,13 @@ function renderProviderCard(provider, options) {
   var detailUrl = base + "pages/service-detail.html?id=" + provider.id;
   var phone = provider.phone || "";
   var badge = provider.category_slug || "";
+  var isLoggedIn = !!localStorage.getItem("autoconnect_token");
+  var loginUrl = base + "pages/login.html";
+
+  var phoneRow   = isLoggedIn && phone ? `<p class="provider-card__meta">📞 ${phone}</p>` : "";
+  var callBtn    = isLoggedIn
+    ? `<a href="tel:${phone}" class="btn btn-primary btn-sm" onclick="createBooking(${provider.id})">${t("call_now")}</a>`
+    : `<a href="${loginUrl}" class="btn btn-primary btn-sm">${t("show_phone")}</a>`;
 
   return `
     <article class="provider-card">
@@ -324,10 +351,10 @@ function renderProviderCard(provider, options) {
         <p class="provider-card__meta"><span class="status-dot ${statusClass}"></span> ${statusText}</p>
         ${address ? `<p class="provider-card__meta">📍 ${address}</p>` : ""}
         ${distText ? `<p class="provider-card__meta">↗ ${distText}</p>` : ""}
-        ${phone ? `<p class="provider-card__meta">📞 ${phone}</p>` : ""}
+        ${phoneRow}
         <div class="provider-card__actions">
           <a href="${detailUrl}" class="btn btn-ghost btn-sm">${options.detailsLabel || t("view_details")}</a>
-          <a href="tel:${phone}" class="btn btn-primary btn-sm">${t("call_now")}</a>
+          ${callBtn}
         </div>
       </div>
     </article>`;
@@ -363,6 +390,13 @@ function renderHorizontalProviderCard(provider, options) {
   var distText = provider.distance_km != null ? formatDistance(provider.distance_km) : "";
   var img = provider.image ? base + provider.image : "";
   var phone = provider.phone || "";
+  var isLoggedIn = !!localStorage.getItem("autoconnect_token");
+  var loginUrl = base + "pages/login.html";
+
+  var phoneRow = isLoggedIn && phone ? `<p class="provider-card__meta">📞 ${phone}</p>` : "";
+  var callBtn  = isLoggedIn
+    ? `<a href="tel:${phone}" class="btn btn-danger btn-sm" onclick="createBooking(${provider.id})">${t("call_now")}</a>`
+    : `<a href="${loginUrl}" class="btn btn-danger btn-sm">${t("show_phone")}</a>`;
 
   return `
     <article class="card" style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center">
@@ -374,11 +408,11 @@ function renderHorizontalProviderCard(provider, options) {
         <p class="provider-card__meta">
           <span class="status-dot ${statusClass}"></span> ${statusText} · ★ ${provider.rating}${distText ? " · " + distText : ""}
         </p>
-        <p class="provider-card__meta">📞 ${phone}</p>
+        ${phoneRow}
       </div>
       <div style="display:flex;gap:0.5rem">
         <button type="button" class="btn btn-outline btn-sm" data-map="${provider.id}">${t("view_map")}</button>
-        <a href="tel:${phone}" class="btn btn-danger btn-sm">${t("call_now")}</a>
+        ${callBtn}
       </div>
     </article>`;
 }
@@ -435,8 +469,16 @@ function renderHeader() {
         <nav class="nav-links" id="nav-links">${linksHtml}</nav>
         <div class="header-actions">
           <button type="button" class="lang-toggle" id="lang-toggle">EN</button>
-          <a href="${base}pages/login.html" class="btn btn-sm btn-ghost" data-i18n="nav_login"></a>
-          <a href="${base}pages/register.html" class="btn btn-sm btn-primary" data-i18n="nav_signup"></a>
+          ${(function () {
+            var token = localStorage.getItem("autoconnect_token");
+            var user  = JSON.parse(localStorage.getItem("autoconnect_user") || "null");
+            if (token && user) {
+              return `<a href="${base}pages/profile.html" class="btn btn-sm btn-ghost" style="display:flex;align-items:center;gap:0.4rem"><img src="${base}assets/images/Container.png" style="width:24px;height:24px;border-radius:50%;object-fit:cover"> ${user.fname}</a>
+                      <a href="#" onclick="logoutUser();return false;" class="btn btn-sm btn-primary" data-i18n="logout"></a>`;
+            }
+            return `<a href="${base}pages/login.html" class="btn btn-sm btn-ghost" data-i18n="nav_login"></a>
+                    <a href="${base}pages/register.html" class="btn btn-sm btn-primary" data-i18n="nav_signup"></a>`;
+          })()}
         </div>
       </div>
     </header>`;
@@ -596,6 +638,8 @@ function handleLoginSubmit(e) {
         if (submitBtn) submitBtn.disabled = false;
         return;
       }
+      localStorage.setItem("autoconnect_token", res.token);
+      localStorage.setItem("autoconnect_user", JSON.stringify(res.data));
       window.location.href = "profile.html";
     })
     .catch(function (err) {
@@ -719,9 +763,10 @@ function loadCitySelect() {
   empty.textContent = currentLang === "ar" ? "— اختر المدينة —" : "— Select city —";
   sel.appendChild(empty);
 
-  EGYPT_CITIES.forEach(function (city, idx) {
+  EGYPT_CITIES.forEach(function (city) {
     var opt = document.createElement("option");
-    opt.value = idx;
+    opt.value = city.en;
+    opt.setAttribute("data-ar", city.ar);
     opt.textContent = currentLang === "ar" ? city.ar : city.en;
     sel.appendChild(opt);
   });
@@ -786,7 +831,7 @@ function loadRegisterCategories() {
   var sel = document.getElementById("provider-category");
   if (!sel) return;
   getCategories().then(function (cats) {
-    sel.innerHTML = "";
+    sel.innerHTML = '<option value="">' + (currentLang === "ar" ? "— اختر نوع الخدمة —" : "— Select service type —") + "</option>";
     cats.forEach(function (c) {
       if (c.parent_id) return; // skip sub-categories in dropdown
       var opt = document.createElement("option");
@@ -894,8 +939,8 @@ function handleRegisterSubmit(e) {
     var catSel = document.getElementById("provider-category");
 
     var citySel = document.getElementById("city-select");
-    var cityIdx = citySel ? parseInt(citySel.value) : -1;
-    var cityData = (cityIdx >= 0 && EGYPT_CITIES[cityIdx]) ? EGYPT_CITIES[cityIdx] : { ar: "", en: "" };
+    var cityEn = citySel ? citySel.value : "";
+    var cityAr = (citySel && citySel.options[citySel.selectedIndex]) ? citySel.options[citySel.selectedIndex].getAttribute("data-ar") || "" : "";
 
     // Upload photos first (if any), then save the provider record
     var photoPromise = selectedPhotos.length > 0
@@ -916,8 +961,8 @@ function handleRegisterSubmit(e) {
         phone:         document.getElementById("mobile").value.trim(),
         address_en:    document.getElementById("address-en").value.trim(),
         address_ar:    document.getElementById("address-ar").value.trim(),
-        city_en:       cityData.en,
-        city_ar:       cityData.ar,
+        city_en:       cityEn,
+        city_ar:       cityAr,
         bio_en:        document.getElementById("bio-en").value.trim(),
         bio_ar:        document.getElementById("bio-ar").value.trim(),
         category_id:   catSel ? catSel.value : "",
@@ -932,7 +977,7 @@ function handleRegisterSubmit(e) {
           return;
         }
         selectedPhotos = []; // clear staged files
-        window.location.href = "services.html";
+        window.location.href = "login.html";
       }).catch(function (err) {
         showFormError(err.message || (currentLang === "ar" ? "فشل في حفظ بيانات الورشة" : "Provider setup failed"));
         if (submitBtn) submitBtn.disabled = false;

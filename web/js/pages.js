@@ -18,28 +18,13 @@ document.addEventListener("DOMContentLoaded", function () {
   if (path.includes("provider-register.html")) initProviderRegisterPage();
   if (path.includes("service-detail.html"))    initServiceDetailPage();
   if (path.includes("settings.html"))          initSettingsPage();
+  if (path.includes("history.html"))           initHistoryPage();
 });
 
 // =============================================================================
 // Favorites helpers — stored in localStorage, no login required
 // =============================================================================
 
-function getFavoriteIds() {
-  var raw = localStorage.getItem("autoconnect_favorites");
-  return raw ? JSON.parse(raw) : [];
-}
-
-function toggleFavoriteLocal(providerId) {
-  var ids = getFavoriteIds();
-  var idx = ids.indexOf(Number(providerId));
-  if (idx === -1) {
-    ids.push(Number(providerId));
-  } else {
-    ids.splice(idx, 1);
-  }
-  localStorage.setItem("autoconnect_favorites", JSON.stringify(ids));
-  return idx === -1; // true = just added
-}
 
 // =============================================================================
 // Home Page
@@ -47,6 +32,7 @@ function toggleFavoriteLocal(providerId) {
 
 function initHomePage() {
   fillCategorySelect("search-type");
+  fillCitySelect("search-location");
   var form = document.getElementById("hero-search-form");
   if (!form) return;
   form.addEventListener("submit", function (e) {
@@ -69,6 +55,22 @@ function fillCategorySelect(selectId) {
       var opt = document.createElement("option");
       opt.value = c.slug;
       opt.textContent = getLocalizedField(c, "name");
+      sel.appendChild(opt);
+    });
+    if (current) sel.value = current;
+  });
+}
+
+function fillCitySelect(selectId) {
+  var sel = document.getElementById(selectId);
+  if (!sel) return;
+  getRegions().then(function (regions) {
+    var current = sel.value;
+    sel.innerHTML = '<option value="">' + t("choose_area") + "</option>";
+    regions.forEach(function (r) {
+      var opt = document.createElement("option");
+      opt.value = r.name_en;
+      opt.textContent = getLocalizedField(r, "name");
       sel.appendChild(opt);
     });
     if (current) sel.value = current;
@@ -121,9 +123,9 @@ function fillServicesDropdowns(params) {
       regionSel.innerHTML = '<option value="">' + t("region") + "</option>";
       regions.forEach(function (r) {
         var opt = document.createElement("option");
-        opt.value = r.id;
+        opt.value = r.name_en;
         opt.textContent = getLocalizedField(r, "name");
-        if (r.id === params.get("city")) opt.selected = true;
+        if (r.name_en === params.get("city")) opt.selected = true;
         regionSel.appendChild(opt);
       });
     }
@@ -173,7 +175,8 @@ function initEmergencyPage() {
           loadEmergencyList(loc);
         })
         .catch(function () {
-          alert(t("location_error"));
+          var errEl = document.getElementById("location-error");
+          if (errEl) errEl.textContent = t("location_error");
           loadEmergencyList(DEFAULT_LOCATION);
         })
         .finally(function () {
@@ -200,7 +203,7 @@ function fillRegions() {
     sel.innerHTML = '<option value="">' + t("choose_area") + "</option>";
     regions.forEach(function (r) {
       var opt = document.createElement("option");
-      opt.value = r.id;
+      opt.value = r.lat + "," + r.lng;
       opt.textContent = getLocalizedField(r, "name");
       sel.appendChild(opt);
     });
@@ -212,7 +215,7 @@ function loadEmergencyList(loc) {
   if (!container) return;
   container.innerHTML = "<p>" + t("loading") + "</p>";
 
-  getProviders({ status: "open" }).then(function (list) {
+  getProviders({}).then(function (list) {
     if (!list.length) {
       container.innerHTML = "<p>" + t("no_results") + "</p>";
       return;
@@ -233,39 +236,51 @@ function loadEmergencyList(loc) {
 // =============================================================================
 
 function initFavoritesPage() {
-  document.querySelectorAll(".pill[data-category]").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      document.querySelectorAll(".pill[data-category]").forEach(function (b) {
-        b.classList.remove("active");
+  getCategories().then(function (cats) {
+    var pillsEl = document.querySelector(".pills");
+    if (pillsEl) {
+      cats.forEach(function (c) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "pill";
+        btn.setAttribute("data-category", c.slug);
+        btn.textContent = getLocalizedField(c, "name");
+        pillsEl.appendChild(btn);
       });
-      btn.classList.add("active");
-      activeCategory = btn.getAttribute("data-category") || "";
-      loadFavorites();
+    }
+
+    document.querySelectorAll(".pill[data-category]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        document.querySelectorAll(".pill[data-category]").forEach(function (b) {
+          b.classList.remove("active");
+        });
+        btn.classList.add("active");
+        activeCategory = btn.getAttribute("data-category") || "";
+        loadFavorites();
+      });
     });
   });
+
   loadFavorites();
 }
 
 function loadFavorites() {
-  var ids = getFavoriteIds();
   var loc = getStoredLocation() || DEFAULT_LOCATION;
+  var grid = document.getElementById("favorites-grid");
 
-  if (!ids.length) {
-    renderProviderList("favorites-grid", []);
+  if (!localStorage.getItem("autoconnect_token")) {
+    if (grid) grid.innerHTML = '<p class="section-subtitle" style="grid-column:1/-1"><a href="login.html">' + t("nav_login") + '</a> ' + (currentLang === "ar" ? "لعرض المفضلة" : "to view your favorites") + '</p>';
     return;
   }
 
-  getProviders({}).then(function (list) {
-    var favs = list.filter(function (p) {
-      return ids.indexOf(p.id) !== -1;
-    });
+  getFavorites().then(function (favs) {
     if (activeCategory) {
-      favs = favs.filter(function (p) {
-        return p.category_slug === activeCategory;
-      });
+      favs = favs.filter(function (p) { return p.category_slug === activeCategory; });
     }
     favs = addDistanceToProviders(favs, loc.lat, loc.long);
     renderProviderList("favorites-grid", favs, { basePath: getBasePath() });
+  }).catch(function () {
+    renderProviderList("favorites-grid", []);
   });
 }
 
@@ -275,24 +290,65 @@ function loadFavorites() {
 
 function initProfilePage() {
   getUser().then(function (user) {
-    setEl("user-name",      getLocalizedField(user, "fname") + " " + getLocalizedField(user, "lname"));
-    setEl("user-id",        "PA-" + user.id + "#");
-    setEl("user-vehicle",   user.vehicle_brand || "");
-    setEl("user-city",      getLocalizedField(user, "city"));
-    setEl("saved-location", getLocalizedField(user, "saved_location"));
-    setEl("total-visits",   user.total_visits || 0);
-    setEl("last-visit",     t("days_ago") + " " + (user.last_visit_days_ago || "—") + " " + t("days"));
-    setEl("next-maint",     getLocalizedField(user, "next_maintenance") || "—");
+    setEl("user-name",    (user.fname || "") + " " + (user.lname || ""));
+    setEl("user-id",      "#" + user.id);
+    setEl("total-visits", user.total_visits || 0);
 
-    var ids = getFavoriteIds();
+    if (user.vehicle_brand) {
+      setEl("user-vehicle", user.vehicle_brand);
+      document.getElementById("user-vehicle-row").style.display = "";
+    }
+
+    if (user.city) {
+      setEl("user-city", user.city);
+      document.getElementById("user-city-row").style.display = "";
+    }
+
+    if (user.saved_location) {
+      setEl("saved-location", user.saved_location);
+      document.getElementById("saved-location-card").style.display = "";
+    }
+
     var loc = getStoredLocation() || DEFAULT_LOCATION;
-    if (ids.length) {
-      getProviders({}).then(function (list) {
-        var favs = list.filter(function (p) { return ids.indexOf(p.id) !== -1; });
+    getFavorites().then(function (favs) {
+      if (favs.length) {
         favs = addDistanceToProviders(favs, loc.lat, loc.long);
         renderProviderList("profile-favorites", favs.slice(0, 2), { basePath: getBasePath() });
-      });
+      }
+    });
+  }).catch(function (err) {
+    if (err && err.response) {
+      window.location.href = "login.html";
     }
+  });
+}
+
+// =============================================================================
+// History Page
+// =============================================================================
+
+function initHistoryPage() {
+  getBookings().then(function (bookings) {
+    var tbody = document.getElementById("history-body");
+    if (!tbody) return;
+
+    if (!bookings.length) {
+      tbody.innerHTML = "<tr><td colspan='2' style='padding:1rem 0.5rem;color:var(--text-muted)'>" + t("history_empty") + "</td></tr>";
+      return;
+    }
+
+    tbody.innerHTML = bookings.map(function (b) {
+      var name = currentLang === "ar" ? (b.name_ar || b.name_en) : (b.name_en || b.name_ar);
+      var date = b.created_at ? b.created_at.split(" ")[0] : "—";
+      return "<tr>" +
+        "<td style='padding:0.65rem 0.5rem;border-bottom:1px solid var(--border-color)'>" +
+          "<a href='service-detail.html?id=" + b.provider_id + "'>" + name + "</a>" +
+        "</td>" +
+        "<td style='padding:0.65rem 0.5rem;border-bottom:1px solid var(--border-color);color:var(--text-muted)'>" + date + "</td>" +
+      "</tr>";
+    }).join("");
+  }).catch(function () {
+    window.location.href = "login.html";
   });
 }
 
@@ -371,7 +427,22 @@ function renderDetail(p) {
   setEl("live-status",    p.is_open_now ? t("online_now") : t("closed"));
 
   var callBtn = document.getElementById("call-btn");
-  if (callBtn) callBtn.href = "tel:" + p.phone;
+  if (callBtn) {
+    if (localStorage.getItem("autoconnect_token")) {
+      callBtn.href = "tel:" + p.phone;
+      callBtn.textContent = t("call_now");
+      callBtn.addEventListener("click", function () {
+        createBooking(p.id);
+      });
+    } else {
+      callBtn.removeAttribute("href");
+      callBtn.textContent = t("show_phone");
+      document.getElementById("detail-phone").style.display = "none";
+      callBtn.addEventListener("click", function () {
+        window.location.href = "login.html";
+      });
+    }
+  }
 
   var heroImg = (p.photos && p.photos.length) ? p.photos[0].photo_url : "assets/images/provider_default.png";
   var hero = document.getElementById("detail-hero");
@@ -393,8 +464,22 @@ function renderPhotoGallery(photos, base) {
   var grid = document.getElementById("photos-grid");
   if (!grid) return;
   grid.innerHTML = photos.map(function (ph) {
-    return '<div class="gallery-thumb" style="background-image:url(\'' + base + ph.photo_url + '\')"></div>';
+    var url = base + ph.photo_url;
+    return '<div class="gallery-thumb" style="background-image:url(\'' + url + '\')" onclick="openLightbox(\'' + url + '\')"></div>';
   }).join("");
+}
+
+function openLightbox(src) {
+  var overlay = document.getElementById("lightbox");
+  var img = document.getElementById("lightbox-img");
+  if (!overlay || !img) return;
+  img.src = src;
+  overlay.classList.add("open");
+}
+
+function closeLightbox() {
+  var overlay = document.getElementById("lightbox");
+  if (overlay) overlay.classList.remove("open");
 }
 
 function renderWorkingHours(hours) {
@@ -442,11 +527,30 @@ function loadReviews(providerId) {
 function setupFavoriteButton(providerId) {
   var btn = document.querySelector(".detail-actions .btn-outline");
   if (!btn) return;
-  var isFav = getFavoriteIds().indexOf(Number(providerId)) !== -1;
-  btn.textContent = (isFav ? "♥ " : "♡ ") + t("favorite");
+
+  btn.textContent = "♡ " + t("favorite");
+
+  if (localStorage.getItem("autoconnect_token")) {
+    getFavorites().then(function (favs) {
+      var isFav = favs.some(function (f) { return f.id === Number(providerId); });
+      btn.textContent = (isFav ? "♥ " : "♡ ") + t("favorite");
+    });
+  }
+
   btn.addEventListener("click", function () {
-    var added = toggleFavoriteLocal(Number(providerId));
-    btn.textContent = (added ? "♥ " : "♡ ") + t("favorite");
+    if (!localStorage.getItem("autoconnect_token")) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    btn.disabled = true;
+    toggleFavorite(providerId).then(function (res) {
+      if (res.success) {
+        btn.textContent = (res.is_saved ? "♥ " : "♡ ") + t("favorite");
+      }
+    }).finally(function () {
+      btn.disabled = false;
+    });
   });
 }
 
@@ -463,29 +567,69 @@ function loadSimilar(current, loc) {
 // =============================================================================
 
 function initSettingsPage() {
-  var form = document.getElementById("password-form");
-  if (form) {
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      updatePassword({
-        current: document.getElementById("current-password").value,
-        new:     document.getElementById("new-password").value,
-        confirm: document.getElementById("confirm-password").value
-      }).then(function (res) {
-        alert(res.message);
-        form.reset();
-      });
-    });
+  if (!localStorage.getItem("autoconnect_token")) {
+    window.location.href = "login.html";
+    return;
   }
 
-  var deleteBtn = document.getElementById("delete-account-btn");
-  if (deleteBtn) {
-    deleteBtn.addEventListener("click", function () {
-      if (confirm(t("delete_account") + "?")) {
-        alert("not implemented yet");
-      }
-    });
-  }
+  var form = document.getElementById("password-form");
+  if (!form) return;
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    var currentVal  = document.getElementById("current-password").value;
+    var newVal      = document.getElementById("new-password").value;
+    var confirmVal  = document.getElementById("confirm-password").value;
+    var msg         = document.getElementById("password-msg");
+    var required    = currentLang === "ar" ? "هذا الحقل مطلوب" : "This field is required";
+    var mismatch    = currentLang === "ar" ? "كلمتا المرور غير متطابقتين" : "Passwords do not match";
+    var isValid     = true;
+
+    document.getElementById("err-current").textContent  = "";
+    document.getElementById("err-new").textContent      = "";
+    document.getElementById("err-confirm").textContent  = "";
+    if (msg) msg.textContent = "";
+
+    if (!currentVal) {
+      document.getElementById("err-current").textContent = required;
+      isValid = false;
+    }
+    if (!newVal) {
+      document.getElementById("err-new").textContent = required;
+      isValid = false;
+    }
+    if (!confirmVal) {
+      document.getElementById("err-confirm").textContent = required;
+      isValid = false;
+    }
+    if (newVal && confirmVal && newVal !== confirmVal) {
+      document.getElementById("err-confirm").textContent = mismatch;
+      isValid = false;
+    }
+    if (!isValid) return;
+
+    var submitBtn = form.querySelector("[type='submit']");
+    if (submitBtn) submitBtn.disabled = true;
+
+    updatePassword({ current: currentVal, new: newVal, confirm: confirmVal })
+      .then(function (res) {
+        if (msg) {
+          msg.textContent = res.message;
+          msg.style.color = res.success ? "var(--success, green)" : "var(--error, #e74c3c)";
+        }
+        if (res.success) form.reset();
+      })
+      .catch(function () {
+        if (msg) {
+          msg.textContent = currentLang === "ar" ? "حدث خطأ، حاول مرة أخرى" : "Something went wrong, try again";
+          msg.style.color = "var(--error, #e74c3c)";
+        }
+      })
+      .finally(function () {
+        if (submitBtn) submitBtn.disabled = false;
+      });
+  });
 }
 
 // =============================================================================
@@ -496,6 +640,7 @@ function pageOnLanguageChange(lang) {
   var path = window.location.pathname;
   if (path.indexOf("/pages/") === -1 || path.includes("index.html")) {
     fillCategorySelect("search-type");
+    fillCitySelect("search-location");
   } else if (path.includes("services.html")) {
     fillServicesDropdowns(new URLSearchParams(window.location.search));
   } else if (path.includes("emergency.html")) {

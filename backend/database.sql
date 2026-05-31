@@ -1,7 +1,8 @@
-DROP DATABASE IF EXISTS autoconnect; CREATE DATABASE autoconnect CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS autoconnect CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE autoconnect;
 
 -- 1. Categories Table (Self-joining for subcategories)
-CREATE TABLE categories (
+CREATE TABLE IF NOT EXISTS categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name_en VARCHAR(255) NOT NULL,
     name_ar VARCHAR(255) NOT NULL,
@@ -11,7 +12,7 @@ CREATE TABLE categories (
 );
 
 -- 2. Users Table
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     fname VARCHAR(100) NOT NULL,
     lname VARCHAR(100) NOT NULL,
@@ -24,14 +25,14 @@ CREATE TABLE users (
 );
 
 -- 3. Vehicle Types Table
-CREATE TABLE vehicle_types (
+CREATE TABLE IF NOT EXISTS vehicle_types (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name_en VARCHAR(100) NOT NULL,
     name_ar VARCHAR(100) NOT NULL
 );
 
 -- 4. Providers Table
-CREATE TABLE providers (
+CREATE TABLE IF NOT EXISTS providers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name_en VARCHAR(255) NOT NULL,
     name_ar VARCHAR(255) NOT NULL,
@@ -54,7 +55,7 @@ CREATE TABLE providers (
 );
 
 -- 5. Tagged With (Pivot table: Providers <-> Vehicle Types)
-CREATE TABLE tagged_with (
+CREATE TABLE IF NOT EXISTS tagged_with (
     id INT AUTO_INCREMENT PRIMARY KEY,
     provider_id INT NOT NULL,
     vehicle_type_id INT NOT NULL,
@@ -63,7 +64,7 @@ CREATE TABLE tagged_with (
 );
 
 -- 6. Provider Photos Table
-CREATE TABLE provider_photos (
+CREATE TABLE IF NOT EXISTS provider_photos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     photo_url VARCHAR(255) NOT NULL,
     sort_order INT DEFAULT 0,
@@ -72,7 +73,7 @@ CREATE TABLE provider_photos (
 );
 
 -- 7. Working Hours Table
-CREATE TABLE working_hours (
+CREATE TABLE IF NOT EXISTS working_hours (
     id INT AUTO_INCREMENT PRIMARY KEY,
     day VARCHAR(20) NOT NULL,
     open_time TIME,
@@ -83,7 +84,7 @@ CREATE TABLE working_hours (
 );
 
 -- 8. Reviews Table
-CREATE TABLE reviews (
+CREATE TABLE IF NOT EXISTS reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
     comment TEXT,
     rate INT NOT NULL,
@@ -94,8 +95,18 @@ CREATE TABLE reviews (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- 9. Saves Table (Bookmarks)
-CREATE TABLE saves (
+-- 9. Bookings Table
+CREATE TABLE IF NOT EXISTS bookings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    provider_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE CASCADE
+);
+
+-- 10. Saves Table (Bookmarks)
+CREATE TABLE IF NOT EXISTS saves (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     provider_id INT NOT NULL,
@@ -108,34 +119,34 @@ CREATE TABLE saves (
 -- ==========================================
 
 -- Insert Categories
-INSERT INTO categories (id, name_en, name_ar, slug, category_id) VALUES
+INSERT IGNORE INTO categories (id, name_en, name_ar, slug, category_id) VALUES
 (1, 'Technician',          'فني',               'technician',   NULL),
 (2, 'Rescue Winches',      'ونش إنقاذ',         'rescue-winches', NULL),
 (3, 'Spare Parts Stores',  'محلات قطع غيار',    'spare-parts',  NULL),
-(4, 'Mechanics',           'ميكانيكي',          'mechanics',    1),   -- Child of Technician
-(5, 'Electrician',         'كهربائي',           'electrician',  1);   -- Child of Technician
+(4, 'Mechanics',           'ميكانيكي',          'mechanics',    1),
+(5, 'Electrician',         'كهربائي',           'electrician',  1);
 
 -- Insert Users (Mock passwords for simplicity)
-INSERT INTO users (id, fname, lname, email, password, phone, role) VALUES
+INSERT IGNORE INTO users (id, fname, lname, email, password, phone, role) VALUES
 (1, 'Ahmed',   'Ali',   'ahmed@example.com',   '123456', '01000000000', 'provider'),
 (2, 'Mohamed', 'Omar',  'mohamed@example.com', '123456', '01111111111', 'provider'),
 (3, 'Sara',    'Kamal', 'sara@example.com',    '123456', '01222222222', 'client');
 
 -- Insert Vehicle Types
-INSERT INTO vehicle_types (id, name_en, name_ar) VALUES
+INSERT IGNORE INTO vehicle_types (id, name_en, name_ar) VALUES
 (1, 'Sedan',      'سيدان'),
 (2, 'SUV',        'دفع رباعي'),
 (3, 'Truck',      'شاحنة'),
 (4, 'Motorcycle', 'دراجة نارية');
 
 -- Insert Providers
-INSERT INTO providers (id, name_en, name_ar, phone, address_en, address_ar, city_en, city_ar, user_id, category_id) VALUES
+INSERT IGNORE INTO providers (id, name_en, name_ar, phone, address_en, address_ar, city_en, city_ar, user_id, category_id) VALUES
 (1, 'Ahmed Auto Repair', 'أحمد لإصلاح السيارات', '01000000000', '10 Main St', '١٠ الشارع الرئيسي', 'Cairo', 'القاهرة', 1, 4),
 (2, 'Fast Rescue Winch', 'ونش الإنقاذ السريع',   '01111111111', 'Ring Road',  'الطريق الدائري',    'Giza',  'الجيزة',  2, 2);
 
 -- Insert tagged_with (Providers supporting specific vehicles)
-INSERT INTO tagged_with (provider_id, vehicle_type_id) VALUES
-(1, 1), -- Ahmed Auto Repair supports Sedan
-(1, 2), -- Ahmed Auto Repair supports SUV
-(2, 1), -- Fast Rescue Winch supports Sedan
-(2, 3); -- Fast Rescue Winch supports Truck
+INSERT IGNORE INTO tagged_with (provider_id, vehicle_type_id) VALUES
+(1, 1),
+(1, 2),
+(2, 1),
+(2, 3);

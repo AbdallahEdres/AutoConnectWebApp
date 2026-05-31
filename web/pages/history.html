@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AutoConnect — المفضلة</title>
+  <title>AutoConnect — Service History</title>
   <link rel="stylesheet" href="../css/variables.css">
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/components.css">
@@ -18,8 +18,8 @@
     <aside class="sidebar">
       <nav class="sidebar-nav">
         <a href="profile.html">📊 <span data-i18n="nav_dashboard"></span></a>
-        <a href="history.html">🕐 <span data-i18n="service_history"></span></a>
-        <a href="favorites.html" class="active">🔖 <span data-i18n="nav_favorites"></span></a>
+        <a href="history.html" class="active">🕐 <span data-i18n="service_history"></span></a>
+        <a href="favorites.html">🔖 <span data-i18n="nav_favorites"></span></a>
         <a href="settings.html">⚙ <span data-i18n="settings_title"></span></a>
         <a href="#" onclick="logoutUser(); return false;" style="color:var(--accent-red, #e74c3c)">🚪 <span data-i18n="logout"></span></a>
       </nav>
@@ -28,23 +28,22 @@
     </aside>
 
     <div>
-      <h1 class="section-title" data-i18n="favorites_title"></h1>
-      <p class="section-subtitle" data-i18n="favorites_sub"></p>
+      <h1 style="color:var(--accent-yellow);margin-bottom:0.25rem" data-i18n="service_history"></h1>
+      <p class="section-subtitle" style="margin-bottom:1.5rem" data-i18n="history_sub"></p>
 
-      <div class="pills" style="margin:1rem 0">
-        <button type="button" class="pill active" data-category="" data-i18n="all_providers"></button>
-      </div>
-
-      <div class="grid-auto" id="favorites-grid"></div>
-
-      <section class="card"
-        style="margin-top:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">
-        <div>
-          <h3 data-i18n="more_services"></h3>
-          <p style="color:var(--text-secondary);font-size:0.9rem" data-i18n="filtered_sub"></p>
-        </div>
-        <a href="services.html" class="btn btn-outline" data-i18n="explore_directory"></a>
-      </section>
+      <article class="card">
+        <table style="width:100%;border-collapse:collapse" id="history-table">
+          <thead>
+            <tr>
+              <th style="text-align:start;padding:0.65rem 0.5rem;border-bottom:1px solid var(--border-color)" data-i18n="history_provider"></th>
+              <th style="text-align:start;padding:0.65rem 0.5rem;border-bottom:1px solid var(--border-color)" data-i18n="history_date"></th>
+            </tr>
+          </thead>
+          <tbody id="history-body">
+            <tr><td colspan="2" style="padding:1rem 0.5rem;color:var(--text-muted)">...</td></tr>
+          </tbody>
+        </table>
+      </article>
     </div>
   </div>
 

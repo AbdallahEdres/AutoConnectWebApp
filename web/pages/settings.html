@@ -14,65 +14,66 @@
 <body class="rtl">
   <div id="site-header"></div>
 
-  <main class="page-main container layout-with-sidebar">
+  <div class="layout-with-sidebar container page-main" style="padding-top:1.5rem">
     <aside class="sidebar">
-      <h3 data-i18n="account_mgmt">إدارة الحساب</h3>
-      <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:1rem" data-i18n="account_mgmt_sub">تحكم في
-        بياناتك وأمانك وتفضيلاتك</p>
       <nav class="sidebar-nav">
-        <a href="profile.html" data-i18n="profile_details">بيانات الملف الشخصي</a>
-        <a href="settings.html" class="active" data-i18n="security">الأمان</a>
-        <a href="favorites.html" data-i18n="nav_favorites">المفضلة</a>
-        <a href="#" data-i18n="notifications">الإشعارات</a>
+        <a href="profile.html">📊 <span data-i18n="nav_dashboard"></span></a>
+        <a href="history.html">🕐 <span data-i18n="service_history"></span></a>
+        <a href="favorites.html">🔖 <span data-i18n="nav_favorites"></span></a>
+        <a href="settings.html" class="active">⚙ <span data-i18n="settings_title"></span></a>
+        <a href="#" onclick="logoutUser(); return false;" style="color:var(--accent-red, #e74c3c)">🚪 <span data-i18n="logout"></span></a>
       </nav>
-      <button type="button" class="btn btn-primary btn-block" style="margin-top:1.5rem" data-i18n="upgrade_plan">ترقية
-        الخطة</button>
+      <p style="margin-top:1.5rem;font-size:0.8rem;color:var(--text-secondary)" data-i18n="system_status"></p>
+      <p><span class="status-dot open"></span> <span data-i18n="connected"></span></p>
     </aside>
 
     <div>
-      <h1 class="section-title" data-i18n="settings_title">الإعدادات</h1>
-      <p class="section-subtitle" data-i18n="settings_sub">تحكم في أمان حسابك</p>
+      <h1 class="section-title" data-i18n="settings_title"></h1>
+      <p class="section-subtitle" data-i18n="settings_sub"></p>
 
       <div class="settings-grid">
         <article class="card">
-          <h3 data-i18n="security_tips">نصائح الأمان</h3>
+          <h3 data-i18n="change_password"></h3>
+          <form id="password-form" novalidate style="margin-top:1rem">
+            <div class="form-group">
+              <label for="current-password" data-i18n="current_password"></label>
+              <input class="form-control" type="password" id="current-password" placeholder="********">
+              <span class="form-error" id="err-current"></span>
+            </div>
+            <div class="form-group">
+              <label for="new-password" data-i18n="new_password"></label>
+              <input class="form-control" type="password" id="new-password" placeholder="********">
+              <span class="form-error" id="err-new"></span>
+            </div>
+            <div class="form-group">
+              <label for="confirm-password" data-i18n="confirm_new_password"></label>
+              <input class="form-control" type="password" id="confirm-password" placeholder="********">
+              <span class="form-error" id="err-confirm"></span>
+            </div>
+            <p id="password-msg" style="font-size:0.9rem;margin-bottom:0.75rem"></p>
+            <button type="submit" class="btn btn-primary" data-i18n="update_password"></button>
+          </form>
+        </article>
+
+        <article class="card">
+          <h3 data-i18n="security_tips"></h3>
           <ul class="tips-list" style="margin-top:1rem">
-            <li data-i18n="tip1">استخدم كلمة مرور قوية ولا تشاركها مع أحد</li>
-            <li data-i18n="tip2">فعّل التحقق بخطوتين لحماية أفضل</li>
-            <li data-i18n="tip3">قم بتغيير كلمة المرور بانتظام</li>
+            <li data-i18n="tip1"></li>
+            <li data-i18n="tip2"></li>
+            <li data-i18n="tip3"></li>
           </ul>
           <div class="map-placeholder" style="margin-top:1.5rem;height:120px">🔒</div>
         </article>
 
-        <article class="card">
-          <h3 data-i18n="change_password">تغيير كلمة المرور</h3>
-          <form id="password-form" style="margin-top:1rem">
-            <div class="form-group">
-              <label for="current-password" data-i18n="current_password">كلمة المرور الحالية</label>
-              <input class="form-control" type="password" id="current-password" placeholder="********">
-            </div>
-            <div class="form-group">
-              <label for="new-password" data-i18n="new_password">كلمة المرور الجديدة</label>
-              <input class="form-control" type="password" id="new-password" placeholder="********">
-            </div>
-            <div class="form-group">
-              <label for="confirm-password" data-i18n="confirm_new_password">تأكيد كلمة المرور الجديدة</label>
-              <input class="form-control" type="password" id="confirm-password" placeholder="********">
-            </div>
-            <button type="submit" class="btn btn-primary" data-i18n="update_password">تحديث كلمة المرور</button>
-          </form>
-        </article>
-
         <article class="card delete-account-card">
-          <h3 style="color:var(--accent-red)">⚠ <span data-i18n="delete_account">حذف الحساب</span></h3>
-          <p style="color:var(--text-secondary);margin:0.75rem 0;font-size:0.9rem" data-i18n="delete_account_desc">سيؤدي
-            هذا إلى حذف حسابك وجميع بياناتك نهائياً ولا يمكن التراجع.</p>
-          <button type="button" class="btn btn-outline" id="delete-account-btn" data-i18n="delete_my_account">حذف
-            حسابي</button>
+          <h3 style="color:var(--accent-red)">⚠ <span data-i18n="delete_account"></span></h3>
+          <p style="color:var(--text-secondary);margin:0.75rem 0;font-size:0.9rem" data-i18n="delete_account_desc"></p>
+          <button type="button" class="btn btn-outline" id="delete-account-btn" disabled
+            style="opacity:0.5;cursor:not-allowed" data-i18n="delete_my_account"></button>
         </article>
       </div>
     </div>
-  </main>
+  </div>
 
   <div id="site-footer"></div>
 

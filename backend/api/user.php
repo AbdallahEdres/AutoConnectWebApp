@@ -21,6 +21,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $user   = mysqli_fetch_assoc($result);
 
     if ($user) {
+        $user['total_visits'] = 0;
+        $count_result = mysqli_query($conn, "SELECT COUNT(*) AS total FROM bookings WHERE user_id = $user_id");
+        if ($count_result) {
+            $count_row = mysqli_fetch_assoc($count_result);
+            $user['total_visits'] = (int)$count_row['total'];
+        }
+
         echo json_encode(['success' => true, 'data' => $user]);
     } else {
         http_response_code(404);

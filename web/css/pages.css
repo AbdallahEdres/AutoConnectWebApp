@@ -382,6 +382,44 @@
   background-position: center;
   background-color: var(--bg-input);
   cursor: pointer;
+  transition: opacity 0.15s;
+}
+.gallery-thumb:hover { opacity: 0.85; }
+
+/* Lightbox */
+.lightbox-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+.lightbox-overlay.open { display: flex; }
+.lightbox-overlay img {
+  max-width: 90vw;
+  max-height: 88vh;
+  border-radius: var(--radius-sm);
+  object-fit: contain;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+.lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  font-size: 1.75rem;
+  line-height: 1;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .wh-list {

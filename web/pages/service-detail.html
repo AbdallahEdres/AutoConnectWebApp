@@ -70,6 +70,12 @@
 
   <div id="site-footer"></div>
 
+  <!-- Lightbox -->
+  <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close">&times;</button>
+    <img id="lightbox-img" src="" alt="">
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="../js/i18n.js"></script>
   <script src="../js/main.js"></script>
