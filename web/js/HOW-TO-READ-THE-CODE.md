@@ -2,54 +2,85 @@
 
 > **CSS:** see [`../css/HOW-TO-READ-THE-CSS.md`](../css/HOW-TO-READ-THE-CSS.md) for colors, classes, and which page uses which styles.
 
-Read files in this order when studying the project.
+There are **three JS files**. Read them in this order.
 
 ## 1. Script load order (every HTML page)
 
 ```
-config.js          → settings (useMock, API URLs)
-i18n.js            → Arabic/English strings
-utils.js           → distance, GPS, filters (no API)
-mock-handlers.js   → fake backend (JSON files)
-api.js             → getProviders(), loginUser(), …  ← pages call THIS
-ui.js              → HTML for provider cards
-layout.js          → header + footer
-app.js             → runs on every page (language, nav)
-home.js / services.js / …  → one file per page
+i18n.js    → translations only: TRANSLATIONS object, t(), setLanguage(), getLocalizedField()
+main.js    → config, utils, API calls, card HTML, header/footer, auth handlers
+pages.js   → page-specific logic (one init function per page)
 ```
 
-## 2. Data flow example (services page)
+All three are loaded on every page. `i18n.js` must come first because `main.js` and `pages.js` call `t()`.
 
-1. `services.js` runs on `DOMContentLoaded`
-2. Calls `getProviders(filters)` from `api.js`
-3. `api.js` → `apiRequest("providers")` → if mock: `runMockHandler` in `mock-handlers.js`
-4. Mock loads `data/providers.json`, runs `filterProviders()` from `utils.js`
-5. Returns `{ success: true, data: [ ...providers ] }`
-6. `unwrap()` gives the array to `services.js`
-7. `renderProviderList()` in `ui.js` writes HTML into `#providers-grid`
+---
 
-## 3. File map
+## 2. What lives inside i18n.js
 
-| File | Purpose |
-|------|---------|
-| `config.js` | `useMock`, `API_ENDPOINTS`, demo login |
-| `api.js` | All server calls — only file to change for PHP |
-| `mock-handlers.js` | Pretend PHP using `/data/*.json` |
-| `utils.js` | Distance, geolocation, filter/sort |
-| `i18n.js` | `t("key")`, AR/EN toggle |
-| `layout.js` | Shared header/footer |
-| `app.js` | Init on every page |
-| `ui.js` | Provider card HTML |
-| `auth.js` | Login + register |
-| `home.js` | index.html search |
-| `services.js` | Filtered list |
-| `emergency.js` | Tow trucks + GPS |
-| `service-detail.js` | One provider + reviews |
-| `favorites.js` | Saved providers |
-| `profile.js` | User dashboard |
-| `settings.js` | Password form |
-| `provider-register.js` | Workshop signup page |
+| Item | What it does |
+|------|-------------|
+| `TRANSLATIONS` | Object with `ar` and `en` keys — every UI string in both languages |
+| `t("key")` | Returns the translated string for the current language |
+| `setLanguage(lang)` | Sets `currentLang`, updates `body` classes, rewrites all `[data-i18n]` elements |
+| `toggleLanguage()` | Flips between `"ar"` and `"en"`, then calls `onLanguageChange()` if defined |
+| `getLocalizedField(obj, "name")` | Returns `obj.name_ar` or `obj.name_en` depending on language |
 
-## 4. Connect real backend
+---
 
-Set `API_CONFIG.useMock = false` in `config.js` and implement PHP files listed in `API_ENDPOINTS`. See `../data/API.md`.
+## 3. What lives inside main.js
+
+| Section | What it does |
+|---------|-------------|
+| **Config** (top of file) | `API_BASE` (path to `backend/api/`) and `API_ENDPOINTS` — a key-to-filename map for every PHP endpoint |
+| **Utils** | `getDistanceKm()`, `formatDistance()`, `getUserLocation()`, `getStoredLocation()`, `saveLocation()`, `setEl()`, `addDistanceToProviders()` |
+| **API** | `apiRequest()` → single fetch gate. Helper wrappers: `getProviders()`, `getProviderById()`, `getCategories()`, `getRegions()`, `getUser()`, `getBookings()`, `createBooking()`, `loginUser()`, `registerUser()`, `updatePassword()`, `addProvider()`, `getReviews()`, `toggleFavorite()` |
+| **UI** | `renderProviderCard()` / `renderProviderList()` — builds provider card HTML. `renderHorizontalProviderCard()` — wider card for the emergency page |
+| **Layout** | `renderHeader()` / `renderFooter()` — writes shared header/footer into `#site-header` / `#site-footer` |
+| **Auth** | `handleLoginSubmit()`, `handleRegisterSubmit()`, `setRegisterRole()` — login and register form logic |
+| **Init** | `DOMContentLoaded` — calls `renderHeader()`, `renderFooter()`, `setLanguage()`, wires up auth forms |
+
+---
+
+## 4. What lives inside pages.js
+
+Each page has one `init` function that runs on `DOMContentLoaded`:
+
+| Function | Page |
+|----------|------|
+| `initHomePage()` | `index.html` — search form |
+| `initServicesPage()` | `services.html` — filtered provider list |
+| `initEmergencyPage()` | `emergency.html` — nearest tow trucks + GPS |
+| `initFavoritesPage()` | `favorites.html` — saved providers |
+| `initProfilePage()` | `profile.html` — user info + favorite providers |
+| `initProviderRegisterPage()` | `provider-register.html` — workshop signup |
+| `initServiceDetailPage()` | `service-detail.html` — one provider + reviews |
+| `initSettingsPage()` | `settings.html` — change password |
+| `initHistoryPage()` | `history.html` — service booking history |
+
+`onLanguageChange()` at the bottom re-runs the relevant init when the user switches AR ↔ EN.
+
+---
+
+## 5. Data flow example (services page)
+
+1. `pages.js` → `initServicesPage()` runs on page load
+2. Calls `fillCategorySelect()` + `fillCitySelect()` → `getCategories()` + `getRegions()` from `main.js`
+3. Then calls `runSearch()` → `getProviders(filters)` from `main.js`
+4. `getProviders` → `apiRequest("providers")` → fetch to `/backend/api/providers.php`
+5. PHP returns `{ success: true, data: [...] }`
+6. `unwrap()` in `main.js` pulls out the array
+7. `addDistanceToProviders()` adds a `distance_km` field to each item
+8. `renderProviderList("providers-grid", list)` writes the card HTML into the page
+
+---
+
+## 6. Useful helper functions to know
+
+| Function | Where | What it does |
+|----------|-------|-------------|
+| `t("key")` | i18n.js | Get translated string for current language |
+| `getLocalizedField(obj, "name")` | i18n.js | Returns `obj.name_ar` or `obj.name_en` based on language |
+| `setEl("id", value)` | main.js | Shortcut for `document.getElementById("id").textContent = value` |
+| `getStoredLocation()` | main.js | Reads last GPS position from localStorage |
+| `apiRequest(key, options)` | main.js | Single fetch gate — all API calls go through this |

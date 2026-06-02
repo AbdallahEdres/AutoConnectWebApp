@@ -210,6 +210,18 @@
   border-color: var(--accent-yellow);
 }
 
+.form-control.is-invalid {
+  border-color: var(--accent-yellow);
+}
+
+.form-error {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--accent-yellow);
+  margin-top: 0.2rem;
+  min-height: 1em;
+}
+
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -231,12 +243,17 @@
   background: linear-gradient(135deg, #1e293b, #334155);
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .provider-card__image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
 .provider-card__badge {
@@ -262,6 +279,11 @@
 .provider-card__rating {
   color: var(--accent-yellow);
   font-size: 0.85rem;
+}
+
+.provider-card__review-count {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
 }
 
 .provider-card__meta {

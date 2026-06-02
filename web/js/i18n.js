@@ -1,21 +1,5 @@
-/**
- * =============================================================================
- * i18n.js — Arabic / English text (no extra library)
- * =============================================================================
- *
- * HOW TO USE IN HTML:
- *   <button data-i18n="login_btn"></button>     → text from TRANSLATIONS
- *   <input data-i18n-placeholder="search_location">
- *
- * On load, app.js calls setLanguage(currentLang) to fill all these elements.
- * currentLang is saved in localStorage as "autoconnect_lang" ("ar" or "en").
- *
- * TRANSLATIONS object below: two big dictionaries { ar: {...}, en: {...} }
- * Same keys in both languages. Add a new key in BOTH ar and en when you add UI text.
- * =============================================================================
- */
+// i18n.js — Arabic / English translations and language switching
 
-/** All UI strings — keys must exist in ar and en */
 var TRANSLATIONS = {
   ar: {
     app_name: "AutoConnect",
@@ -25,9 +9,8 @@ var TRANSLATIONS = {
     nav_login: "تسجيل الدخول",
     nav_signup: "سجل الآن",
     nav_profile: "الملف الشخصي",
-    nav_favorites: "المفضلة",
     nav_dashboard: "لوحة التحكم",
-    nav_support: "الدعم",
+    nav_favorites: "المفضلة",
     hero_title_1: "عطلان؟",
     hero_title_2: "متقلقش هنا هتلاقي الي محتاجه",
     hero_sub: "أدخل موقعك واعثر على أقرب ميكانيكي أو قطع غيار أو ونش في دقائق.",
@@ -42,6 +25,24 @@ var TRANSLATIONS = {
     discover_more: "اكتشف المزيد",
     shop_now: "تسوق الآن",
     order_now: "اطلب الآن",
+    reviews_title: "التقييمات",
+    map_placeholder: "📍 حدد الموقع على الخريطة",
+    tires: "إطارات",
+    service_history: "سجل الخدمة",
+    history_sub: "قائمة بجميع مزودي الخدمة الذين اتصلت بهم",
+    history_provider: "مزود الخدمة",
+    history_date: "التاريخ",
+    history_empty: "لا يوجد سجل خدمة بعد",
+    mechanic_tagline: "مخطط الميكانيكي الحديث",
+    certified_experts: "خبراء معتمدون",
+    mechanic_sub: "صيانة وإصلاح مع فنيين معتمدين",
+    certified_techs: "فنيون معتمدون",
+    spare_parts_sub: "قطع أصلية وتوصيل للمنزل",
+    original_parts: "قطع أصلية",
+    home_delivery: "توصيل للمنزل",
+    towing_sub: "ونش طوارئ سريع",
+    response_15_min: "استجابة 15 دقيقة",
+    gps_tracking: "تتبع GPS",
     cta_join_title: "انضم إلى نخبة خبراء السيارات في مصر",
     cta_join_sub: "هل أنت مزود خدمة؟ انضم لشبكتنا واستقبل الطلبات.",
     partner_btn: "انضم إلينا",
@@ -77,6 +78,7 @@ var TRANSLATIONS = {
     open_now: "مفتوح الآن",
     closed: "مغلق",
     call_now: "اتصل الآن",
+    show_phone: "🔒 اظهار رقم الهاتف",
     view_map: "عرض الموقع",
     emergency_footer: "إذا كنت في خطر وشيك، يرجى الاتصال بخدمات الطوارئ المحلية فوراً (15088). سلامتك هي أولويتنا القصوى.",
     filtered_services: "خدمات مصفاة",
@@ -112,6 +114,7 @@ var TRANSLATIONS = {
     notification_prefs: "تفضيلات الإشعارات",
     language_settings: "إعدادات اللغة",
     settings_title: "الإعدادات",
+    logout: "تسجيل الخروج",
     settings_sub: "قم بتهيئة أمان حسابك وتفضيلاتك",
     account_mgmt: "إدارة الحساب",
     account_mgmt_sub: "إدارة بيانات السيارات الخاصة بك",
@@ -173,7 +176,37 @@ var TRANSLATIONS = {
     location_error: "تعذر الحصول على موقعك. اختر المنطقة يدوياً.",
     login_success: "تم تسجيل الدخول (تجريبي)",
     register_success: "تم إنشاء الحساب (تجريبي)",
-    password_updated: "تم تحديث كلمة المرور (تجريبي)"
+    password_updated: "تم تحديث كلمة المرور (تجريبي)",
+    fname: "الاسم الأول",
+    lname: "اسم العائلة",
+    name_ar_label: "اسم الورشة (بالعربية)",
+    name_en_label: "Workshop name (English)",
+    address_ar_label: "العنوان (بالعربية)",
+    address_en_label: "Address (English)",
+    city_ar_label: "المدينة (بالعربية)",
+    city_en_label: "City (English)",
+    bio_ar_label: "وصف الخدمة (بالعربية)",
+    bio_en_label: "Service description (English)",
+    day_sat: "السبت",
+    day_sun: "الأحد",
+    day_mon: "الاثنين",
+    day_tue: "الثلاثاء",
+    day_wed: "الأربعاء",
+    day_thu: "الخميس",
+    day_fri: "الجمعة",
+    day_off: "إجازة",
+    photos_label: "صور الورشة",
+    photos_hint: " — اختياري، حتى 10 صور",
+    add_photos: "إضافة صور",
+    review_add_title: "أضف تقييمك",
+    review_comment_ph: "تعليقك (اختياري)...",
+    review_submit: "إرسال التقييم",
+    review_login_prompt: "سجّل الدخول لإضافة تقييم",
+    review_success: "تم إرسال تقييمك بنجاح ✓",
+    review_duplicate: "لقد قيّمت هذا المزود من قبل",
+    review_error: "حدث خطأ، حاول مجدداً",
+    review_pick_star: "الرجاء اختيار تقييم",
+    no_reviews_yet: "لا يوجد تقييم بعد"
   },
   en: {
     app_name: "AutoConnect",
@@ -183,9 +216,8 @@ var TRANSLATIONS = {
     nav_login: "Login",
     nav_signup: "Sign Up",
     nav_profile: "Profile",
-    nav_favorites: "Favorites",
     nav_dashboard: "Dashboard",
-    nav_support: "Support",
+    nav_favorites: "Favorites",
     hero_title_1: "Broken down?",
     hero_title_2: "Don't worry — find what you need here",
     hero_sub: "Enter your location to find the nearest mechanic, spare parts shop, or tow truck in minutes.",
@@ -200,6 +232,24 @@ var TRANSLATIONS = {
     discover_more: "Discover more",
     shop_now: "Shop now",
     order_now: "Order now",
+    reviews_title: "Reviews",
+    map_placeholder: "📍 Set location on map",
+    tires: "Tires",
+    service_history: "Service History",
+    history_sub: "All providers you have called",
+    history_provider: "Provider",
+    history_date: "Date",
+    history_empty: "No service history yet",
+    mechanic_tagline: "The Modern Mechanic's Planner",
+    certified_experts: "Certified Experts",
+    mechanic_sub: "Maintenance & repair with certified technicians",
+    certified_techs: "Certified technicians",
+    spare_parts_sub: "Original parts with home delivery",
+    original_parts: "Original parts",
+    home_delivery: "Home delivery",
+    towing_sub: "Fast emergency tow truck",
+    response_15_min: "15-min response",
+    gps_tracking: "GPS tracking",
     cta_join_title: "Join Egypt's elite automotive experts",
     cta_join_sub: "Are you a service provider? Join our network and receive orders.",
     partner_btn: "Partner with us",
@@ -235,6 +285,7 @@ var TRANSLATIONS = {
     open_now: "Open now",
     closed: "Closed",
     call_now: "Call now",
+    show_phone: "🔒 Show phone number",
     view_map: "View location",
     emergency_footer: "If you are in immediate danger, call local emergency services (15088). Your safety is our top priority.",
     filtered_services: "Filtered services",
@@ -270,6 +321,7 @@ var TRANSLATIONS = {
     notification_prefs: "Notification preferences",
     language_settings: "Language settings",
     settings_title: "Settings",
+    logout: "Logout",
     settings_sub: "Configure your account security and preferences",
     account_mgmt: "Account management",
     account_mgmt_sub: "Manage your vehicle data",
@@ -331,23 +383,47 @@ var TRANSLATIONS = {
     location_error: "Could not get your location. Please choose your area manually.",
     login_success: "Logged in (demo)",
     register_success: "Account created (demo)",
-    password_updated: "Password updated (demo)"
+    password_updated: "Password updated (demo)",
+    fname: "First name",
+    lname: "Last name",
+    name_ar_label: "Workshop name (Arabic)",
+    name_en_label: "Workshop name (English)",
+    address_ar_label: "Address (Arabic)",
+    address_en_label: "Address (English)",
+    city_ar_label: "City (Arabic)",
+    city_en_label: "City (English)",
+    bio_ar_label: "Description (Arabic)",
+    bio_en_label: "Description (English)",
+    day_sat: "Saturday",
+    day_sun: "Sunday",
+    day_mon: "Monday",
+    day_tue: "Tuesday",
+    day_wed: "Wednesday",
+    day_thu: "Thursday",
+    day_fri: "Friday",
+    day_off: "Day off",
+    photos_label: "Workshop photos",
+    photos_hint: " — optional, up to 10 images",
+    add_photos: "Add photos",
+    review_add_title: "Add your review",
+    review_comment_ph: "Your comment (optional)...",
+    review_submit: "Submit review",
+    review_login_prompt: "Log in to add a review",
+    review_success: "Review submitted successfully ✓",
+    review_duplicate: "You have already reviewed this provider",
+    review_error: "Something went wrong, please try again",
+    review_pick_star: "Please select a rating",
+    no_reviews_yet: "No reviews yet"
   }
 };
 
-/** Active language: "ar" (default) or "en" */
 var currentLang = localStorage.getItem("autoconnect_lang") || "ar";
 
-/** Get one translated string by key, e.g. t("login_btn") */
 function t(key) {
   var pack = TRANSLATIONS[currentLang];
   return (pack && pack[key]) || TRANSLATIONS.ar[key] || key;
 }
 
-/**
- * Switch language: updates body dir (rtl/ltr), all data-i18n elements, and calls
- * onLanguageChange() on the current page if that function exists (e.g. services.js).
- */
 function setLanguage(lang) {
   if (!TRANSLATIONS[lang]) return;
   currentLang = lang;
@@ -368,25 +444,19 @@ function setLanguage(lang) {
   if (toggle) {
     toggle.textContent = lang === "ar" ? "EN" : "AR";
   }
-
-  if (typeof onLanguageChange === "function") {
-    onLanguageChange(lang);
-  }
 }
 
-/** Flip AR ↔ EN (header button calls this) */
 function toggleLanguage() {
   setLanguage(currentLang === "ar" ? "en" : "ar");
+  if (typeof onLanguageChange === "function") {
+    onLanguageChange(currentLang);
+  }
 }
 
-/**
- * Pick Arabic or English field from API data.
- * Example: getLocalizedField(provider, "name") → name or name_en
- */
 function getLocalizedField(obj, field) {
   if (!obj) return "";
-  if (currentLang === "en" && obj[field + "_en"]) {
-    return obj[field + "_en"];
+  if (currentLang === "en") {
+    return obj[field + "_en"] || obj[field + "_ar"] || "";
   }
-  return obj[field] || "";
+  return obj[field + "_ar"] || obj[field + "_en"] || "";
 }

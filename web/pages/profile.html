@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,20 +10,22 @@
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/pages.css">
 </head>
+
 <body class="rtl">
+  <div id="site-header"></div>
+
   <div class="layout-with-sidebar container page-main" style="padding-top:1.5rem">
     <!-- ========================================== -->
     <!-- 1. SIDEBAR NAVIGATION START                -->
     <!-- Static sidebar used for profile pages      -->
     <!-- ========================================== -->
     <aside class="sidebar">
-      <p class="logo" style="font-size:1rem;margin-bottom:0.25rem">AUTO CONNECT</p>
-      <p style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:1rem">مخطط الميكانيكي الحديث</p>
       <nav class="sidebar-nav">
         <a href="profile.html" class="active">📊 <span data-i18n="nav_dashboard"></span></a>
-        <a href="services.html">🕐 سجل الخدمة</a>
+        <a href="history.html">🕐 <span data-i18n="service_history"></span></a>
         <a href="favorites.html">🔖 <span data-i18n="nav_favorites"></span></a>
         <a href="settings.html">⚙ <span data-i18n="settings_title"></span></a>
+        <a href="#" onclick="logoutUser(); return false;" style="color:var(--accent-red, #e74c3c)">🚪 <span data-i18n="logout">تسجيل الخروج</span></a>
       </nav>
       <p style="margin-top:1.5rem;font-size:0.8rem;color:var(--text-secondary)" data-i18n="system_status"></p>
       <p><span class="status-dot open"></span> <span data-i18n="connected"></span></p>
@@ -40,11 +43,12 @@
       <!-- ========================================== -->
       <div class="grid-2" style="margin-bottom:1.25rem">
         <article class="card profile-header-card">
-          <h2 id="user-name"></h2>
-          <p id="user-id" style="color:var(--text-muted);font-size:0.85rem"></p>
-          <p class="provider-card__meta">🚗 <span id="user-vehicle"></span></p>
-          <p class="provider-card__meta">📍 <span id="user-city"></span></p>
-          <button type="button" class="btn btn-primary btn-sm" style="margin-top:0.75rem" data-i18n="edit_profile"></button>
+          <h2 id="user-name">...</h2>
+          <p id="user-id" style="color:var(--text-muted);font-size:0.85rem">...</p>
+          <p id="user-vehicle-row" class="provider-card__meta" style="display:none">🚗 <span id="user-vehicle"></span></p>
+          <p id="user-city-row" class="provider-card__meta" style="display:none">📍 <span id="user-city"></span></p>
+          <a href="settings.html" class="btn btn-primary btn-sm" style="margin-top:0.75rem;display:inline-block"
+            data-i18n="edit_profile"></a>
         </article>
         <article class="card">
           <h3 data-i18n="service_summary"></h3>
@@ -54,11 +58,11 @@
               <p style="font-size:0.8rem;color:var(--text-secondary)" data-i18n="total_visits"></p>
             </div>
             <div class="stat-box">
-              <p class="number" id="last-visit" style="font-size:1rem">—</p>
+              <p class="number" style="font-size:1rem">—</p>
               <p style="font-size:0.8rem;color:var(--text-secondary)" data-i18n="last_visit"></p>
             </div>
             <div class="stat-box">
-              <p class="number" id="next-maint" style="font-size:0.9rem;color:var(--warning)">—</p>
+              <p class="number" style="font-size:0.9rem;color:var(--warning)">—</p>
               <p style="font-size:0.8rem;color:var(--text-secondary)" data-i18n="next_maintenance"></p>
             </div>
           </div>
@@ -90,8 +94,9 @@
       <!-- ========================================== -->
 
       <div class="grid-2">
-        <article class="card">
-          <div class="map-placeholder"><span data-i18n="saved_location"></span><br><span id="saved-location"></span></div>
+        <article id="saved-location-card" class="card" style="display:none">
+          <div class="map-placeholder"><span data-i18n="saved_location"></span><br><span id="saved-location"></span>
+          </div>
         </article>
         <article class="card">
           <h3 data-i18n="account_settings"></h3>
@@ -103,7 +108,7 @@
               <a href="#" data-i18n="notification_prefs"></a>
             </li>
             <li style="padding:0.65rem 0">
-              <button type="button" class="lang-toggle" onclick="toggleLanguage()" style="width:100%">EN</button>
+              <button type="button" id="lang-toggle" class="lang-toggle" onclick="toggleLanguage()" style="width:100%">EN</button>
             </li>
           </ul>
         </article>
@@ -117,14 +122,9 @@
   <!-- ========================================== -->
   <div id="site-footer"></div>
 
-  <script src="../js/config.js"></script>
   <script src="../js/i18n.js"></script>
-  <script src="../js/utils.js"></script>
-  <script src="../js/mock-handlers.js"></script>
-  <script src="../js/api.js"></script>
-  <script src="../js/ui.js"></script>
-  <script src="../js/layout.js"></script>
-  <script src="../js/app.js"></script>
-  <script src="../js/profile.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/pages.js"></script>
 </body>
+
 </html>

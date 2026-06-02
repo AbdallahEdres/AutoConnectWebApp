@@ -15,8 +15,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-// Fetch unique cities from providers table to serve as "regions"
-$sql = "SELECT DISTINCT city FROM providers WHERE city IS NOT NULL AND city != '' ORDER BY city ASC";
+// Fetch unique cities with averaged lat/lng from providers
+$sql = "SELECT city_en, city_ar, AVG(lat) AS lat, AVG(lng) AS lng
+        FROM providers
+        WHERE city_en IS NOT NULL AND city_en != '' AND lat IS NOT NULL
+        GROUP BY city_en, city_ar
+        ORDER BY city_en ASC";
 $result = mysqli_query($conn, $sql);
 
 if (!$result) {
@@ -28,8 +32,10 @@ if (!$result) {
 $regions = [];
 while ($row = mysqli_fetch_assoc($result)) {
     $regions[] = [
-        'id' => $row['city'], // Using city name as ID for simplicity
-        'name' => $row['city']
+        'name_en' => $row['city_en'],
+        'name_ar' => $row['city_ar'],
+        'lat'     => (float)$row['lat'],
+        'lng'     => (float)$row['lng']
     ];
 }
 

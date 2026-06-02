@@ -1,9 +1,5 @@
 <?php
-// ============================================================
-// api/add_provider.php — POST /autoconnect/api/add_provider.php
-// Creates a new provider and its related records (hours, photos, types).
-// ============================================================
-
+// api/add_provider.php — POST: create a new provider with hours, photos, vehicle types
 require_once '../config/db.php';
 
 header('Content-Type: application/json');
@@ -15,11 +11,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// ── 1. Parse JSON body ──────────────────────────────────────
 $data = json_decode(file_get_contents('php://input'), true) ?? [];
 
-// ── 2. Validate Required Fields ─────────────────────────────
-$required_fields = ['name', 'phone', 'address', 'city', 'user_id', 'category_id', 'working_hours'];
+// Validate required fields
+$required_fields = ['name_en', 'name_ar', 'phone', 'address_en', 'city_en', 'user_id', 'category_id', 'working_hours'];
 foreach ($required_fields as $field) {
     if (empty($data[$field])) {
         http_response_code(400);
@@ -28,108 +23,90 @@ foreach ($required_fields as $field) {
     }
 }
 
-// ── 3. Sanitize Inputs ──────────────────────────────────────
-$name        = trim($data['name']);
-$phone       = trim($data['phone']);
-$address     = trim($data['address']);
-$city        = trim($data['city']);
-$user_id     = (int) $data['user_id'];
-$category_id = (int) $data['category_id'];
-$bio         = $data['bio'] ?? null;
-$lat         = !empty($data['lat'])  ? (float)$data['lat']  : null;
-$lng         = !empty($data['lng'])  ? (float)$data['lng']  : (!empty($data['long']) ? (float)$data['long'] : null);
+// Sanitize string inputs
+$name_en    = mysqli_real_escape_string($conn, trim($data['name_en']));
+$name_ar    = mysqli_real_escape_string($conn, trim($data['name_ar']));
+$phone      = mysqli_real_escape_string($conn, trim($data['phone']));
+$address_en = mysqli_real_escape_string($conn, trim($data['address_en']));
+$address_ar = mysqli_real_escape_string($conn, isset($data['address_ar']) ? trim($data['address_ar']) : '');
+$city_en    = mysqli_real_escape_string($conn, trim($data['city_en']));
+$city_ar    = mysqli_real_escape_string($conn, isset($data['city_ar']) ? trim($data['city_ar']) : '');
+$bio_en     = mysqli_real_escape_string($conn, isset($data['bio_en']) ? trim($data['bio_en']) : '');
+$bio_ar     = mysqli_real_escape_string($conn, isset($data['bio_ar']) ? trim($data['bio_ar']) : '');
+$user_id     = (int)$data['user_id'];
+$category_id = (int)$data['category_id'];
+$lat_sql     = !empty($data['lat']) ? (float)$data['lat'] : 'NULL';
+$lng_sql     = !empty($data['lng']) ? (float)$data['lng'] : 'NULL';
 
-// Arrays
-$working_hours = $data['working_hours'];         // Expected structured array
-$vehicle_types = $data['vehicle_types'] ?? [];   // Optional
-$photos        = $data['photos'] ?? [];           // Optional
+$working_hours = is_array($data['working_hours']) ? $data['working_hours'] : json_decode($data['working_hours'], true);
+$vehicle_types = $data['vehicle_types'] ?? [];
+$photos        = $data['photos'] ?? [];
 
-// ── 3. Start Database Transaction ──────────────────────────
 mysqli_begin_transaction($conn);
 
-try {
-    // A. Insert into Providers
-    $sql = "INSERT INTO providers (name, phone, address, bio, city, lat, lng, user_id, category_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, "sssssddii", $name, $phone, $address, $bio, $city, $lat, $lng, $user_id, $category_id);
-    
-    if (!mysqli_stmt_execute($stmt)) {
-        throw new Exception("Failed to insert provider: " . mysqli_stmt_error($stmt));
-    }
-    
-    $provider_id = mysqli_insert_id($conn);
-    mysqli_stmt_close($stmt);
+// A. Insert provider
+$ok = mysqli_query($conn, "INSERT INTO providers (name_en, name_ar, phone, address_en, address_ar, bio_en, bio_ar, city_en, city_ar, lat, lng, status, user_id, category_id)
+    VALUES ('$name_en', '$name_ar', '$phone', '$address_en', '$address_ar', '$bio_en', '$bio_ar', '$city_en', '$city_ar', $lat_sql, $lng_sql, 'active', $user_id, $category_id)");
 
-    // B. Insert Working Hours
-    if (!is_array($working_hours)) {
-        // Fallback if sent as JSON string
-        $working_hours = json_decode($working_hours, true);
-    }
-
-    if ($working_hours) {
-        $wh_sql = "INSERT INTO working_hours (provider_id, day, open_time, close_time, is_close) VALUES (?, ?, ?, ?, ?)";
-        $wh_stmt = mysqli_prepare($conn, $wh_sql);
-        
-        foreach ($working_hours as $hour) {
-            $day        = $hour['day'];
-            $open_time  = !empty($hour['open_time']) ? $hour['open_time'] : null;
-            $close_time = !empty($hour['close_time']) ? $hour['close_time'] : null;
-            $is_close   = (int) ($hour['is_close'] ?? 0);
-            
-            mysqli_stmt_bind_param($wh_stmt, "isssi", $provider_id, $day, $open_time, $close_time, $is_close);
-            if (!mysqli_stmt_execute($wh_stmt)) {
-                throw new Exception("Failed to insert working hours for $day");
-            }
-        }
-        mysqli_stmt_close($wh_stmt);
-    }
-
-    // C. Insert Vehicle Types (Tagged With)
-    if (!empty($vehicle_types) && is_array($vehicle_types)) {
-        $tw_sql = "INSERT INTO tagged_with (provider_id, vehicle_type_id) VALUES (?, ?)";
-        $tw_stmt = mysqli_prepare($conn, $tw_sql);
-        
-        foreach ($vehicle_types as $vt_id) {
-            $vt_id = (int)$vt_id;
-            mysqli_stmt_bind_param($tw_stmt, "ii", $provider_id, $vt_id);
-            if (!mysqli_stmt_execute($tw_stmt)) {
-                throw new Exception("Failed to tag vehicle type ID: $vt_id");
-            }
-        }
-        mysqli_stmt_close($tw_stmt);
-    }
-
-    // D. Insert Photos
-    if (!empty($photos) && is_array($photos)) {
-        $ph_sql = "INSERT INTO provider_photos (provider_id, photo_url, sort_order) VALUES (?, ?, ?)";
-        $ph_stmt = mysqli_prepare($conn, $ph_sql);
-        
-        foreach ($photos as $index => $url) {
-            $sort_order = $index + 1;
-            mysqli_stmt_bind_param($ph_stmt, "isi", $provider_id, $url, $sort_order);
-            if (!mysqli_stmt_execute($ph_stmt)) {
-                throw new Exception("Failed to insert photo: $url");
-            }
-        }
-        mysqli_stmt_close($ph_stmt);
-    }
-
-    // All successful
-    mysqli_commit($conn);
-    
-    echo json_encode([
-        "success" => true,
-        "message" => "Provider and all related data added successfully",
-        "provider_id" => $provider_id
-    ]);
-
-} catch (Exception $e) {
+if (!$ok) {
     mysqli_rollback($conn);
     http_response_code(500);
-    echo json_encode([
-        "success" => false,
-        "message" => $e->getMessage()
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Failed to save provider.']);
+    exit;
 }
-?>
+$provider_id = mysqli_insert_id($conn);
 
+// B. Insert working hours
+if ($working_hours) {
+    foreach ($working_hours as $hour) {
+        $day        = mysqli_real_escape_string($conn, $hour['day']);
+        $open_time  = mysqli_real_escape_string($conn, $hour['open_time'] ?? '');
+        $close_time = mysqli_real_escape_string($conn, $hour['close_time'] ?? '');
+        $is_close   = (int)($hour['is_close'] ?? 0);
+        $open_sql   = $open_time  ? "'$open_time'"  : 'NULL';
+        $close_sql  = $close_time ? "'$close_time'" : 'NULL';
+
+        $ok = mysqli_query($conn, "INSERT INTO working_hours (provider_id, day, open_time, close_time, is_close)
+            VALUES ($provider_id, '$day', $open_sql, $close_sql, $is_close)");
+
+        if (!$ok) {
+            mysqli_rollback($conn);
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => "Failed to save working hours for $day."]);
+            exit;
+        }
+    }
+}
+
+// C. Insert vehicle types
+if (!empty($vehicle_types) && is_array($vehicle_types)) {
+    foreach ($vehicle_types as $vt_id) {
+        $vt_id = (int)$vt_id;
+        $ok = mysqli_query($conn, "INSERT INTO tagged_with (provider_id, vehicle_type_id) VALUES ($provider_id, $vt_id)");
+        if (!$ok) {
+            mysqli_rollback($conn);
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => "Failed to save vehicle type $vt_id."]);
+            exit;
+        }
+    }
+}
+
+// D. Insert photos
+if (!empty($photos) && is_array($photos)) {
+    foreach ($photos as $index => $url) {
+        $url        = mysqli_real_escape_string($conn, $url);
+        $sort_order = $index + 1;
+        $ok = mysqli_query($conn, "INSERT INTO provider_photos (provider_id, photo_url, sort_order) VALUES ($provider_id, '$url', $sort_order)");
+        if (!$ok) {
+            mysqli_rollback($conn);
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Failed to save photo.']);
+            exit;
+        }
+    }
+}
+
+mysqli_commit($conn);
+echo json_encode(['success' => true, 'message' => 'Provider added successfully.', 'provider_id' => $provider_id]);
+?>

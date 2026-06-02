@@ -1,33 +1,34 @@
-# AutoConnect — Graduation Project (Frontend)
+# AutoConnect — Graduation Project
 
-P2C platform to find nearby car and motorcycle garages, spare parts shops, and emergency tow services. Built with **HTML, CSS, and vanilla JavaScript only** (no frameworks, no npm).
+P2C platform to find nearby car and motorcycle garages, spare parts shops, and emergency tow services. Built with **HTML, CSS, and vanilla JavaScript** on the frontend and **PHP/MySQL** on the backend (no frameworks, no npm).
 
 ## Project structure
 
 ```
-Auto connect copy/
+AutoConnectWebApp/
 ├── design/          # UI mockups (PNG, Figma, PDF)
-├── backend/         # ERD + infrastructure reference (PHP/MySQL plan)
-└── web/             # Frontend application ← open this folder
+├── backend/         # PHP API + MySQL schema
+│   ├── api/         # PHP endpoint scripts
+│   ├── config/      # db.php — database connection
+│   └── database.sql # Full schema
+└── web/             # Frontend application ← main entry point
     ├── index.html
     ├── pages/       # All screens
-    ├── css/
-    ├── js/
-    └── data/        # Mock JSON (swap for API later)
+    ├── css/         # Four CSS files loaded in order
+    ├── js/          # Three JS files loaded in order
+    └── data/        # JSON reference files + API contract
 ```
 
 ## Run locally
 
-The project uses `fetch()` to load data, which requires a local web server to function correctly.
+Requires **XAMPP** (Apache + MySQL). See the full setup guide:
 
-**Detailed Instructions:**
-👉 **[See the Local Server Setup Guide (Windows & Mac)](./RUN-LOCALLY.md)**
+👉 **[RUN-LOCALLY.md](./RUN-LOCALLY.md)**
 
-Quick command (from root):
-```bash
-cd web && python3 -m http.server 8080
-```
-Then visit: [http://localhost:8080](http://localhost:8080)
+Short version:
+1. Start Apache and MySQL in XAMPP Control Panel.
+2. Import `backend/database.sql` in phpMyAdmin.
+3. Visit `http://localhost/AutoConnectWebApp/web/`
 
 ## Pages
 
@@ -41,42 +42,25 @@ Then visit: [http://localhost:8080](http://localhost:8080)
 | Service detail | `pages/service-detail.html?id=1` |
 | Favorites | `pages/favorites.html` |
 | Customer profile | `pages/profile.html` |
+| Service history | `pages/history.html` |
 | Settings (security) | `pages/settings.html` |
 | Provider registration | `pages/provider-register.html` |
 
 ## Language (AR / EN)
 
-Click **EN** or **AR** in the header. Choice is saved in `localStorage` (`autoconnect_lang`). Layout uses `dir="rtl"` / `dir="ltr"` on `<body>`.
+Click **EN** or **AR** in the header. Choice is saved in `localStorage` (`autoconnect_lang`). Layout uses `body.rtl` / `body.ltr` classes.
 
-## Mock data & API (preview)
+## JavaScript files
 
-| File | Purpose |
-|------|---------|
-| `data/providers.json` | 12 workshops (mechanic, towing, parts, tires, …) |
-| `data/categories.json` | Service categories |
-| `data/regions.json` | Cities for area dropdown |
-| `data/user.json` | Logged-in client profile + history |
-| `data/favorites.json` | Saved provider IDs |
-| `data/reviews.json` | Reviews per provider |
-| `data/auth.json` | Demo login users |
-| `data/API.md` | Contract for your PHP team |
+Three files are loaded on every page, in this order:
 
-**Demo login:** `demo@autoconnect.com` / `demo1234`
+| File | Role |
+|------|------|
+| `js/i18n.js` | Arabic/English translations, `t()`, `setLanguage()`, `getLocalizedField()` |
+| `js/main.js` | Config (`API_BASE`, `API_ENDPOINTS`), utils, API calls, UI rendering, header/footer, auth handlers |
+| `js/pages.js` | Page-specific init functions (one per screen) |
 
-All network access goes through `js/api.js`. Mock logic is in `js/mock-handlers.js` (simulates delay + console logs when `logMockCalls: true`).
-
-### Mock → real backend
-
-Edit `web/js/config.js`:
-
-```javascript
-var API_CONFIG = {
-  baseUrl: "../api",
-  useMock: false   // flip when PHP is ready
-};
-```
-
-Endpoint map is in `API_ENDPOINTS` (same file). Full request/response shapes: `web/data/API.md`.
+All API calls go through `apiRequest()` in `main.js`, which reads `API_BASE` and sends `Authorization: Bearer <token>` when a token is stored. Full endpoint reference: `web/data/API.md`.
 
 ## Location
 
@@ -86,14 +70,12 @@ Endpoint map is in `API_ENDPOINTS` (same file). Full request/response shapes: `w
 
 ## Understanding the code
 
-Every JS and CSS file has a comment block at the top explaining what it does. Start here:
-
-- **`web/js/HOW-TO-READ-THE-CODE.md`** — JavaScript load order, data flow, file map
-- **`web/css/HOW-TO-READ-THE-CSS.md`** — CSS load order, classes per page, what each style does
-- **`web/data/API.md`** — request/response format for PHP team
+- **`web/js/HOW-TO-READ-THE-CODE.md`** — JS load order, data flow, function map
+- **`web/css/HOW-TO-READ-THE-CSS.md`** — CSS load order, classes per page
+- **`web/data/API.md`** — request/response shapes for every endpoint
+- **`backend/README.md`** — backend endpoint reference
 
 ## Team notes
 
-- Keep changes simple: one JS file per page + shared `api.js`, `i18n.js`, `ui.js`
 - Do not commit real passwords or API keys
 - Design assets live in `design/` for reference

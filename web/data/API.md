@@ -1,7 +1,7 @@
 # AutoConnect API contract (for backend team)
 
-Frontend calls **only** functions in `js/api.js`.  
-Mock responses live in `js/mock-handlers.js` and `data/*.json`.
+Frontend calls **only** functions in `js/main.js` (`apiRequest()` and its wrappers).  
+All fetch calls are gated through a single function that reads `API_BASE` and `API_ENDPOINTS` (both defined at the top of `main.js`).
 
 ## Response format (all endpoints)
 
@@ -61,19 +61,10 @@ On error: `"success": false` and a `message`.
 }
 ```
 
-## Switch mock → real
+## Backend base path
 
-In `js/config.js`:
+`API_BASE` in `js/main.js` resolves automatically:
+- From `index.html` (root) → `../backend/api`
+- From `pages/*.html` → `../../backend/api`
 
-```javascript
-var API_CONFIG = { useMock: false, baseUrl: "../api" };
-```
-
-Do **not** change function names in `api.js` — only implement PHP behind `API_ENDPOINTS`.
-
-## Demo login (mock only)
-
-- Email: `demo@autoconnect.com`
-- Password: `demo1234`
-
-Defined in `data/auth.json` and `js/config.js` (`MOCK_DEMO_AUTH`).
+Do **not** change wrapper function names in `main.js` — only implement or adjust the PHP scripts behind `API_ENDPOINTS`.

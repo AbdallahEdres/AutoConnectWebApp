@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,12 +10,14 @@
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/pages.css">
 </head>
+
 <body class="rtl">
   <div id="site-header"></div>
 
   <main class="page-main container">
     <section class="provider-hero">
-      <div class="hero-image" style="min-height:200px;background:url('../assets/images/مزود الخدمه.png') center/cover"></div>
+      <div class="hero-image" style="min-height:200px;background:url('../assets/images/مزود الخدمه.png') center/cover">
+      </div>
       <div>
         <h1 class="section-title" data-i18n="provider_reg_title"></h1>
         <p class="section-subtitle" data-i18n="provider_reg_sub"></p>
@@ -63,7 +66,7 @@
         </div>
         <div class="form-group">
           <label data-i18n="pin_on_map"></label>
-          <div class="map-placeholder" style="height:200px">📍 Map placeholder</div>
+          <div class="map-placeholder" style="height:200px" data-i18n="map_placeholder"></div>
         </div>
         <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem">
           <button type="submit" class="btn btn-primary" data-i18n="register_workshop"></button>
@@ -82,13 +85,9 @@
 
   <div id="site-footer"></div>
 
-  <script src="../js/config.js"></script>
   <script src="../js/i18n.js"></script>
-  <script src="../js/utils.js"></script>
-  <script src="../js/mock-handlers.js"></script>
-  <script src="../js/api.js"></script>
-  <script src="../js/layout.js"></script>
-  <script src="../js/app.js"></script>
-  <script src="../js/provider-register.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/pages.js"></script>
 </body>
+
 </html>

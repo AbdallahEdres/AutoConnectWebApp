@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-$sql = "SELECT id, name, slug, category_id FROM categories ORDER BY name ASC";
+$sql = "SELECT id, name_en, name_ar, slug, category_id AS parent_id FROM categories ORDER BY name_en ASC";
 $result = mysqli_query($conn, $sql);
 
 if (!$result) {
@@ -26,8 +26,8 @@ if (!$result) {
 
 $categories = [];
 while ($row = mysqli_fetch_assoc($result)) {
-    $row['id'] = (int)$row['id'];
-    $row['category_id'] = $row['category_id'] ? (int)$row['category_id'] : null;
+    $row['id']        = (int)$row['id'];
+    $row['parent_id'] = $row['parent_id'] ? (int)$row['parent_id'] : null;
     $categories[] = $row;
 }
 
