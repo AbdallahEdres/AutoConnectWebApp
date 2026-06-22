@@ -5,10 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AutoConnect — تسجيل الدخول</title>
-  <link rel="stylesheet" href="../css/variables.css">
-  <link rel="stylesheet" href="../css/base.css">
-  <link rel="stylesheet" href="../css/components.css">
-  <link rel="stylesheet" href="../css/pages.css">
+  <link rel="stylesheet" href="../variables.css">
+  <link rel="stylesheet" href="../base.css">
+  <link rel="stylesheet" href="../components.css">
+  <link rel="stylesheet" href="login.css">
 </head>
 
 <body class="rtl auth-page">
@@ -54,10 +54,10 @@
         <button type="submit" class="btn btn-primary btn-block" data-i18n="login_btn">تسجيل الدخول</button>
       </form>
       <p class="auth-divider" data-i18n="or">أو</p>
-      <a href="services.html" class="btn btn-ghost btn-block" data-i18n="guest_btn">المتابعة كضيف</a>
+      <a href="../services/index.html" class="btn btn-ghost btn-block" data-i18n="guest_btn">المتابعة كضيف</a>
       <p class="auth-footer-text">
         <span data-i18n="no_account">ليس لديك حساب؟</span>
-        <a href="register.html" data-i18n="signup_link">سجل الآن</a>
+        <a href="../register/index.html" data-i18n="signup_link">سجل الآن</a>
       </p>
       <p id="demo-hint" style="margin-top:1rem;font-size:0.75rem;color:var(--text-muted);text-align:center"></p>
       <!-- ALTERNATIVE LOGIN / SIGNUP LINKS END -->
@@ -73,7 +73,7 @@
   <div class="provider-cta container">
     <span>🤝</span>
     <p data-i18n="cta_join_sub">هل أنت مزود خدمة؟ انضم لشبكتنا واستقبل الطلبات.</p>
-    <a href="provider-register.html" class="btn btn-ghost btn-sm" data-i18n="partner_btn">انضم إلينا</a>
+    <a href="../provider-register/index.html" class="btn btn-ghost btn-sm" data-i18n="partner_btn">انضم إلينا</a>
   </div>
   <!-- ========================================== -->
   <!-- BECOME A PARTNER (CTA) SECTION END         -->
@@ -84,23 +84,9 @@
   <!-- ========================================== -->
   <div id="site-footer"></div>
 
-  <!-- ========================================== -->
-  <!-- 5. JAVASCRIPT IMPORTS START                -->
-  <!-- ========================================== -->
-  <script src="../js/config.js"></script>
-  <script src="../js/i18n.js"></script>
-  <script src="../js/utils.js"></script>
-  <script src="../js/mock-handlers.js"></script>
-  <script src="../js/api.js"></script>
-  <script src="../js/layout.js"></script>
-  <script src="../js/app.js"></script>
-  <script src="../js/auth.js"></script>
-  <!-- ========================================== -->
-  <!-- JAVASCRIPT IMPORTS END                     -->
-  <!-- ========================================== -->
-  <script src="../js/i18n.js"></script>
-  <script src="../js/main.js"></script>
-  <script src="../js/pages.js"></script>
+  <script src="../i18n.js"></script>
+  <script src="../main.js"></script>
+  <script src="login.js"></script>
 </body>
 
 </html>

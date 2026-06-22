@@ -5,29 +5,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AutoConnect — إنشاء حساب</title>
-  <link rel="stylesheet" href="../css/variables.css">
-  <link rel="stylesheet" href="../css/base.css">
-  <link rel="stylesheet" href="../css/components.css">
-  <link rel="stylesheet" href="../css/pages.css">
+  <link rel="stylesheet" href="../variables.css">
+  <link rel="stylesheet" href="../base.css">
+  <link rel="stylesheet" href="../components.css">
+  <link rel="stylesheet" href="register.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <style>
-    .req { color: var(--accent-yellow); }
-    .wh-grid { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; }
-    .wh-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; padding: 0.25rem 0; }
-    .wh-day-name { min-width: 72px; font-size: 0.9rem; font-weight: 500; }
-    .wh-closed-label { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; cursor: pointer; white-space: nowrap; }
-    .wh-time { width: 110px !important; padding: 0.3rem 0.5rem !important; }
-    .wh-open:disabled, .wh-close:disabled { opacity: 0.35; pointer-events: none; }
-    .provider-section-title { font-size: 0.85rem; margin: 1rem 0 0.4rem; color: var(--accent-yellow); border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.35rem; }
-    .photo-upload-area { border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; text-align: center; cursor: pointer; transition: border-color 0.2s; }
-    .photo-upload-area:hover { border-color: var(--accent-yellow); }
-    .photo-add-btn { display: inline-flex; flex-direction: column; align-items: center; gap: 0.35rem; color: var(--text-secondary); font-size: 0.85rem; background: none; border: none; cursor: pointer; }
-    .photo-add-btn span:first-child { font-size: 1.6rem; }
-    .photo-preview-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.6rem; }
-    .photo-thumb { position: relative; width: 76px; height: 76px; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-color); flex-shrink: 0; }
-    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .photo-thumb-remove { position: absolute; top: 3px; inset-inline-end: 3px; width: 18px; height: 18px; border-radius: 50%; background: rgba(0,0,0,0.65); color: #fff; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; line-height: 1; }
-  </style>
 </head>
 
 <body class="rtl">
@@ -315,9 +297,9 @@
 
       <p class="auth-footer-text" style="margin-top:1rem">
         <span data-i18n="have_account">لديك حساب بالفعل؟</span>
-        <a href="login.html" data-i18n="nav_login">سجل الآن</a>
+        <a href="../login/index.html" data-i18n="nav_login">سجل الآن</a>
         ·
-        <a href="services.html" data-i18n="continue_guest">المتابعة كزائر</a>
+        <a href="../services/index.html" data-i18n="continue_guest">المتابعة كزائر</a>
       </p>
     </div>
     <!-- ========================================== -->
@@ -332,9 +314,9 @@
   <div id="site-footer"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="../js/i18n.js"></script>
-  <script src="../js/main.js"></script>
-  <script src="../js/pages.js"></script>
+  <script src="../i18n.js"></script>
+  <script src="../main.js"></script>
+  <script src="register.js"></script>
 </body>
 
 </html>

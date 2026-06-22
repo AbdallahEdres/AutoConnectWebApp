@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoConnect — Home</title>
+  <link rel="stylesheet" href="../variables.css">
+  <link rel="stylesheet" href="../base.css">
+  <link rel="stylesheet" href="../components.css">
+  <link rel="stylesheet" href="home.css">
+</head>
+
+<body class="rtl">
+  <!-- ========================================== -->
+  <!-- 1. HEADER INJECTION POINT                  -->
+  <!-- Handled by: web/js/layout.js -> injectHeader() -->
+  <!-- ========================================== -->
+  <div id="site-header"></div>
+
+  <main class="page-main">
+    <!-- ========================================== -->
+    <!-- 2. HERO SECTION START                      -->
+    <!-- Search form Handled by: web/js/home.js     -->
+    <!-- (submit listener & fillCategorySelect())   -->
+    <!-- ========================================== -->
+    <section class="hero container">
+      <div class="hero-grid">
+        <div>
+          <h1>
+            <span data-i18n="hero_title_1"></span>
+            <span class="highlight" data-i18n="hero_title_2"></span>
+          </h1>
+          <p data-i18n="hero_sub"></p>
+          <form id="hero-search-form" class="search-bar">
+            <select id="search-type" name="type"></select>
+            <select id="search-location" class="form-control"></select>
+            <button type="submit" class="btn btn-primary" data-i18n="search_btn"></button>
+          </form>
+        </div>
+        <div class="hero-visual">
+          <div class="hero-image">
+            <img src="../assets/images/صوره خدمه.png" alt="Hero Image">
+            <div class="hero-badge">
+              <span>+500</span>
+              <div style="font-size:0.85rem;color:var(--text-secondary)" data-i18n="certified_experts"></div>
+            </div>
+          </div>
+        </div>
+    </section>
+    <!-- ========================================== -->
+    <!-- HERO SECTION END                           -->
+    <!-- ========================================== -->
+
+    <!-- ========================================== -->
+    <!-- 3. SERVICES CARDS SECTION START            -->
+    <!-- Static links mapping to specific categories-->
+    <!-- ========================================== -->
+    <section class="container">
+      <h2 class="section-title" data-i18n="services_title"></h2>
+      <p class="section-subtitle" data-i18n="services_sub"></p>
+      <div class="service-cards">
+        <article class="service-type-card">
+          <div class="icon-box">🔧</div>
+          <h3 data-i18n="mechanic"></h3>
+          <p style="color:var(--text-secondary);font-size:0.9rem" data-i18n="mechanic_sub"></p>
+          <ul>
+            <li>24/7</li>
+            <li data-i18n="certified_techs"></li>
+          </ul>
+          <a href="../services/index.html?category_slug=mechanics" class="btn btn-ghost btn-block"
+            data-i18n="discover_more"></a>
+        </article>
+        <article class="service-type-card">
+          <div class="icon-box">⚙️</div>
+          <h3 data-i18n="spare_parts"></h3>
+          <p style="color:var(--text-secondary);font-size:0.9rem" data-i18n="spare_parts_sub"></p>
+          <ul>
+            <li data-i18n="original_parts"></li>
+            <li data-i18n="home_delivery"></li>
+          </ul>
+          <a href="../services/index.html?category_slug=spare-parts" class="btn btn-ghost btn-block"
+            data-i18n="shop_now"></a>
+        </article>
+        <article class="service-type-card">
+          <div class="icon-box">🚛</div>
+          <h3 data-i18n="towing"></h3>
+          <p style="color:var(--text-secondary);font-size:0.9rem" data-i18n="towing_sub"></p>
+          <ul>
+            <li data-i18n="response_15_min"></li>
+            <li data-i18n="gps_tracking"></li>
+          </ul>
+          <div style="display: flex; flex-direction: row; gap: 0.5rem; margin-top: 0.5rem;">
+            <a href="../services/index.html?category_slug=towing" class="btn btn-ghost btn-block" data-i18n="discover_more"></a>
+            <a href="../emergency/index.html" class="btn btn-primary btn-block" data-i18n="order_now"></a>
+          </div>
+        </article>
+      </div>
+      <!-- ========================================== -->
+      <!-- SERVICES CARDS SECTION END                 -->
+      <!-- ========================================== -->
+
+      <!-- ========================================== -->
+      <!-- 4. CALL TO ACTION (CTA) BANNER START       -->
+      <!-- ========================================== -->
+      <section class="cta-banner">
+        <img class="hero-grid hero-visual" src="../assets/images/انضم لنا.png" alt="صوره انضم لنا">
+        <div>
+          <h2 data-i18n="cta_join_title"></h2>
+          <p data-i18n="cta_join_sub"></p>
+          <a href="../provider-register/index.html" class="partner_btn " data-i18n="partner_btn"></a>
+        </div>
+      </section>
+      <!-- ========================================== -->
+      <!-- CALL TO ACTION (CTA) BANNER END            -->
+      <!-- ========================================== -->
+    </section>
+  </main>
+
+  <!-- ========================================== -->
+  <!-- 5. FOOTER INJECTION POINT                  -->
+  <!-- Handled by: web/js/layout.js -> injectFooter() -->
+  <!-- ========================================== -->
+  <div id="site-footer"></div>
+
+  <script src="../i18n.js"></script>
+  <script src="../main.js"></script>
+  <script src="home.js"></script>
+</body>
+
+</html>

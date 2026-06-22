@@ -1,6 +1,6 @@
 # AutoConnect API contract (for backend team)
 
-Frontend calls **only** functions in `js/main.js` (`apiRequest()` and its wrappers).  
+Frontend calls **only** functions in `main.js` (`apiRequest()` and its wrappers).  
 All fetch calls are gated through a single function that reads `API_BASE` and `API_ENDPOINTS` (both defined at the top of `main.js`).
 
 ## Response format (all endpoints)
@@ -63,8 +63,7 @@ On error: `"success": false` and a `message`.
 
 ## Backend base path
 
-`API_BASE` in `js/main.js` resolves automatically:
-- From `index.html` (root) → `../backend/api`
-- From `pages/*.html` → `../../backend/api`
+`API_BASE` in `main.js` is hardcoded for all screens under `web/[page]/index.html`:
+- From any page folder → `../../backend/api`
 
 Do **not** change wrapper function names in `main.js` — only implement or adjust the PHP scripts behind `API_ENDPOINTS`.

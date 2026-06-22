@@ -5,10 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AutoConnect — المفضلة</title>
-  <link rel="stylesheet" href="../css/variables.css">
-  <link rel="stylesheet" href="../css/base.css">
-  <link rel="stylesheet" href="../css/components.css">
-  <link rel="stylesheet" href="../css/pages.css">
+  <link rel="stylesheet" href="../variables.css">
+  <link rel="stylesheet" href="../base.css">
+  <link rel="stylesheet" href="../components.css">
 </head>
 
 <body class="rtl">
@@ -17,10 +16,10 @@
   <div class="layout-with-sidebar container page-main" style="padding-top:1.5rem">
     <aside class="sidebar">
       <nav class="sidebar-nav">
-        <a href="profile.html">📊 <span data-i18n="nav_dashboard"></span></a>
-        <a href="history.html">🕐 <span data-i18n="service_history"></span></a>
-        <a href="favorites.html" class="active">🔖 <span data-i18n="nav_favorites"></span></a>
-        <a href="settings.html">⚙ <span data-i18n="settings_title"></span></a>
+        <a href="../profile/index.html">📊 <span data-i18n="nav_dashboard"></span></a>
+        <a href="../history/index.html">🕐 <span data-i18n="service_history"></span></a>
+        <a href="../favorites/index.html" class="active">🔖 <span data-i18n="nav_favorites"></span></a>
+        <a href="../settings/index.html">⚙ <span data-i18n="settings_title"></span></a>
         <a href="#" onclick="logoutUser(); return false;" style="color:var(--accent-red, #e74c3c)">🚪 <span data-i18n="logout"></span></a>
       </nav>
       <p style="margin-top:1.5rem;font-size:0.8rem;color:var(--text-secondary)" data-i18n="system_status"></p>
@@ -43,16 +42,16 @@
           <h3 data-i18n="more_services"></h3>
           <p style="color:var(--text-secondary);font-size:0.9rem" data-i18n="filtered_sub"></p>
         </div>
-        <a href="services.html" class="btn btn-outline" data-i18n="explore_directory"></a>
+        <a href="../services/index.html" class="btn btn-outline" data-i18n="explore_directory"></a>
       </section>
     </div>
   </div>
 
   <div id="site-footer"></div>
 
-  <script src="../js/i18n.js"></script>
-  <script src="../js/main.js"></script>
-  <script src="../js/pages.js"></script>
+  <script src="../i18n.js"></script>
+  <script src="../main.js"></script>
+  <script src="favorites.js"></script>
 </body>
 
 </html>
