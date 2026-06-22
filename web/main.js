@@ -116,6 +116,11 @@ function saveLocation(loc) {
   localStorage.setItem("autoconnect_location", JSON.stringify(loc));
 }
 
+function getLocationLng(loc) {
+  if (!loc) return null;
+  return loc.lng != null ? loc.lng : loc.long;
+}
+
 function setEl(id, value) {
   var el = document.getElementById(id);
   if (el) el.textContent = value;
@@ -125,9 +130,30 @@ function setEl(id, value) {
 function addDistanceToProviders(providers, userLat, userLong) {
   return providers.map(function (p) {
     var copy = Object.assign({}, p);
-    copy.distance_km = getDistanceKm(userLat, userLong, p.lat, p.lng);
+    var providerLng = getLocationLng(p);
+    copy.distance_km = (p.lat != null && providerLng != null)
+      ? getDistanceKm(userLat, userLong, Number(p.lat), Number(providerLng))
+      : null;
     return copy;
   });
+}
+
+function normalizeProvider(provider) {
+  if (!provider) return provider;
+  var p = Object.assign({}, provider);
+  if (p.lng == null && p.long != null) p.lng = p.long;
+  if (!p.image && p.photo_url) p.image = p.photo_url;
+  if (p.rating == null && p.avg_rating != null) p.rating = p.avg_rating;
+  if (p.review_count == null) p.review_count = 0;
+  if (!p.category_slug && p.slug) p.category_slug = p.slug;
+  if (!p.status || p.status === "active") {
+    p.status = p.is_open_now === false ? "closed" : "open";
+  }
+  return p;
+}
+
+function normalizeProviderList(list) {
+  return (list || []).map(normalizeProvider);
 }
 
 // =============================================================================
@@ -197,7 +223,9 @@ function unwrap(response) {
 
 /** List providers; optional filters — see filterProviders() in utils.js */
 function getProviders(filters) {
-  return apiRequest("providers", { method: "GET", params: filters || {} }).then(unwrap);
+  return apiRequest("providers", { method: "GET", params: filters || {} })
+    .then(unwrap)
+    .then(normalizeProviderList);
 }
 
 /** One provider by id (service detail page uses ?id=1 in URL) */
@@ -205,7 +233,7 @@ function getProviderById(id) {
   return apiRequest("providerById", {
     method: "GET",
     params: { id: id }
-  }).then(unwrap);
+  }).then(unwrap).then(normalizeProvider);
 }
 
 // ---------------------------------------------------------------------------
@@ -293,7 +321,7 @@ function postReview(providerId, rate, comment) {
 }
 
 function getFavorites() {
-  return apiRequest("favorites", { method: "GET" }).then(unwrap);
+  return apiRequest("favorites", { method: "GET" }).then(unwrap).then(normalizeProviderList);
 }
 
 function toggleFavorite(providerId) {
@@ -312,7 +340,7 @@ function renderProviderCard(provider, options) {
   var base = options.basePath || getBasePath();
   var name = getLocalizedField(provider, "name");
   var address = getLocalizedField(provider, "address");
-  var isOpen = provider.status === "open";
+  var isOpen = provider.status === "open" || provider.is_open_now === true;
   var statusText = isOpen ? t("open_now") : t("closed");
   var statusClass = isOpen ? "open" : "closed";
   var distText = provider.distance_km != null ? formatDistance(provider.distance_km) : "";
@@ -365,7 +393,7 @@ function renderHorizontalProviderCard(provider, options) {
   options = options || {};
   var base = options.basePath || getBasePath();
   var name = getLocalizedField(provider, "name");
-  var isOpen = provider.status === "open";
+  var isOpen = provider.status === "open" || provider.is_open_now === true;
   var statusText = isOpen ? t("open_now") : t("closed");
   var statusClass = isOpen ? "open" : "closed";
   var distText = provider.distance_km != null ? formatDistance(provider.distance_km) : "";

@@ -13,6 +13,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $data = json_decode(file_get_contents('php://input'), true) ?? [];
 
+$headers = getallheaders();
+$token   = str_replace('Bearer ', '', isset($headers['Authorization']) ? $headers['Authorization'] : '');
+$payload = verifyToken($token);
+if (empty($data['user_id']) && $payload) {
+    $data['user_id'] = (int)$payload['id'];
+}
+
 // Validate required fields
 $required_fields = ['name_en', 'name_ar', 'phone', 'address_en', 'city_en', 'user_id', 'category_id', 'working_hours'];
 foreach ($required_fields as $field) {
@@ -108,5 +115,10 @@ if (!empty($photos) && is_array($photos)) {
 }
 
 mysqli_commit($conn);
-echo json_encode(['success' => true, 'message' => 'Provider added successfully.', 'provider_id' => $provider_id]);
+echo json_encode([
+    'success' => true,
+    'message' => 'Provider added successfully.',
+    'data' => ['id' => $provider_id],
+    'provider_id' => $provider_id
+]);
 ?>

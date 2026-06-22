@@ -15,10 +15,23 @@ function initProviderRegisterPage() {
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
+
+    if (!localStorage.getItem("autoconnect_token")) {
+      window.location.href = "../register/index.html?role=provider";
+      return;
+    }
+
     var catSel = document.getElementById("provider-category");
     var workshopName = document.getElementById("workshop-name").value;
     var cityValue = document.getElementById("city-area").value;
     var bioValue = document.getElementById("service-desc").value;
+    var hoursValue = document.getElementById("working-hours").value || "09:00 - 18:00";
+    var hoursParts = hoursValue.split("-");
+    var openTime = (hoursParts[0] || "09:00").trim();
+    var closeTime = (hoursParts[1] || "18:00").trim();
+    var workingHours = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map(function (day) {
+      return { day: day, open_time: openTime, close_time: closeTime, is_close: 0 };
+    });
 
     addProvider({
       name_en: workshopName,
@@ -31,12 +44,16 @@ function initProviderRegisterPage() {
       bio_en: bioValue,
       bio_ar: bioValue,
       category_id: catSel.value,
-      working_hours: document.getElementById("working-hours").value,
+      working_hours: workingHours,
       lat: DEFAULT_LOCATION.lat,
       lng: DEFAULT_LOCATION.long
     }).then(function (res) {
-      alert(res.message || t("register_success"));
-      window.location.href = "../services/index.html";
+      if (res.success) {
+        alert(res.message || t("register_success"));
+        window.location.href = "../services/index.html";
+      } else {
+        alert(res.message || (currentLang === "ar" ? "فشل في حفظ بيانات الورشة" : "Provider setup failed"));
+      }
     });
   });
 }

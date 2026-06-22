@@ -1,18 +1,50 @@
 <?php
 // db.php: Database Connection File
 
-$host = "localhost";
-$username = "root";       // Default XAMPP/WAMP username
-$password = "";           // Default XAMPP/WAMP password is empty
-$database = "autoconnect"; // We will create this database soon
+$database = getenv('AUTOCONNECT_DB_NAME') ?: "autoconnect";
 
-// 1. Create a simple mysqli connection
-$conn = new mysqli($host, $username, $password, $database);
+$connection_attempts = [
+    [
+        'host' => getenv('AUTOCONNECT_DB_HOST') ?: '127.0.0.1',
+        'user' => getenv('AUTOCONNECT_DB_USER') ?: 'root',
+        'pass' => getenv('AUTOCONNECT_DB_PASS') !== false ? getenv('AUTOCONNECT_DB_PASS') : 'root',
+        'port' => getenv('AUTOCONNECT_DB_PORT') ?: 8889
+    ],
+    // XAMPP/WAMP default fallback.
+    ['host' => '127.0.0.1', 'user' => 'root', 'pass' => '', 'port' => 3306],
+    // Some MAMP installs expose MySQL on 3306 while still using password "root".
+    ['host' => '127.0.0.1', 'user' => 'root', 'pass' => 'root', 'port' => 3306]
+];
 
-// 2. Handle connection errors properly
-if ($conn->connect_error) {
-    // If there is an error, stop execution and show the message
-    die("Database Connection Failed: " . $conn->connect_error);
+$conn = null;
+$last_error = '';
+
+foreach ($connection_attempts as $attempt) {
+    $conn = @new mysqli(
+        $attempt['host'],
+        $attempt['user'],
+        $attempt['pass'],
+        $database,
+        (int)$attempt['port']
+    );
+
+    if (!$conn->connect_error) {
+        break;
+    }
+
+    $last_error = $conn->connect_error;
+    $conn = null;
+}
+
+if (!$conn) {
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => false,
+        'message' => 'Database connection failed. Check MAMP MySQL is running and the autoconnect database is imported.',
+        'error' => $last_error
+    ]);
+    exit;
 }
 
 // Set character set to utf8mb4 for proper character encoding (important for Arabic/emojis)

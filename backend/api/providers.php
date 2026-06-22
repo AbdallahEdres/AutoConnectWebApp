@@ -14,8 +14,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 // Start with a base query — always return all active providers
 $sql = "SELECT
             p.id, p.name_en, p.name_ar, p.phone, p.address_en, p.address_ar, p.city_en, p.city_ar,
-            p.lat, p.lng, p.status,
+            p.lat, p.lng, p.status AS provider_status,
             c.name_en AS category_name_en, c.name_ar AS category_name_ar, c.slug AS category_slug,
+            EXISTS (
+                SELECT 1 FROM working_hours wh
+                WHERE wh.provider_id = p.id
+                AND wh.day = DAYNAME(NOW())
+                AND wh.is_close = 0
+                AND TIME(NOW()) BETWEEN wh.open_time AND wh.close_time
+            ) AS is_open_now,
             ROUND(COALESCE((SELECT AVG(rate) FROM reviews WHERE provider_id = p.id), 0), 1) AS rating,
             (SELECT COUNT(*) FROM reviews WHERE provider_id = p.id) AS review_count,
             (SELECT photo_url FROM provider_photos WHERE provider_id = p.id ORDER BY sort_order ASC LIMIT 1) AS image
@@ -53,9 +60,13 @@ $result = mysqli_query($conn, $sql);
 $providers = [];
 while ($row = mysqli_fetch_assoc($result)) {
     $row['id']     = (int)   $row['id'];
-    $row['lat']    = (float) $row['lat'];
-    $row['lng']    = (float) $row['lng'];
+    $row['lat']    = $row['lat'] !== null ? (float) $row['lat'] : null;
+    $row['lng']    = $row['lng'] !== null ? (float) $row['lng'] : null;
     $row['rating'] = (float) $row['rating'];
+    $row['review_count'] = (int) $row['review_count'];
+    $row['is_open_now'] = (bool) $row['is_open_now'];
+    $row['status'] = $row['is_open_now'] ? 'open' : 'closed';
+    unset($row['provider_status']);
     if (empty($row['image'])) {
         $row['image'] = 'assets/images/provider_default.png';
     }

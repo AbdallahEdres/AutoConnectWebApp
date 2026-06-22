@@ -259,8 +259,15 @@ function setRegisterRole(role) {
   var card = document.getElementById("register-card");
   var subtitle = document.getElementById("register-subtitle");
   var submitBtn = document.getElementById("register-submit");
+  var toggle = document.getElementById("register-role-toggle");
 
   var isProvider = role === "provider";
+
+  if (toggle) {
+    toggle.querySelectorAll("button").forEach(function (btn) {
+      btn.classList.toggle("active", btn.getAttribute("data-role") === role);
+    });
+  }
 
   if (customerFields) customerFields.classList.toggle("register-fields-hidden", isProvider);
   if (providerFields) providerFields.classList.toggle("register-fields-hidden", !isProvider);
@@ -309,6 +316,11 @@ function handleRegisterSubmit(e) {
   var submitBtn = document.getElementById("register-submit");
   if (submitBtn) submitBtn.disabled = true;
 
+  if (isProvider) {
+    saveProviderProfile(userData, submitBtn);
+    return;
+  }
+
   registerUser(userData).then(function (res) {
     if (!res.success) {
       if (res.message && res.message.toLowerCase().indexOf("email") !== -1) {
@@ -320,12 +332,7 @@ function handleRegisterSubmit(e) {
       return;
     }
 
-    if (!isProvider) {
-      window.location.href = "../login/index.html";
-      return;
-    }
-
-    saveProviderProfile(res.data && res.data.id, submitBtn);
+    window.location.href = "../login/index.html";
   }).catch(function (err) {
     showFormError(err.message || (currentLang === "ar" ? "حدث خطأ، حاول مرة أخرى" : "Something went wrong, try again"));
     if (submitBtn) submitBtn.disabled = false;
@@ -333,9 +340,9 @@ function handleRegisterSubmit(e) {
 }
 
 /**
-  * Upload photos and then save the workshop details row.
+  * Upload photos and then save the account and workshop details in one backend transaction.
   */
-function saveProviderProfile(userId, submitBtn) {
+function saveProviderProfile(userData, submitBtn) {
   var wh = [];
   document.querySelectorAll(".wh-row").forEach(function (row) {
     var isClosed = row.querySelector(".wh-closed").checked;
@@ -365,8 +372,7 @@ function saveProviderProfile(userId, submitBtn) {
       return;
     }
 
-    addProvider({
-      user_id: userId,
+    var providerData = Object.assign({}, userData, {
       name_en: document.getElementById("name-en").value.trim(),
       name_ar: document.getElementById("name-ar").value.trim(),
       phone: document.getElementById("mobile").value.trim(),
@@ -381,9 +387,15 @@ function saveProviderProfile(userId, submitBtn) {
       photos: uploadRes.urls,
       lat: registerLat,
       lng: registerLng
-    }).then(function (provRes) {
-      if (!provRes.success) {
-        showFormError(provRes.message);
+    });
+
+    registerUser(providerData).then(function (res) {
+      if (!res.success) {
+        if (res.message && res.message.toLowerCase().indexOf("email") !== -1) {
+          showFieldError("reg-email", res.message);
+        } else {
+          showFormError(res.message);
+        }
         if (submitBtn) submitBtn.disabled = false;
         return;
       }
@@ -424,7 +436,8 @@ function initRegisterPage() {
 
   loadRegisterCategories();
   loadCitySelect();
-  setRegisterRole("customer");
+  var params = new URLSearchParams(window.location.search);
+  setRegisterRole(params.get("role") === "provider" ? "provider" : "customer");
   setupPhotoPreview();
   setupRoleToggle();
 

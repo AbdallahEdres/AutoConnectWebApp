@@ -22,10 +22,18 @@ if (!$payload) {
 $user_id = (int)$payload['id'];
 
 $result = mysqli_query($conn, "SELECT
-        p.id, p.name_en, p.name_ar, p.phone, p.city_en, p.city_ar, p.lat, p.lng,
-        c.name_en AS category_name_en, c.name_ar AS category_name_ar,
-        (SELECT photo_url FROM provider_photos WHERE provider_id = p.id ORDER BY sort_order ASC LIMIT 1) AS photo_url,
-        ROUND(COALESCE((SELECT AVG(rate) FROM reviews WHERE provider_id = p.id), 0), 1) AS avg_rating
+        p.id, p.name_en, p.name_ar, p.phone, p.address_en, p.address_ar, p.city_en, p.city_ar, p.lat, p.lng,
+        c.name_en AS category_name_en, c.name_ar AS category_name_ar, c.slug AS category_slug,
+        EXISTS (
+            SELECT 1 FROM working_hours wh
+            WHERE wh.provider_id = p.id
+            AND wh.day = DAYNAME(NOW())
+            AND wh.is_close = 0
+            AND TIME(NOW()) BETWEEN wh.open_time AND wh.close_time
+        ) AS is_open_now,
+        (SELECT photo_url FROM provider_photos WHERE provider_id = p.id ORDER BY sort_order ASC LIMIT 1) AS image,
+        ROUND(COALESCE((SELECT AVG(rate) FROM reviews WHERE provider_id = p.id), 0), 1) AS rating,
+        (SELECT COUNT(*) FROM reviews WHERE provider_id = p.id) AS review_count
     FROM saves s
     JOIN providers p ON s.provider_id = p.id
     JOIN categories c ON p.category_id = c.id
@@ -35,9 +43,14 @@ $result = mysqli_query($conn, "SELECT
 $favorites = [];
 while ($row = mysqli_fetch_assoc($result)) {
     $row['id']         = (int)$row['id'];
-    $row['avg_rating'] = (float)$row['avg_rating'];
-    if (empty($row['photo_url'])) {
-        $row['photo_url'] = 'assets/images/provider_default.png';
+    $row['lat']        = $row['lat'] !== null ? (float)$row['lat'] : null;
+    $row['lng']        = $row['lng'] !== null ? (float)$row['lng'] : null;
+    $row['rating']     = (float)$row['rating'];
+    $row['review_count'] = (int)$row['review_count'];
+    $row['is_open_now'] = (bool)$row['is_open_now'];
+    $row['status'] = $row['is_open_now'] ? 'open' : 'closed';
+    if (empty($row['image'])) {
+        $row['image'] = 'assets/images/provider_default.png';
     }
     $favorites[] = $row;
 }
