@@ -11,8 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$headers = getallheaders();
-$token   = str_replace('Bearer ', '', isset($headers['Authorization']) ? $headers['Authorization'] : '');
+$token   = getBearerToken();
 $payload = verifyToken($token);
 if (!$payload) {
     http_response_code(401);

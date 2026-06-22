@@ -6,8 +6,7 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 
 $method  = $_SERVER['REQUEST_METHOD'];
-$headers = getallheaders();
-$token   = str_replace('Bearer ', '', isset($headers['Authorization']) ? $headers['Authorization'] : '');
+$token   = getBearerToken();
 $payload = verifyToken($token);
 
 if (!$payload) {

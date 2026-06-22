@@ -40,7 +40,7 @@ function initProfilePage() {
     var loc = getStoredLocation() || DEFAULT_LOCATION;
     getFavorites().then(function (favs) {
       if (favs.length) {
-        favs = addDistanceToProviders(favs, loc.lat, loc.long);
+        favs = addDistanceToProviders(favs, loc.lat, getLocationLng(loc));
         renderProviderList("profile-favorites", favs.slice(0, 2), { basePath: getBasePath() });
       } else {
         var favsEl = document.getElementById("profile-favorites");

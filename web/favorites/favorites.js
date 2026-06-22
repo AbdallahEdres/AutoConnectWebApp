@@ -56,7 +56,7 @@ function loadFavorites() {
     if (activeCategory) {
       favs = favs.filter(function (p) { return p.category_slug === activeCategory; });
     }
-    favs = addDistanceToProviders(favs, loc.lat, loc.long);
+    favs = addDistanceToProviders(favs, loc.lat, getLocationLng(loc));
     renderProviderList("favorites-grid", favs, { basePath: getBasePath() });
   }).catch(function () {
     renderProviderList("favorites-grid", []);

@@ -18,9 +18,10 @@ function initServiceDetailPage() {
   var params = new URLSearchParams(window.location.search);
   var id = params.get("id") || "1";
   var loc = getStoredLocation() || DEFAULT_LOCATION;
+  var locLng = getLocationLng(loc);
 
   getProviderById(id).then(function (provider) {
-    var p = addDistanceToProviders([provider], loc.lat, loc.long)[0];
+    var p = addDistanceToProviders([provider], loc.lat, locLng)[0];
     renderDetail(p);
     loadReviews(id);
     renderReviewForm(id);
@@ -81,8 +82,11 @@ function renderDetail(p) {
   renderPhotoGallery(p.photos || [], base);
   renderWorkingHours(p.working_hours || []);
 
-  if (p.lat && p.lng) {
-    initDetailMap(p.lat, p.lng, getLocalizedField(p, "name"));
+  if (p.lat != null && p.lng != null) {
+    initDetailMap(Number(p.lat), Number(p.lng), getLocalizedField(p, "name"));
+    renderDirectionsLink(p.lat, p.lng);
+  } else {
+    renderEmptyDetailMap();
   }
 
   var locationBtn = document.getElementById("location-btn");
@@ -164,6 +168,8 @@ function renderWorkingHours(hours) {
 function initDetailMap(lat, lng, title) {
   var mapEl = document.getElementById("detail-map");
   if (!mapEl || typeof L === "undefined") return;
+  mapEl.classList.remove("detail-map-empty");
+  mapEl.textContent = "";
   if (detailMapInstance) {
     detailMapInstance.remove();
     detailMapInstance = null;
@@ -173,6 +179,31 @@ function initDetailMap(lat, lng, title) {
     attribution: "© OpenStreetMap"
   }).addTo(detailMapInstance);
   L.marker([lat, lng]).addTo(detailMapInstance).bindPopup(title).openPopup();
+  setTimeout(function () {
+    if (detailMapInstance) detailMapInstance.invalidateSize();
+  }, 100);
+}
+
+function renderDirectionsLink(lat, lng) {
+  var link = document.getElementById("directions-link");
+  if (!link) return;
+  link.style.display = "inline-flex";
+  link.href = "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(lat + "," + lng);
+  link.textContent = t("directions");
+}
+
+function renderEmptyDetailMap() {
+  var mapEl = document.getElementById("detail-map");
+  var link = document.getElementById("directions-link");
+  if (detailMapInstance) {
+    detailMapInstance.remove();
+    detailMapInstance = null;
+  }
+  if (mapEl) {
+    mapEl.classList.add("detail-map-empty");
+    mapEl.textContent = t("location_unavailable");
+  }
+  if (link) link.style.display = "none";
 }
 
 /**
@@ -221,7 +252,11 @@ function setupFavoriteButton(providerId) {
     toggleFavorite(providerId).then(function (res) {
       if (res.success) {
         btn.textContent = (res.is_saved ? "♥ " : "♡ ") + t("favorite");
+      } else if (res.message) {
+        alert(res.message);
       }
+    }).catch(function (err) {
+      alert((err && err.message) || "Could not update favorite.");
     }).finally(function () {
       btn.disabled = false;
     });
@@ -321,7 +356,7 @@ function renderReviewForm(providerId) {
 function loadSimilar(current, loc) {
   getProviders({ category_slug: current.category_slug }).then(function (list) {
     var similar = list.filter(function (p) { return p.id !== current.id; }).slice(0, 3);
-    similar = addDistanceToProviders(similar, loc.lat, loc.long);
+    similar = addDistanceToProviders(similar, loc.lat, getLocationLng(loc));
     renderProviderList("similar-grid", similar, { basePath: getBasePath() });
   });
 }

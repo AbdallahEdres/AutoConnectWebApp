@@ -37,8 +37,7 @@ if ($method === 'GET') {
 
 // ── POST: add a new review ───────────────────────────────────
 if ($method === 'POST') {
-    $headers = getallheaders();
-    $token   = str_replace('Bearer ', '', isset($headers['Authorization']) ? $headers['Authorization'] : '');
+    $token   = getBearerToken();
     $payload = verifyToken($token);
     if (!$payload) {
         http_response_code(401);

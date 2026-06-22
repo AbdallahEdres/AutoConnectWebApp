@@ -5,8 +5,7 @@ require_once '../config/db.php';
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 
-$headers = getallheaders();
-$token   = str_replace('Bearer ', '', isset($headers['Authorization']) ? $headers['Authorization'] : '');
+$token   = getBearerToken();
 $payload = verifyToken($token);
 if (!$payload) {
     http_response_code(401);

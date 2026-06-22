@@ -18,7 +18,7 @@ function initHomePage() {
     e.preventDefault();
     var type = document.getElementById("search-type").value;
     var loc = document.getElementById("search-location").value;
-    var url = "../services/index.html?category_slug=" + encodeURIComponent(type);
+    var url = "../services/index.html?from_search=1&category_slug=" + encodeURIComponent(type);
     if (loc) {
       url += "&city=" + encodeURIComponent(loc);
     }

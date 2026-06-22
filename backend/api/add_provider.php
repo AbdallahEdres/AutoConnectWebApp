@@ -13,8 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $data = json_decode(file_get_contents('php://input'), true) ?? [];
 
-$headers = getallheaders();
-$token   = str_replace('Bearer ', '', isset($headers['Authorization']) ? $headers['Authorization'] : '');
+$token   = getBearerToken();
 $payload = verifyToken($token);
 if (empty($data['user_id']) && $payload) {
     $data['user_id'] = (int)$payload['id'];

@@ -77,7 +77,7 @@ function loadEmergencyList(loc) {
       container.innerHTML = "<p>" + t("no_results") + "</p>";
       return;
     }
-    list = addDistanceToProviders(list, loc.lat, loc.long);
+    list = addDistanceToProviders(list, loc.lat, getLocationLng(loc));
     list.sort(function (a, b) { return a.distance_km - b.distance_km; });
     var html = '<div class="grid-2">';
     list.slice(0, 6).forEach(function (p) {

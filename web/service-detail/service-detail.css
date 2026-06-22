@@ -26,15 +26,27 @@
   margin-top: 1rem;
 }
 
-.map-placeholder {
-  height: 180px;
+#detail-map {
+  height: 260px;
   background: #1a2230;
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.detail-map-empty {
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
-  border: 1px dashed var(--border-color);
+  text-align: center;
+  padding: 1rem;
+}
+
+.detail-directions {
+  display: none;
+  margin-top: 0.75rem;
+  width: 100%;
 }
 
 @media (max-width: 900px) {
@@ -42,4 +54,3 @@
     grid-template-columns: 1fr;
   }
 }
-

@@ -58,9 +58,45 @@ $conn->set_charset("utf8mb4");
 define('SECRET_KEY', 'autoconnect_change_this_secret_in_production');
 
 function generateToken($user_id) {
-    $payload_b64 = base64_encode(json_encode(['id' => (int)$user_id, 'exp' => time() + 3600]));
+    $payload_b64 = base64_encode(json_encode(['id' => (int)$user_id, 'exp' => time() + (7 * 24 * 3600)]));
     $sig = hash_hmac('sha256', $payload_b64, SECRET_KEY);
     return $payload_b64 . '.' . $sig;
+}
+
+function getBearerToken() {
+    $header = '';
+
+    if (!empty($_GET['auth_token'])) {
+        return trim($_GET['auth_token']);
+    }
+
+    if (function_exists('getallheaders')) {
+        $headers = getallheaders();
+        foreach ($headers as $key => $value) {
+            if (strtolower($key) === 'authorization') {
+                $header = $value;
+                break;
+            }
+        }
+    }
+
+    if (!$header && !empty($_SERVER['HTTP_AUTHORIZATION'])) {
+        $header = $_SERVER['HTTP_AUTHORIZATION'];
+    }
+
+    if (!$header && !empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+        $header = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+    }
+
+    if (!$header && !empty($_SERVER['Authorization'])) {
+        $header = $_SERVER['Authorization'];
+    }
+
+    if (stripos($header, 'Bearer ') === 0) {
+        return trim(substr($header, 7));
+    }
+
+    return trim($header);
 }
 
 /**

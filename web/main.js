@@ -113,7 +113,13 @@ function getStoredLocation() {
 }
 
 function saveLocation(loc) {
-  localStorage.setItem("autoconnect_location", JSON.stringify(loc));
+  if (!loc) return;
+  var lng = getLocationLng(loc);
+  localStorage.setItem("autoconnect_location", JSON.stringify({
+    lat: loc.lat,
+    lng: lng,
+    long: lng
+  }));
 }
 
 function getLocationLng(loc) {
@@ -192,6 +198,10 @@ function apiRequest(endpointKey, options) {
   if (options.params && method === "GET") {
     var qs = new URLSearchParams(options.params).toString();
     if (qs) url += (url.indexOf("?") >= 0 ? "&" : "?") + qs;
+  }
+
+  if (token) {
+    url += (url.indexOf("?") >= 0 ? "&" : "?") + "auth_token=" + encodeURIComponent(token);
   }
 
   // POST: form data goes in JSON body
