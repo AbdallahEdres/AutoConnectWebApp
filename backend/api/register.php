@@ -22,6 +22,13 @@ foreach ($required as $field) {
     }
 }
 
+// Minimum password length check.
+if (strlen($data['password']) < 8) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Password must be at least 8 characters long.']);
+    exit;
+}
+
 $fname    = mysqli_real_escape_string($conn, trim($data['fname']));
 $lname    = mysqli_real_escape_string($conn, trim($data['lname']));
 $email    = mysqli_real_escape_string($conn, trim($data['email']));
@@ -90,8 +97,13 @@ if ($ok) {
         $provider_id = mysqli_insert_id($conn);
 
         $working_hours = is_array($data['working_hours']) ? $data['working_hours'] : json_decode($data['working_hours'], true);
+        $valid_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
         if ($working_hours) {
             foreach ($working_hours as $hour) {
+                // Skip any entry with an invalid day name.
+                if (!in_array($hour['day'] ?? '', $valid_days, true)) continue;
+
                 $day        = mysqli_real_escape_string($conn, $hour['day']);
                 $open_time  = mysqli_real_escape_string($conn, $hour['open_time'] ?? '');
                 $close_time = mysqli_real_escape_string($conn, $hour['close_time'] ?? '');

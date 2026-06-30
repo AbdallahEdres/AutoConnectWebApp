@@ -3,17 +3,24 @@
 
 $database = getenv('AUTOCONNECT_DB_NAME') ?: "autoconnect";
 
+// How this works:
+//   - In production: set environment variables on your server (AUTOCONNECT_DB_HOST, etc.).
+//     Attempt 1 reads them and connects on the first try.
+//   - On XAMPP (no env vars set): attempt 1 falls back to XAMPP defaults
+//     (127.0.0.1, root, no password, port 3306) and also succeeds on the first try.
+//   - On MAMP (Mac): attempt 1 fails (MAMP uses password "root"), so attempt 2 or 3 runs.
 $connection_attempts = [
+    // Attempt 1: production env vars, or XAMPP defaults if env vars are not set.
     [
         'host' => getenv('AUTOCONNECT_DB_HOST') ?: '127.0.0.1',
         'user' => getenv('AUTOCONNECT_DB_USER') ?: 'root',
-        'pass' => getenv('AUTOCONNECT_DB_PASS') !== false ? getenv('AUTOCONNECT_DB_PASS') : 'root',
-        'port' => getenv('AUTOCONNECT_DB_PORT') ?: 8889
+        'pass' => getenv('AUTOCONNECT_DB_PASS') !== false ? getenv('AUTOCONNECT_DB_PASS') : '',
+        'port' => (int)(getenv('AUTOCONNECT_DB_PORT') ?: 3306)
     ],
-    // XAMPP/WAMP default fallback.
-    ['host' => '127.0.0.1', 'user' => 'root', 'pass' => '', 'port' => 3306],
-    // Some MAMP installs expose MySQL on 3306 while still using password "root".
-    ['host' => '127.0.0.1', 'user' => 'root', 'pass' => 'root', 'port' => 3306]
+    // Attempt 2: MAMP on port 3306 with password "root".
+    ['host' => '127.0.0.1', 'user' => 'root', 'pass' => 'root', 'port' => 3306],
+    // Attempt 3: older MAMP versions that use port 8889.
+    ['host' => '127.0.0.1', 'user' => 'root', 'pass' => 'root', 'port' => 8889],
 ];
 
 $conn = null;

@@ -158,7 +158,7 @@ function renderWorkingHours(hours) {
     var time = wh.is_close
       ? '<span class="wh-time wh-closed">' + t("day_off") + '</span>'
       : '<span class="wh-time">' + wh.open_time + ' – ' + wh.close_time + '</span>';
-    return '<li class="wh-item"><span class="wh-day">' + t(key) + '</span>' + time + '</li>';
+    return '<li class="wh-item"><span class="wh-day">' + t(key) + " : " + '</span>' + time + '</li>';
   }).join("");
 }
 

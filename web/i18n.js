@@ -138,7 +138,7 @@ var TRANSLATIONS = {
     confirm_new_password: "تأكيد كلمة المرور الجديدة",
     update_password: "تحديث كلمة المرور",
     delete_account: "حذف الحساب",
-    delete_account_desc: "حذف الحساب نهائي وسيمحو كل بيانات الأسطول والتشخيص والمخزون من السحابة.",
+    delete_account_desc: "حذف الحساب نهائي سيمحو كل بياناتك.",
     delete_my_account: "حذف حسابي",
     provider_reg_title: "انضم لأكبر شبكة خدمات النقل في مصر",
     provider_reg_sub: "سجّل ورشتك وابدأ في استقبال طلبات العملاء القريبين منك.",

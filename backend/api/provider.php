@@ -18,7 +18,12 @@ if (empty($_GET['id'])) {
 }
 
 $provider_id = (int)$_GET['id'];
-$user_id     = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0;
+
+// Get user_id from the auth token, not from the URL.
+// Reading it from the URL would let anyone check another user's saved state.
+$token   = getBearerToken();
+$payload = verifyToken($token);
+$user_id = $payload ? (int)$payload['id'] : 0;
 
 // 1. Main provider data
 $result = mysqli_query($conn, "SELECT p.*,

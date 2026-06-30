@@ -132,6 +132,16 @@ function setEl(id, value) {
   if (el) el.textContent = value;
 }
 
+// Converts characters like < > & " into their safe HTML equivalents.
+// Always use this when putting API data (provider names, addresses, etc.) into HTML.
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 /** Add distance_km property to each provider object */
 function addDistanceToProviders(providers, userLat, userLong) {
   return providers.map(function (p) {
@@ -198,10 +208,6 @@ function apiRequest(endpointKey, options) {
   if (options.params && method === "GET") {
     var qs = new URLSearchParams(options.params).toString();
     if (qs) url += (url.indexOf("?") >= 0 ? "&" : "?") + qs;
-  }
-
-  if (token) {
-    url += (url.indexOf("?") >= 0 ? "&" : "?") + "auth_token=" + encodeURIComponent(token);
   }
 
   // POST: form data goes in JSON body
@@ -361,9 +367,10 @@ function renderProviderCard(provider, options) {
   var isLoggedIn = !!localStorage.getItem("autoconnect_token");
   var loginUrl = base + "login/index.html?from=" + encodeURIComponent(window.location.href);
 
-  var phoneRow   = isLoggedIn && phone ? `<p class="provider-card__meta">📞 ${phone}</p>` : "";
-  var callBtn    = isLoggedIn
-    ? `<a href="tel:${phone}" class="btn btn-primary btn-sm" onclick="createBooking(${provider.id})">${t("call_now")}</a>`
+  var safePhone = escapeHtml(phone);
+  var phoneRow  = isLoggedIn && phone ? `<p class="provider-card__meta">📞 ${safePhone}</p>` : "";
+  var callBtn   = isLoggedIn
+    ? `<a href="tel:${safePhone}" class="btn btn-primary btn-sm" onclick="createBooking(${provider.id})">${t("call_now")}</a>`
     : `<a href="${loginUrl}" class="btn btn-primary btn-sm">${t("show_phone")}</a>`;
 
   var ratingHtml = provider.review_count > 0
@@ -373,14 +380,14 @@ function renderProviderCard(provider, options) {
   return `
     <article class="provider-card">
       <div class="provider-card__image">
-        ${img ? `<img src="${img}" alt="${name}">` : ""}
-        ${badge ? `<span class="provider-card__badge">${badge}</span>` : ""}
+        ${img ? `<img src="${img}" alt="${escapeHtml(name)}">` : ""}
+        ${badge ? `<span class="provider-card__badge">${escapeHtml(badge)}</span>` : ""}
       </div>
       <div class="provider-card__body">
         <p class="provider-card__rating">${ratingHtml}</p>
-        <h3>${name}</h3>
+        <h3>${escapeHtml(name)}</h3>
         <p class="provider-card__meta"><span class="status-dot ${statusClass}"></span> ${statusText}</p>
-        ${address ? `<p class="provider-card__meta">📍 ${address}</p>` : ""}
+        ${address ? `<p class="provider-card__meta">📍 ${escapeHtml(address)}</p>` : ""}
         ${distText ? `<p class="provider-card__meta">↗ ${distText}</p>` : ""}
         ${phoneRow}
         <div class="provider-card__actions">
@@ -412,9 +419,10 @@ function renderHorizontalProviderCard(provider, options) {
   var isLoggedIn = !!localStorage.getItem("autoconnect_token");
   var loginUrl = base + "login/index.html?from=" + encodeURIComponent(window.location.href);
 
-  var phoneRow = isLoggedIn && phone ? `<p class="provider-card__meta">📞 ${phone}</p>` : "";
-  var callBtn  = isLoggedIn
-    ? `<a href="tel:${phone}" class="btn btn-danger btn-sm" onclick="createBooking(${provider.id})">${t("call_now")}</a>`
+  var safePhone2 = escapeHtml(phone);
+  var phoneRow   = isLoggedIn && phone ? `<p class="provider-card__meta">📞 ${safePhone2}</p>` : "";
+  var callBtn    = isLoggedIn
+    ? `<a href="tel:${safePhone2}" class="btn btn-danger btn-sm" onclick="createBooking(${provider.id})">${t("call_now")}</a>`
     : `<a href="${loginUrl}" class="btn btn-danger btn-sm">${t("show_phone")}</a>`;
 
   return `
@@ -423,7 +431,7 @@ function renderHorizontalProviderCard(provider, options) {
         ${img ? `<img src="${img}" alt="" style="width:100%;height:100%;object-fit:cover">` : ""}
       </div>
       <div style="flex:1;min-width:180px">
-        <h3>${name}</h3>
+        <h3>${escapeHtml(name)}</h3>
         <p class="provider-card__meta">
           <span class="status-dot ${statusClass}"></span> ${statusText} · ★ ${provider.rating}${distText ? " · " + distText : ""}
         </p>

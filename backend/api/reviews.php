@@ -70,7 +70,9 @@ if ($method === 'POST') {
         exit;
     }
 
-    $comment = mysqli_real_escape_string($conn, isset($data['comment']) ? trim($data['comment']) : '');
+    // Limit comment to 1000 characters so nobody can send a huge block of text.
+    $comment = substr(trim($data['comment'] ?? ''), 0, 1000);
+    $comment = mysqli_real_escape_string($conn, $comment);
 
     $ok = mysqli_query($conn, "INSERT INTO reviews (provider_id, user_id, rate, comment) VALUES ($provider_id, $user_id, $rate, '$comment')");
 

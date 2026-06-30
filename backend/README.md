@@ -1,24 +1,6 @@
-# AutoConnect API Documentation
+# AutoConnect — Backend API Reference
 
-This directory contains the backend endpoints for the AutoConnect platform. All responses are JSON. All protected endpoints require an `Authorization: Bearer <token>` header.
-
----
-
-## Lookup Endpoints
-
-### Get Categories
-**`GET /api/categories.php`**  
-Returns all service categories.
-
-**Response:** `{ success, data: [{ id, name, slug, category_id }] }`
-
----
-
-### Get Regions
-**`GET /api/regions.php`**  
-Returns unique cities where active providers are located.
-
-**Response:** `{ success, data: [{ id, name }] }` — `id` is the city name string.
+All endpoints live in `backend/api/`. Every response is JSON with `{ success: true|false, ... }`. Protected endpoints require an `Authorization: Bearer <token>` header (token is returned by `login.php` or `register.php`).
 
 ---
 
@@ -29,21 +11,31 @@ Returns unique cities where active providers are located.
 
 **Body:** `{ email, password }`
 
-**Response:** `{ success, token, data: { id, fname, lname, email, role } }`  
-**Errors:** `400` missing fields, `401` invalid credentials.
+**Response:** `{ success, token, data: { id, fname, lname, email, role } }`
 
-> Plain-text passwords in the DB are auto-upgraded to bcrypt on first login.
+**Errors:** `400` missing fields · `401` wrong credentials
+
+> Passwords stored as plain text in the DB are automatically upgraded to bcrypt on first successful login.
 
 ---
 
 ### Register
 **`POST /api/register.php`**
 
-**Body:** `{ fname, lname, email, password, role, phone? }`  
-`role` must be `"client"` or `"provider"` (`"customer"` is accepted as an alias for `"client"`).
+**Body (customer):** `{ fname, lname, email, password, role: "client", phone? }`
 
-**Response:** `{ success, data: { id, email, role } }`  
-**Errors:** `400` missing/invalid fields, `409` email already registered.
+**Body (provider):** same as above plus `{ role: "provider", name_en, name_ar, phone, address_en, address_ar?, city_en, city_ar?, category_id, working_hours, bio_en?, bio_ar?, lat?, lng?, photos? }`
+
+`"customer"` is accepted as an alias for `"client"`.
+`password` must be at least 8 characters.
+`working_hours` is an array: `[{ day, open_time, close_time, is_close }]` where `day` is one of `Monday`–`Sunday`.
+`photos` is an array of URL strings returned by `upload_photos.php`.
+
+**Response:** `{ success, data: { id, email, role, provider_id } }`
+
+**Errors:** `400` missing/invalid fields · `409` email already registered
+
+> Provider registration runs inside a DB transaction — user, provider, working hours, and photos are all inserted atomically.
 
 ---
 
@@ -61,67 +53,49 @@ Returns unique cities where active providers are located.
 
 **Body:** `{ current, new, confirm }`
 
-**Response:** `{ success, message }`  
-**Errors:** `400` fields missing or `new`/`confirm` mismatch, `401` wrong current password.
+**Response:** `{ success, message }`
+
+**Errors:** `400` missing fields or `new`/`confirm` mismatch · `401` wrong current password
 
 ---
 
 ## Providers
 
-### Get Providers List
+### List Providers
 **`GET /api/providers.php`**
 
-| Parameter | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `page` | int | `1` | Page number |
-| `limit` | int | `10` | Items per page |
-| `user_id` | int | — | Adds `is_saved` flag per provider |
-| `q` / `search` | string | — | Keyword search on name and address |
-| `city` | string | — | Filter by city |
-| `category_id` | int | — | Filter by category ID |
-| `category_slug` | string | — | Filter by category slug (alias) |
-| `open_now` / `status=open` | bool | — | Only currently open providers |
-| `sort` | string | `featured` | `featured`, `nearest`, `highest_rate` / `rating`, `most_common` |
-| `lat`, `lng` / `long` | float | — | Required when `sort=nearest` (Haversine distance in km) |
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `category_slug` | string | Filter by category (e.g. `mechanic`) |
+| `city` | string | Filter by city (English or Arabic name) |
+| `q` | string | Keyword search on name and address |
+| `sort` | string | `newest` (default) or `rating` |
 
-**Response:**
-```json
-{
-  "success": true,
-  "pagination": { "total", "current_page", "per_page", "last_page" },
-  "filters": { "city", "category_id", "sort" },
-  "data": [{ "id", "name", "phone", "address", "city", "full_address", "lat", "lng",
-             "category_name", "photo_url", "avg_rating", "review_count",
-             "is_open_now", "is_saved", "distance" }]
-}
-```
+**Response:** `{ success, data: [ { id, name_en, name_ar, phone, address_en, address_ar, city_en, city_ar, lat, lng, image, rating, review_count, is_open_now, status, category_name_en, category_name_ar, category_slug } ] }`
+
+Results are limited to 100 per request.
 
 ---
 
 ### Get Provider Details
-**`GET /api/provider.php?id=<id>`**
+**`GET /api/provider.php?id=<id>`** — auth optional (affects `is_saved` field)
 
-| Parameter | Type | Description |
-| :--- | :--- | :--- |
-| `id` | int | *Required.* Provider ID |
-| `user_id` | int | Optional. Adds `is_saved` flag |
+**Response data** includes: all provider fields + `working_hours`, `photos`, `vehicle_types`, `reviews`, `avg_rating`, `review_count`, `is_open_now`, `is_saved`, `similar_providers` (up to 3 from the same category).
 
-**Response data** includes `working_hours`, `photos`, `vehicle_types`, `reviews`, `avg_rating`, `review_count`, `is_open_now`, `is_saved`, and `similar_providers` (up to 3 from the same category).
+If a valid auth token is provided, `is_saved` reflects whether the logged-in user has saved this provider. Without a token `is_saved` is always `false`.
 
 ---
 
 ### Add Provider
-**`POST /api/add_provider.php`**
+**`POST /api/add_provider.php`** — *Protected*
 
-**Required body fields:** `name`, `phone`, `address`, `city`, `user_id`, `category_id`, `working_hours`
+**Required body fields:** `name_en`, `name_ar`, `phone`, `address_en`, `city_en`, `category_id`, `working_hours`
 
-**Optional:** `bio`, `lat`, `lng` / `long`, `vehicle_types` (array of IDs), `photos` (array of URLs)
+**Optional:** `address_ar`, `city_ar`, `bio_en`, `bio_ar`, `lat`, `lng`, `vehicle_types` (array of IDs), `photos` (array of URL strings)
 
-`working_hours` format: `[{ day, open_time, close_time, is_close }]`
+Runs inside a DB transaction.
 
-Runs inside a DB transaction — all sub-tables (`working_hours`, `tagged_with`, `provider_photos`) are inserted atomically.
-
-**Response:** `{ success, message, provider_id }`
+**Response:** `{ success, message, data: { provider_id } }`
 
 ---
 
@@ -130,7 +104,7 @@ Runs inside a DB transaction — all sub-tables (`working_hours`, `tagged_with`,
 
 **Required body field:** `id` (provider ID)
 
-All other fields are optional. Sending `working_hours`, `vehicle_types`, or `photos` replaces the existing rows for that sub-table entirely. Only the authenticated user who owns the provider profile can edit it (`403` otherwise).
+All other fields are optional. Sending `working_hours`, `vehicle_types`, or `photos` replaces all existing rows for that sub-table. Only the authenticated user who owns the provider profile can edit it (`403` otherwise).
 
 **Response:** `{ success, message }`
 
@@ -139,52 +113,34 @@ All other fields are optional. Sending `working_hours`, `vehicle_types`, or `pho
 ### Upload Photos
 **`POST /api/upload_photos.php`** — *Protected*
 
-Accepts multipart/form-data with `photos[]` (image files) and `provider_id`.
+Accepts `multipart/form-data` with field `photos[]` (one or more image files).
 
-**Response:** `{ success, data: [{ url }] }`
+- Allowed types: JPEG, PNG, WebP, GIF
+- Max size per file: 5 MB
+- Max files per request: 10
+- File extension is derived from the actual MIME type, not the filename
 
----
+**Response:** `{ success, urls: [ "string", ... ] }`
 
-## Bookings
-
-### List / Create Bookings
-**`GET /api/bookings.php`** — *Protected*
-
-Returns all bookings made by the logged-in user, newest first.
-
-**Response:** `{ success, data: [{ id, provider_id, provider_name, created_at, ... }] }`
+Pass the returned URLs as the `photos` field in `register.php` or `add_provider.php`.
 
 ---
 
-**`POST /api/bookings.php`** — *Protected*
+## Lookups
 
-**Body:** `{ provider_id }`
+### Get Categories
+**`GET /api/categories.php`**
 
-Creates a booking record (service history entry) for the logged-in user.
-
-**Response:** `{ success, message, data: { id } }`
-
----
-
-## Favorites
-
-### Get Favorites
-**`GET /api/favorites.php`** — *Protected*
-
-Returns all providers saved by the logged-in user with summary fields (`name`, `city`, `category_name`, `photo_url`, `avg_rating`, `lat`, `lng`), newest first.
-
-**Response:** `{ success, data: [...] }`
+**Response:** `{ success, data: [ { id, name_en, name_ar, slug, category_id } ] }`
 
 ---
 
-### Toggle Favorite
-**`POST /api/toggle_favorite.php`** — *Protected*
+### Get Regions
+**`GET /api/regions.php`**
 
-**Body:** `{ provider_id }`
+Returns unique cities where active providers are located.
 
-Adds or removes the provider from the `saves` table based on current state.
-
-**Response:** `{ success, is_saved: true|false, message }`
+**Response:** `{ success, data: [ { city_en, city_ar } ] }`
 
 ---
 
@@ -193,16 +149,61 @@ Adds or removes the provider from the `saves` table based on current state.
 ### Get Reviews
 **`GET /api/reviews.php?provider_id=<id>`**
 
-Returns all reviews for a provider with `user_name`, `rate`, `comment`, `created_at`, newest first.
-
-**Response:** `{ success, data: [...] }`
+**Response:** `{ success, data: [ { id, rate, comment, created_at, user_name } ] }`
 
 ---
 
 ### Post Review
 **`POST /api/reviews.php`** — *Protected*
 
-**Body:** `{ provider_id, rate, comment? }`  
-`rate` must be 1–5. One review per user per provider (`409` if already reviewed).
+**Body:** `{ provider_id, rate, comment? }`
+
+`rate` must be 1–5. `comment` is limited to 1000 characters. One review per user per provider.
+
+**Response:** `{ success, message, data: { id } }`
+
+**Errors:** `400` missing/invalid fields · `409` already reviewed this provider
+
+---
+
+## Favorites
+
+### Get Favorites
+**`GET /api/favorites.php`** — *Protected*
+
+Returns all providers saved by the logged-in user, newest first.
+
+**Response:** `{ success, data: [ { id, name_en, name_ar, city_en, city_ar, image, rating, lat, lng, category_name_en, category_name_ar } ] }`
+
+---
+
+### Toggle Favorite
+**`POST /api/toggle_favorite.php`** — *Protected*
+
+**Body:** `{ provider_id }`
+
+Adds or removes the provider from the `saves` table based on its current state.
+
+**Response:** `{ success, is_saved: true|false, message }`
+
+---
+
+## Bookings (Service History)
+
+### List Bookings
+**`GET /api/bookings.php`** — *Protected*
+
+Returns all bookings made by the logged-in user, newest first.
+
+**Response:** `{ success, data: [ { id, provider_id, provider_name_en, provider_name_ar, created_at } ] }`
+
+---
+
+### Create Booking
+**`POST /api/bookings.php`** — *Protected*
+
+**Body:** `{ provider_id }`
+
+Creates a booking record (this is how service history is tracked — a booking is created when the user clicks "Call Now").
 
 **Response:** `{ success, message, data: { id } }`

@@ -11,6 +11,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// Only logged-in users can upload photos.
+$token   = getBearerToken();
+$payload = verifyToken($token);
+if (!$payload) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'You must be logged in to upload photos.']);
+    exit;
+}
+
 $upload_dir = __DIR__ . '/../uploads/providers/';
 
 // Create folder if it doesn't exist yet
@@ -60,8 +69,11 @@ for ($i = 0; $i < $count; $i++) {
         exit;
     }
 
-    $ext      = strtolower(pathinfo($files['name'][$i], PATHINFO_EXTENSION));
-    $filename = time() . '_' . mt_rand(1000, 9999) . '_' . $i . '.' . $ext;
+    // Derive the extension from the MIME type (not from the user's filename).
+    // This prevents someone from uploading a file named "hack.php" that happens to have valid image content.
+    $mime_to_ext = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
+    $ext      = $mime_to_ext[$mime];
+    $filename = uniqid('photo_', true) . '_' . $i . '.' . $ext;
     $dest     = $upload_dir . $filename;
 
     if (move_uploaded_file($files['tmp_name'][$i], $dest)) {
