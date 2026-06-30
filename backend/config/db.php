@@ -122,4 +122,41 @@ function verifyToken($token) {
     if (isset($payload['exp']) && $payload['exp'] < time()) return null;
     return $payload;
 }
+
+/**
+ * Resolves the Bearer token to a full user row joined with the correct subtype table.
+ * Returns the user array (with subtype fields) on success, or sends a 401 and exits.
+ *
+ * For clients  : includes vehicle_type, vehicle_brand from clients table.
+ * For agents   : no extra columns yet (extendable).
+ * For supervisors: no extra columns yet (extendable).
+ */
+function getAuthUser($conn) {
+    $token = getBearerToken();
+    $payload = verifyToken($token);
+    if (!$payload) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+        exit;
+    }
+
+    $user_id = (int)$payload['id'];
+
+    $sql = "SELECT u.id, u.fname, u.lname, u.email, u.phone, u.role, u.is_active, u.created_at,
+                   c.vehicle_type, c.vehicle_brand
+            FROM users u
+            LEFT JOIN clients c ON c.user_id = u.id AND u.role = 'client'
+            WHERE u.id = $user_id AND u.is_active = 1";
+
+    $result = mysqli_query($conn, $sql);
+    $user   = $result ? mysqli_fetch_assoc($result) : null;
+
+    if (!$user) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'User not found or inactive']);
+        exit;
+    }
+
+    return $user;
+}
 ?>

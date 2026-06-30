@@ -52,6 +52,14 @@ function loadFavorites() {
     return;
   }
 
+  var storedUser = JSON.parse(localStorage.getItem("autoconnect_user") || "null");
+  if (!storedUser || storedUser.role !== "client") {
+    if (grid) {
+      grid.innerHTML = '<p class="section-subtitle" style="grid-column:1/-1">' + (currentLang === "ar" ? "هذه الصفحة للعملاء فقط" : "This page is for clients only") + '</p>';
+    }
+    return;
+  }
+
   getFavorites().then(function (favs) {
     if (activeCategory) {
       favs = favs.filter(function (p) { return p.category_slug === activeCategory; });

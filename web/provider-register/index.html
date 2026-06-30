@@ -4,89 +4,202 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AutoConnect — Provider Register</title>
+  <title>AutoConnect — تسجيل مزود خدمة</title>
   <link rel="stylesheet" href="../variables.css">
   <link rel="stylesheet" href="../base.css">
   <link rel="stylesheet" href="../components.css">
-  <link rel="stylesheet" href="provider-register.css">
+  <link rel="stylesheet" href="../register/register.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 
 <body class="rtl">
   <div id="site-header"></div>
 
-  <main class="page-main container">
-    <section class="provider-hero">
-      <div class="hero-image" style="min-height:200px;background:url('../assets/images/مزود الخدمه.png') center/cover">
-      </div>
-      <div>
-        <h1 class="section-title" data-i18n="provider_reg_title"></h1>
-        <p class="section-subtitle" data-i18n="provider_reg_sub"></p>
-      </div>
-    </section>
+  <div class="container page-main" style="padding-top:1.5rem">
+    <!-- <aside class="sidebar" id="sidebar-nav"></aside> -->
 
-    <article class="provider-form-card">
-      <h2 data-i18n="provider_form_title"></h2>
-      <form id="provider-form" style="margin-top:1.5rem">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="workshop-name" data-i18n="workshop_name"></label>
-            <input class="form-control" type="text" id="workshop-name" required>
-          </div>
-          <div class="form-group">
-            <label for="mobile" data-i18n="mobile"></label>
-            <input class="form-control" type="tel" id="mobile" placeholder="+20" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="provider-category" data-i18n="service_type"></label>
-            <select class="form-control" id="provider-category" required></select>
-          </div>
-          <div class="form-group">
-            <label for="availability" data-i18n="availability"></label>
-            <select class="form-control" id="availability">
-              <option data-i18n="open_now"></option>
-              <option data-i18n="status_closed"></option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="working-hours" data-i18n="working_hours"></label>
-            <input class="form-control" type="text" id="working-hours" placeholder="9:00 - 18:00">
-          </div>
-          <div class="form-group">
-            <label for="city-area" data-i18n="city_area"></label>
-            <input class="form-control" type="text" id="city-area" required>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="service-desc" data-i18n="service_desc"></label>
-          <textarea class="form-control" id="service-desc" rows="4"></textarea>
-        </div>
-        <div class="form-group">
-          <label data-i18n="pin_on_map"></label>
-          <div class="map-placeholder" style="height:200px" data-i18n="map_placeholder"></div>
-        </div>
-        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem">
-          <button type="submit" class="btn btn-primary" data-i18n="register_workshop"></button>
-          <button type="button" class="btn btn-outline" data-i18n="save_later"></button>
-        </div>
-      </form>
-    </article>
+    <div>
+      <h1 style="color:var(--accent-yellow);margin-bottom:0.25rem" data-i18n="provider_reg_title"></h1>
+      <p class="section-subtitle" style="margin-bottom:1.5rem" data-i18n="provider_reg_sub"></p>
 
-    <p style="text-align:center;color:var(--text-secondary);margin:1.5rem 0" data-i18n="quality_note"></p>
-    <div class="trust-features">
-      <div><span class="icon">🛡</span><span data-i18n="tech_support"></span></div>
-      <div><span class="icon">📍</span><span data-i18n="geo_expand"></span></div>
-      <div><span class="icon">⚡</span><span data-i18n="quick_response"></span></div>
+      <article class="card auth-card--provider" style="width:100%;max-width:100%">
+        <h2 data-i18n="provider_form_title"></h2>
+        <form id="provider-form" novalidate style="margin-top:1.5rem">
+
+          <!-- Workshop name — bilingual -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name-ar">
+                <span data-i18n="name_ar_label">اسم الورشة (بالعربية)</span> <span class="req">*</span>
+              </label>
+              <input class="form-control" type="text" id="name-ar" placeholder="مثال: أحمد لإصلاح السيارات" required>
+              <span class="form-error" id="err-name-ar"></span>
+            </div>
+            <div class="form-group">
+              <label for="name-en">
+                <span data-i18n="name_en_label">Workshop name (English)</span> <span class="req">*</span>
+              </label>
+              <input class="form-control" type="text" id="name-en" dir="ltr" placeholder="e.g. Ahmed Auto Repair" required>
+              <span class="form-error" id="err-name-en"></span>
+            </div>
+          </div>
+
+          <!-- Mobile + Service category -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="mobile">
+                <span data-i18n="mobile">رقم الموبايل</span> <span class="req">*</span>
+              </label>
+              <input class="form-control" type="tel" id="mobile" placeholder="+20" required>
+              <span class="form-error" id="err-mobile"></span>
+            </div>
+            <div class="form-group">
+              <label for="provider-category">
+                <span data-i18n="service_type">نوع الخدمة</span> <span class="req">*</span>
+              </label>
+              <select class="form-control" id="provider-category" required></select>
+              <span class="form-error" id="err-provider-category"></span>
+            </div>
+          </div>
+
+          <!-- City -->
+          <div class="form-group">
+            <label for="city-select">
+              <span data-i18n="city_area">المدينة / المنطقة</span> <span class="req">*</span>
+            </label>
+            <select class="form-control" id="city-select" required></select>
+            <span class="form-error" id="err-city-select"></span>
+          </div>
+
+          <!-- Address — bilingual -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="address-ar" data-i18n="address_ar_label">العنوان (بالعربية)</label>
+              <input class="form-control" type="text" id="address-ar">
+            </div>
+            <div class="form-group">
+              <label for="address-en">
+                <span data-i18n="address_en_label">Address (English)</span> <span class="req">*</span>
+              </label>
+              <input class="form-control" type="text" id="address-en" dir="ltr" required>
+              <span class="form-error" id="err-address-en"></span>
+            </div>
+          </div>
+
+          <!-- Working hours — one row per day -->
+          <div class="form-group">
+            <label>
+              <span data-i18n="working_hours">مواعيد العمل</span> <span class="req">*</span>
+            </label>
+            <div class="wh-grid">
+              <div class="wh-row" data-day="Saturday">
+                <span class="wh-day-name" data-i18n="day_sat">السبت</span>
+                <label class="wh-closed-label"><input type="checkbox" class="wh-closed"><span data-i18n="day_off">إجازة</span></label>
+                <input type="time" class="form-control wh-time wh-open" value="09:00">
+                <span>—</span>
+                <input type="time" class="form-control wh-time wh-close" value="18:00">
+              </div>
+              <div class="wh-row" data-day="Sunday">
+                <span class="wh-day-name" data-i18n="day_sun">الأحد</span>
+                <label class="wh-closed-label"><input type="checkbox" class="wh-closed"><span data-i18n="day_off">إجازة</span></label>
+                <input type="time" class="form-control wh-time wh-open" value="09:00">
+                <span>—</span>
+                <input type="time" class="form-control wh-time wh-close" value="18:00">
+              </div>
+              <div class="wh-row" data-day="Monday">
+                <span class="wh-day-name" data-i18n="day_mon">الاثنين</span>
+                <label class="wh-closed-label"><input type="checkbox" class="wh-closed"><span data-i18n="day_off">إجازة</span></label>
+                <input type="time" class="form-control wh-time wh-open" value="09:00">
+                <span>—</span>
+                <input type="time" class="form-control wh-time wh-close" value="18:00">
+              </div>
+              <div class="wh-row" data-day="Tuesday">
+                <span class="wh-day-name" data-i18n="day_tue">الثلاثاء</span>
+                <label class="wh-closed-label"><input type="checkbox" class="wh-closed"><span data-i18n="day_off">إجازة</span></label>
+                <input type="time" class="form-control wh-time wh-open" value="09:00">
+                <span>—</span>
+                <input type="time" class="form-control wh-time wh-close" value="18:00">
+              </div>
+              <div class="wh-row" data-day="Wednesday">
+                <span class="wh-day-name" data-i18n="day_wed">الأربعاء</span>
+                <label class="wh-closed-label"><input type="checkbox" class="wh-closed"><span data-i18n="day_off">إجازة</span></label>
+                <input type="time" class="form-control wh-time wh-open" value="09:00">
+                <span>—</span>
+                <input type="time" class="form-control wh-time wh-close" value="18:00">
+              </div>
+              <div class="wh-row" data-day="Thursday">
+                <span class="wh-day-name" data-i18n="day_thu">الخميس</span>
+                <label class="wh-closed-label"><input type="checkbox" class="wh-closed"><span data-i18n="day_off">إجازة</span></label>
+                <input type="time" class="form-control wh-time wh-open" value="09:00">
+                <span>—</span>
+                <input type="time" class="form-control wh-time wh-close" value="18:00">
+              </div>
+              <div class="wh-row" data-day="Friday">
+                <span class="wh-day-name" data-i18n="day_fri">الجمعة</span>
+                <label class="wh-closed-label"><input type="checkbox" class="wh-closed"><span data-i18n="day_off">إجازة</span></label>
+                <input type="time" class="form-control wh-time wh-open" value="09:00">
+                <span>—</span>
+                <input type="time" class="form-control wh-time wh-close" value="18:00">
+              </div>
+            </div>
+          </div>
+
+          <!-- Bio / description — bilingual -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="bio-ar" data-i18n="bio_ar_label">وصف الخدمة (بالعربية)</label>
+              <textarea class="form-control" id="bio-ar" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="bio-en" data-i18n="bio_en_label">Description (English)</label>
+              <textarea class="form-control" id="bio-en" rows="3" dir="ltr"></textarea>
+            </div>
+          </div>
+
+          <!-- Photos (optional, max 10) -->
+          <div class="form-group">
+            <label>
+              <span data-i18n="photos_label">صور الورشة</span>
+              <span style="color:var(--text-muted);font-size:0.75rem" data-i18n="photos_hint"> — اختياري، حتى 10 صور</span>
+            </label>
+            <div class="photo-upload-area" id="photo-upload-area">
+              <input type="file" id="photo-input" accept="image/*" multiple style="display:none">
+              <button type="button" class="photo-add-btn" id="photo-add-btn">
+                <span>📷</span>
+                <span id="photo-add-label" data-i18n="add_photos">إضافة صور</span>
+              </button>
+            </div>
+            <div class="photo-preview-grid" id="photo-preview-grid"></div>
+            <span class="form-error" id="err-photos"></span>
+          </div>
+
+          <!-- Leaflet map -->
+          <div class="form-group">
+            <label data-i18n="pin_on_map">حدد مكانك بدقة على الخريطة</label>
+            <div id="provider-map" style="height:220px;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--border-color)"></div>
+          </div>
+
+          <!-- General error -->
+          <span class="form-error" id="form-provider-error" style="display:block;margin-bottom:0.5rem;text-align:center"></span>
+
+          <button type="submit" class="btn btn-primary btn-block" id="provider-submit" data-i18n="register_workshop">
+            سجل ورشتك الآن
+          </button>
+        </form>
+      </article>
     </div>
-  </main>
+  </div>
 
   <div id="site-footer"></div>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="../i18n.js"></script>
   <script src="../main.js"></script>
+  <script src="provider-register.js"></script>
+</body>
+
+</html>
+c="../main.js"></script>
   <script src="provider-register.js"></script>
 </body>
 

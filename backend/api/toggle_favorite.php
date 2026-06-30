@@ -11,14 +11,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$token   = getBearerToken();
-$payload = verifyToken($token);
-if (!$payload) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'You must be logged in to save providers.']);
+$auth_user = getAuthUser($conn);
+if ($auth_user['role'] !== 'client') {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Only clients can save providers.']);
     exit;
 }
-$user_id = (int)$payload['id'];
+$user_id = (int)$auth_user['id'];
 
 $data = json_decode(file_get_contents('php://input'), true);
 if (empty($data['provider_id'])) {

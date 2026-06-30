@@ -5,18 +5,15 @@ require_once '../config/db.php';
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 
-$token   = getBearerToken();
-$payload = verifyToken($token);
-if (!$payload) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Invalid or expired token.']);
-    exit;
-}
-
-$user_id = (int)$payload['id'];
+$user = getAuthUser($conn);
+$user_id = (int)$user['id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $result = mysqli_query($conn, "SELECT id, fname, lname, email, phone, role, created_at FROM users WHERE id = $user_id LIMIT 1");
+    $result = mysqli_query($conn, "SELECT u.id, u.fname, u.lname, u.email, u.phone, u.role, u.created_at,
+                                          c.vehicle_type, c.vehicle_brand
+                                   FROM users u
+                                   LEFT JOIN clients c ON c.user_id = u.id AND u.role = 'client'
+                                   WHERE u.id = $user_id LIMIT 1");
     $user   = mysqli_fetch_assoc($result);
 
     if ($user) {

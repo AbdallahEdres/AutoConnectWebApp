@@ -8,6 +8,17 @@
   * Fetch current user's call history/bookings and render them in the table body.
   */
 function initHistoryPage() {
+  var storedUser = JSON.parse(localStorage.getItem("autoconnect_user") || "null");
+  if (!storedUser || storedUser.role !== "client") {
+    var tbody = document.getElementById("history-body");
+    if (tbody) {
+      tbody.innerHTML = "<tr><td colspan='2' style='padding:1rem 0.5rem;color:var(--text-muted)'>" +
+        (currentLang === "ar" ? "هذه الصفحة للعملاء فقط" : "This page is for clients only") +
+        "</td></tr>";
+    }
+    return;
+  }
+
   getBookings().then(function (bookings) {
     var tbody = document.getElementById("history-body");
     if (!tbody) return;

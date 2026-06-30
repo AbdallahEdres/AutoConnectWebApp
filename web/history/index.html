@@ -14,17 +14,7 @@
   <div id="site-header"></div>
 
   <div class="layout-with-sidebar container page-main" style="padding-top:1.5rem">
-    <aside class="sidebar">
-      <nav class="sidebar-nav">
-        <a href="../profile/index.html">📊 <span data-i18n="nav_dashboard"></span></a>
-        <a href="../history/index.html" class="active">🕐 <span data-i18n="service_history"></span></a>
-        <a href="../favorites/index.html">🔖 <span data-i18n="nav_favorites"></span></a>
-        <a href="../settings/index.html">⚙ <span data-i18n="settings_title"></span></a>
-        <a href="#" onclick="logoutUser(); return false;" style="color:var(--accent-red, #e74c3c)">🚪 <span data-i18n="logout"></span></a>
-      </nav>
-      <p style="margin-top:1.5rem;font-size:0.8rem;color:var(--text-secondary)" data-i18n="system_status"></p>
-      <p><span class="status-dot open"></span> <span data-i18n="connected"></span></p>
-    </aside>
+    <aside class="sidebar" id="sidebar-nav"></aside>
 
     <div>
       <h1 style="color:var(--accent-yellow);margin-bottom:0.25rem" data-i18n="service_history"></h1>

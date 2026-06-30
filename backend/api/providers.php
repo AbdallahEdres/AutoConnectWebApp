@@ -11,10 +11,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-// Start with a base query — always return all active providers
+$status_filter = (!empty($_GET['status']) && $_GET['status'] === 'pending') ? 'pending' : 'active';
+
 $sql = "SELECT
             p.id, p.name_en, p.name_ar, p.phone, p.address_en, p.address_ar, p.city_en, p.city_ar,
-            p.lat, p.lng, p.status AS provider_status,
+            p.lat, p.lng, p.status AS provider_status, p.verified_at,
             c.name_en AS category_name_en, c.name_ar AS category_name_ar, c.slug AS category_slug,
             EXISTS (
                 SELECT 1 FROM working_hours wh
@@ -28,7 +29,7 @@ $sql = "SELECT
             (SELECT photo_url FROM provider_photos WHERE provider_id = p.id ORDER BY sort_order ASC LIMIT 1) AS image
         FROM providers p
         INNER JOIN categories c ON p.category_id = c.id
-        WHERE p.status = 'active'";
+        WHERE p.status = '$status_filter'";
 
 // Filter by category slug (e.g. ?category_slug=mechanic)
 if (!empty($_GET['category_slug'])) {
@@ -65,7 +66,8 @@ while ($row = mysqli_fetch_assoc($result)) {
     $row['rating'] = (float) $row['rating'];
     $row['review_count'] = (int) $row['review_count'];
     $row['is_open_now'] = (bool) $row['is_open_now'];
-    $row['status'] = $row['is_open_now'] ? 'open' : 'closed';
+    $row['provider_status'] = $row['provider_status'];
+    $row['status'] = $status_filter === 'pending' ? $row['provider_status'] : ($row['is_open_now'] ? 'open' : 'closed');
     unset($row['provider_status']);
     if (empty($row['image'])) {
         $row['image'] = 'assets/images/provider_default.png';

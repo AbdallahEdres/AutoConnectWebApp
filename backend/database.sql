@@ -24,6 +24,26 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 2a. Clients Subtype Table
+CREATE TABLE IF NOT EXISTS clients (
+    user_id INT PRIMARY KEY,
+    vehicle_type VARCHAR(100),
+    vehicle_brand VARCHAR(100),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 2b. Agents Subtype Table
+CREATE TABLE IF NOT EXISTS agents (
+    user_id INT PRIMARY KEY,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 2c. Supervisors Subtype Table
+CREATE TABLE IF NOT EXISTS supervisors (
+    user_id INT PRIMARY KEY,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- 3. Vehicle Types Table
 CREATE TABLE IF NOT EXISTS vehicle_types (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -45,12 +65,14 @@ CREATE TABLE IF NOT EXISTS providers (
     city_ar VARCHAR(100),
     lat DECIMAL(10, 8),
     lng DECIMAL(11, 8),
-    status VARCHAR(50) DEFAULT 'active',
+    status VARCHAR(50) DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     verified_at TIMESTAMP NULL,
-    user_id INT NOT NULL,
+    created_by INT NULL,
+    verified_by INT NULL,
     category_id INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (verified_by) REFERENCES supervisors(user_id) ON DELETE SET NULL,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT
 );
 
@@ -92,7 +114,7 @@ CREATE TABLE IF NOT EXISTS reviews (
     provider_id INT NOT NULL,
     user_id INT NOT NULL,
     FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES clients(user_id) ON DELETE CASCADE
 );
 
 -- 9. Bookings Table
@@ -101,7 +123,7 @@ CREATE TABLE IF NOT EXISTS bookings (
     user_id INT NOT NULL,
     provider_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES clients(user_id) ON DELETE CASCADE,
     FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE CASCADE
 );
 
@@ -110,7 +132,7 @@ CREATE TABLE IF NOT EXISTS saves (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     provider_id INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES clients(user_id) ON DELETE CASCADE,
     FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE CASCADE
 );
 
@@ -126,21 +148,28 @@ INSERT IGNORE INTO categories (id, name_en, name_ar, slug, category_id) VALUES
 (4, 'Mechanics',           'ميكانيكي',          'mechanics',    1),
 (5, 'Electrician',         'كهربائي',           'electrician',  1);
 
--- Insert Users (Mock passwords for simplicity)
+-- Insert Users (Passwords are bcrypt hashes of '123456' via password_hash())
+-- role: 'client' = end customer | 'agent' = workshop owner | 'supervisor' = platform admin
 INSERT IGNORE INTO users (id, fname, lname, email, password, phone, role) VALUES
-(1, 'Ahmed',   'Ali',   'ahmed@example.com',   '123456', '01000000000', 'provider'),
-(2, 'Mohamed', 'Omar',  'mohamed@example.com', '123456', '01111111111', 'provider'),
-(3, 'Sara',    'Kamal', 'sara@example.com',    '123456', '01222222222', 'client'),
-(4, 'Mostafa', 'Hassan', 'mostafa.garage@example.com', '123456', '01010001001', 'provider'),
-(5, 'Mariam',  'Nabil',  'mariam.motocare@example.com', '123456', '01010001002', 'provider'),
-(6, 'Youssef', 'Samir',  'youssef.auto@example.com', '123456', '01010001003', 'provider'),
-(7, 'Hany',    'Fawzy',  'hany.electric@example.com', '123456', '01010001004', 'provider'),
-(8, 'Karim',   'Adel',   'karim.moto@example.com', '123456', '01010001005', 'provider'),
-(9, 'Nour',    'Tarek',  'nour.service@example.com', '123456', '01010001006', 'provider'),
-(10, 'Ibrahim', 'Sayed', 'ibrahim.road@example.com', '123456', '01010001007', 'provider'),
-(11, 'Omar',   'Maher',  'omar.october@example.com', '123456', '01010001008', 'provider'),
-(12, 'Dina',   'Ashraf', 'dina.alex@example.com', '123456', '01010001009', 'provider'),
-(13, 'Mahmoud', 'Reda',  'mahmoud.delta@example.com', '123456', '01010001010', 'provider');
+(1,  'Ahmed',   'Ali',    'ahmed@example.com',            '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01000000000', 'agent'),
+(2,  'Mohamed', 'Omar',   'mohamed@example.com',          '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01111111111', 'agent'),
+(3,  'Sara',    'Kamal',  'sara@example.com',             '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01222222222', 'client'),
+(4,  'Mostafa', 'Hassan', 'mostafa.garage@example.com',   '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01010001001', 'agent'),
+(5,  'Mariam',  'Nabil',  'mariam.motocare@example.com',  '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01010001002', 'agent'),
+(6,  'Youssef', 'Samir',  'youssef.auto@example.com',     '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01010001003', 'agent'),
+(7,  'Hany',    'Fawzy',  'hany.electric@example.com',    '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01010001004', 'agent'),
+(8,  'Karim',   'Adel',   'karim.moto@example.com',       '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01010001005', 'agent'),
+(9,  'Nour',    'Tarek',  'nour.service@example.com',     '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01010001006', 'agent'),
+(10, 'Ibrahim', 'Sayed',  'ibrahim.road@example.com',     '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01010001007', 'agent'),
+(11, 'Omar',    'Maher',  'omar.october@example.com',     '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01010001008', 'agent'),
+(12, 'Dina',    'Ashraf', 'dina.alex@example.com',        '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01010001009', 'agent'),
+(13, 'Mahmoud', 'Reda',   'mahmoud.delta@example.com',    '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01010001010', 'agent'),
+(14, 'Admin',   'Super',  'admin@autoconnect.com',        '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01099999999', 'supervisor');
+
+-- Insert Subtype rows (must match role in users table)
+INSERT IGNORE INTO clients     (user_id, vehicle_type, vehicle_brand) VALUES (3, 'Sedan', 'Toyota');
+INSERT IGNORE INTO agents      (user_id) VALUES (1),(2),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13);
+INSERT IGNORE INTO supervisors (user_id) VALUES (14);
 
 -- Insert Vehicle Types
 INSERT IGNORE INTO vehicle_types (id, name_en, name_ar) VALUES
@@ -150,19 +179,19 @@ INSERT IGNORE INTO vehicle_types (id, name_en, name_ar) VALUES
 (4, 'Motorcycle', 'دراجة نارية');
 
 -- Insert Providers
-INSERT INTO providers (id, name_en, name_ar, phone, address_en, address_ar, bio_en, bio_ar, city_en, city_ar, lat, lng, status, user_id, category_id) VALUES
-(1, 'Ahmed Auto Repair', 'أحمد لإصلاح السيارات', '01000000000', '10 Main St', '١٠ الشارع الرئيسي', 'Routine maintenance, engines, and diagnostics.', 'صيانة دورية ومحركات وفحص كمبيوتر.', 'Cairo', 'القاهرة', 30.04440000, 31.23570000, 'active', 1, 4),
-(2, 'Fast Rescue Winch', 'ونش الإنقاذ السريع',   '01111111111', 'Ring Road',  'الطريق الدائري',    'Fast towing and roadside rescue.', 'ونش سريع وخدمة إنقاذ على الطريق.', 'Giza',  'الجيزة',  30.01310000, 31.20890000, 'active', 2, 2),
-(3, 'Nasr City Motors', 'ناسـر سيتي موتورز', '01010001001', 'Abbas El Akkad St, Nasr City', 'شارع عباس العقاد، مدينة نصر', 'Car engine repair, brakes, suspension, and computer diagnostics.', 'إصلاح محركات السيارات والفرامل والعفشة وفحص الكمبيوتر.', 'Cairo', 'القاهرة', 30.06260000, 31.34000000, 'active', 4, 4),
-(4, 'Maadi Bike & Auto Garage', 'معادي بايك وأوتو جراج', '01010001002', 'Road 9, Maadi', 'شارع ٩، المعادي', 'Mixed car and motorcycle garage for oil changes, tires, and quick maintenance.', 'جراج سيارات وموتوسيكلات لتغيير الزيت والإطارات والصيانة السريعة.', 'Cairo', 'القاهرة', 29.96020000, 31.25690000, 'active', 5, 4),
-(5, 'Alex Desert Road Garage', 'جراج طريق إسكندرية الصحراوي', '01010001003', 'Alexandria Desert Road, Al Amreya', 'طريق الإسكندرية الصحراوي، العامرية', 'Roadside-friendly car repair, cooling systems, and transmission checks.', 'إصلاح سيارات قريب من الطريق وأنظمة تبريد وفحص فتيس.', 'Alexandria', 'الإسكندرية', 31.16560000, 29.88020000, 'active', 6, 4),
-(6, 'Zagazig Auto Electric', 'زقازيق أوتو كهرباء', '01010001004', 'El Galaa St, Zagazig', 'شارع الجلاء، الزقازيق', 'Auto electrical repairs, batteries, alternators, sensors, and ECU scans.', 'كهرباء سيارات وبطاريات ودينامو وحساسات وفحص كمبيوتر.', 'Zagazig', 'الزقازيق', 30.58770000, 31.50200000, 'active', 7, 5),
-(7, 'Mansoura MotoCare', 'المنصورة موتو كير', '01010001005', 'El Gomhoria St, Mansoura', 'شارع الجمهورية، المنصورة', 'Motorcycle specialist for scooters, delivery bikes, chains, brakes, and tuning.', 'متخصص موتوسيكلات وسكوتر ودراجات دليفري وسلاسل وفرامل وضبط.', 'Mansoura', 'المنصورة', 31.04090000, 31.37850000, 'active', 8, 4),
-(8, 'Tanta Gear Garage', 'طنطا جير جراج', '01010001006', 'El Bahr St, Tanta', 'شارع البحر، طنطا', 'Manual and automatic gearbox service, clutch repairs, and general mechanics.', 'صيانة فتيس مانيوال وأوتوماتيك ودبرياج وميكانيكا عامة.', 'Tanta', 'طنطا', 30.78650000, 31.00040000, 'active', 9, 4),
-(9, 'Hurghada Road Service', 'الغردقة رود سيرفيس', '01010001007', 'El Nasr Road, Hurghada', 'طريق النصر، الغردقة', 'Tourist-area car service, AC repair, tires, and emergency checks.', 'خدمة سيارات في المناطق السياحية وتكييف وإطارات وفحص طوارئ.', 'Hurghada', 'الغردقة', 27.25790000, 33.81160000, 'active', 10, 4),
-(10, '6 October Riders Garage', 'جراج رايدرز ٦ أكتوبر', '01010001008', 'Central Axis, 6th of October', 'المحور المركزي، ٦ أكتوبر', 'Motorcycle and car quick service near 6 October and Sheikh Zayed.', 'خدمة سريعة للموتوسيكلات والسيارات قرب ٦ أكتوبر والشيخ زايد.', '6th of October', '٦ أكتوبر', 29.92850000, 30.91880000, 'active', 11, 4),
-(11, 'Alex Moto Clinic', 'إسكندرية موتو كلينك', '01010001009', 'Sidi Gaber, Alexandria', 'سيدي جابر، الإسكندرية', 'Motorcycle diagnostics, carburetor cleaning, injection systems, and brakes.', 'تشخيص موتوسيكلات وتنظيف كربراتير وأنظمة حقن وفرامل.', 'Alexandria', 'الإسكندرية', 31.21810000, 29.94200000, 'active', 12, 4),
-(12, 'Asyut Auto Works', 'أسيوط أوتو ووركس', '01010001010', 'El Hilaly St, Asyut', 'شارع الهلالي، أسيوط', 'Upper Egypt garage for engine overhaul, suspension, oil, and inspection.', 'جراج في الصعيد لعمرة المحركات والعفشة والزيوت والفحص.', 'Asyut', 'أسيوط', 27.18010000, 31.18370000, 'active', 13, 4)
+INSERT INTO providers (id, name_en, name_ar, phone, address_en, address_ar, bio_en, bio_ar, city_en, city_ar, lat, lng, status, category_id, created_by, verified_at, verified_by) VALUES
+(1,  'Ahmed Auto Repair',          'أحمد لإصلاح السيارات',           '01000000000', '10 Main St',                        '١٠ الشارع الرئيسي',                  'Routine maintenance, engines, and diagnostics.',                          'صيانة دورية ومحركات وفحص كمبيوتر.',                              'Cairo',         'القاهرة',     30.04440000, 31.23570000, 'active',  4,  1, '2025-01-15 10:00:00', 14),
+(2,  'Fast Rescue Winch',          'ونش الإنقاذ السريع',              '01111111111', 'Ring Road',                         'الطريق الدائري',                     'Fast towing and roadside rescue.',                                        'ونش سريع وخدمة إنقاذ على الطريق.',                               'Giza',          'الجيزة',      30.01310000, 31.20890000, 'active',  2,  2, '2025-01-15 10:00:00', 14),
+(3,  'Nasr City Motors',           'ناسـر سيتي موتورز',               '01010001001', 'Abbas El Akkad St, Nasr City',      'شارع عباس العقاد، مدينة نصر',       'Car engine repair, brakes, suspension, and computer diagnostics.',        'إصلاح محركات السيارات والفرامل والعفشة وفحص الكمبيوتر.',         'Cairo',         'القاهرة',     30.06260000, 31.34000000, 'active',  4,  4, '2025-01-16 09:00:00', 14),
+(4,  'Maadi Bike & Auto Garage',   'معادي بايك وأوتو جراج',           '01010001002', 'Road 9, Maadi',                     'شارع ٩، المعادي',                    'Mixed car and motorcycle garage for oil changes, tires, and quick maintenance.', 'جراج سيارات وموتوسيكلات لتغيير الزيت والإطارات والصيانة السريعة.', 'Cairo',       'القاهرة',     29.96020000, 31.25690000, 'active',  4,  5, '2025-01-16 09:30:00', 14),
+(5,  'Alex Desert Road Garage',    'جراج طريق إسكندرية الصحراوي',    '01010001003', 'Alexandria Desert Road, Al Amreya', 'طريق الإسكندرية الصحراوي، العامرية','Roadside-friendly car repair, cooling systems, and transmission checks.',  'إصلاح سيارات قريب من الطريق وأنظمة تبريد وفحص فتيس.',           'Alexandria',    'الإسكندرية',  31.16560000, 29.88020000, 'active',  4,  6, '2025-01-17 11:00:00', 14),
+(6,  'Zagazig Auto Electric',      'زقازيق أوتو كهرباء',              '01010001004', 'El Galaa St, Zagazig',              'شارع الجلاء، الزقازيق',              'Auto electrical repairs, batteries, alternators, sensors, and ECU scans.','كهرباء سيارات وبطاريات ودينامو وحساسات وفحص كمبيوتر.',           'Zagazig',       'الزقازيق',    30.58770000, 31.50200000, 'active',  5,  7, '2025-01-17 11:30:00', 14),
+(7,  'Mansoura MotoCare',          'المنصورة موتو كير',               '01010001005', 'El Gomhoria St, Mansoura',          'شارع الجمهورية، المنصورة',           'Motorcycle specialist for scooters, delivery bikes, chains, brakes, and tuning.','متخصص موتوسيكلات وسكوتر ودراجات دليفري وسلاسل وفرامل وضبط.',  'Mansoura',      'المنصورة',    31.04090000, 31.37850000, 'active',  4,  8, '2025-01-18 08:00:00', 14),
+(8,  'Tanta Gear Garage',          'طنطا جير جراج',                   '01010001006', 'El Bahr St, Tanta',                 'شارع البحر، طنطا',                   'Manual and automatic gearbox service, clutch repairs, and general mechanics.','صيانة فتيس مانيوال وأوتوماتيك ودبرياج وميكانيكا عامة.',        'Tanta',         'طنطا',        30.78650000, 31.00040000, 'active',  4,  9, '2025-01-18 08:30:00', 14),
+(9,  'Hurghada Road Service',      'الغردقة رود سيرفيس',              '01010001007', 'El Nasr Road, Hurghada',            'طريق النصر، الغردقة',                'Tourist-area car service, AC repair, tires, and emergency checks.',       'خدمة سيارات في المناطق السياحية وتكييف وإطارات وفحص طوارئ.',     'Hurghada',      'الغردقة',     27.25790000, 33.81160000, 'active',  4, 10, '2025-01-19 10:00:00', 14),
+(10, '6 October Riders Garage',    'جراج رايدرز ٦ أكتوبر',           '01010001008', 'Central Axis, 6th of October',     'المحور المركزي، ٦ أكتوبر',           'Motorcycle and car quick service near 6 October and Sheikh Zayed.',       'خدمة سريعة للموتوسيكلات والسيارات قرب ٦ أكتوبر والشيخ زايد.', '6th of October','٦ أكتوبر',    29.92850000, 30.91880000, 'active',  4, 11, '2025-01-19 10:30:00', 14),
+(11, 'Alex Moto Clinic',           'إسكندرية موتو كلينك',             '01010001009', 'Sidi Gaber, Alexandria',            'سيدي جابر، الإسكندرية',              'Motorcycle diagnostics, carburetor cleaning, injection systems, and brakes.','تشخيص موتوسيكلات وتنظيف كربراتير وأنظمة حقن وفرامل.',          'Alexandria',    'الإسكندرية',  31.21810000, 29.94200000, 'pending', 4, 12, NULL,                  NULL),
+(12, 'Asyut Auto Works',           'أسيوط أوتو ووركس',                '01010001010', 'El Hilaly St, Asyut',              'شارع الهلالي، أسيوط',                'Upper Egypt garage for engine overhaul, suspension, oil, and inspection.','جراج في الصعيد لعمرة المحركات والعفشة والزيوت والفحص.',          'Asyut',         'أسيوط',       27.18010000, 31.18370000, 'pending', 4, 13, NULL,                  NULL)
 ON DUPLICATE KEY UPDATE
     name_en = VALUES(name_en),
     name_ar = VALUES(name_ar),
@@ -176,8 +205,10 @@ ON DUPLICATE KEY UPDATE
     lat = VALUES(lat),
     lng = VALUES(lng),
     status = VALUES(status),
-    user_id = VALUES(user_id),
-    category_id = VALUES(category_id);
+    created_by = VALUES(created_by),
+    category_id = VALUES(category_id),
+    verified_at = VALUES(verified_at),
+    verified_by = VALUES(verified_by);
 
 -- Reset seeded child rows so repeated imports do not duplicate photos, hours, tags, saves, or reviews.
 DELETE FROM tagged_with WHERE provider_id BETWEEN 1 AND 12;

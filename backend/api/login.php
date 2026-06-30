@@ -22,7 +22,11 @@ if (empty($data['email']) || empty($data['password'])) {
 $email    = mysqli_real_escape_string($conn, trim($data['email']));
 $password = $data['password'];
 
-$result = mysqli_query($conn, "SELECT id, fname, lname, email, password, role FROM users WHERE email = '$email' LIMIT 1");
+$result = mysqli_query($conn, "SELECT u.id, u.fname, u.lname, u.email, u.password, u.role,
+                                      c.vehicle_type, c.vehicle_brand
+                               FROM users u
+                               LEFT JOIN clients c ON c.user_id = u.id AND u.role = 'client'
+                               WHERE u.email = '$email' LIMIT 1");
 $user   = mysqli_fetch_assoc($result);
 
 $password_ok = false;

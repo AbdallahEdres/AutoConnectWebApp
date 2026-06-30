@@ -4,7 +4,7 @@
  * =============================================================================
  */
 
-var registerRole = "customer";
+var registerRole = "client";
 var selectedPhotos = [];
 var registerMapInitialized = false;
 var registerLat = DEFAULT_LOCATION.lat;
@@ -250,18 +250,21 @@ function loadCitySelect() {
 }
 
 /**
-  * Toggle field groups, inputs, and map view between Customer & Provider modes.
+  * Toggle field groups, inputs, and map view between Client / Agent / Supervisor modes.
   */
 function setRegisterRole(role) {
   registerRole = role;
-  var customerFields = document.getElementById("customer-fields");
-  var providerFields = document.getElementById("provider-fields");
-  var card = document.getElementById("register-card");
-  var subtitle = document.getElementById("register-subtitle");
+  var clientFields     = document.getElementById("customer-fields");
+  var supervisorFields = document.getElementById("supervisor-fields");
+  var card      = document.getElementById("register-card");
+  var subtitle  = document.getElementById("register-subtitle");
   var submitBtn = document.getElementById("register-submit");
-  var toggle = document.getElementById("register-role-toggle");
+  var toggle    = document.getElementById("register-role-toggle");
 
-  var isProvider = role === "provider";
+  var isClient     = role === "client";
+  var isAgent      = role === "agent";
+  var isSupervisor = role === "supervisor";
+  var agentFields  = document.getElementById("agent-fields");
 
   if (toggle) {
     toggle.querySelectorAll("button").forEach(function (btn) {
@@ -269,26 +272,16 @@ function setRegisterRole(role) {
     });
   }
 
-  if (customerFields) customerFields.classList.toggle("register-fields-hidden", isProvider);
-  if (providerFields) providerFields.classList.toggle("register-fields-hidden", !isProvider);
-  if (card) card.classList.toggle("auth-card--provider", isProvider);
+  if (clientFields)     clientFields.classList.toggle("register-fields-hidden", !isClient);
+  if (agentFields)      agentFields.classList.toggle("register-fields-hidden", !isAgent);
+  if (supervisorFields) supervisorFields.classList.toggle("register-fields-hidden", !isSupervisor);
+  if (card) card.classList.remove("auth-card--provider");
   if (subtitle) {
-    subtitle.textContent = isProvider ? t("register_provider_sub") : t("register_sub");
-    subtitle.classList.toggle("provider-mode", isProvider);
+    subtitle.textContent = t("register_sub");
+    subtitle.classList.remove("provider-mode");
   }
   if (submitBtn) {
-    submitBtn.textContent = isProvider ? t("register_workshop") : t("create_account");
-  }
-
-  var providerRequiredIds = ["name-en", "name-ar", "mobile", "provider-category", "city-select", "address-en"];
-  providerRequiredIds.forEach(function (id) {
-    var el = document.getElementById(id);
-    if (el) el.required = isProvider;
-  });
-
-  if (isProvider && !registerMapInitialized) {
-    registerMapInitialized = true;
-    setTimeout(initRegisterMap, 50);
+    submitBtn.textContent = t("create_account");
   }
 }
 
@@ -300,26 +293,24 @@ function handleRegisterSubmit(e) {
 
   if (!validateRegisterForm()) return;
 
-  var isProvider = registerRole === "provider";
-
   var userData = {
     role: registerRole,
     email: document.getElementById("reg-email").value.trim(),
     password: document.getElementById("reg-password").value,
     fname: document.getElementById("fname").value.trim(),
     lname: document.getElementById("lname").value.trim(),
-    phone: isProvider
-      ? document.getElementById("mobile").value.trim()
-      : document.getElementById("phone").value.trim()
+    phone: (document.getElementById("phone") || {}).value || ""
   };
+
+  if (registerRole === "client") {
+    var vtEl = document.getElementById("vehicle-type");
+    var vbEl = document.getElementById("vehicle-brand");
+    userData.vehicle_type  = vtEl ? vtEl.value.trim() : "";
+    userData.vehicle_brand = vbEl ? vbEl.value.trim() : "";
+  }
 
   var submitBtn = document.getElementById("register-submit");
   if (submitBtn) submitBtn.disabled = true;
-
-  if (isProvider) {
-    saveProviderProfile(userData, submitBtn);
-    return;
-  }
 
   registerUser(userData).then(function (res) {
     if (!res.success) {
@@ -422,7 +413,7 @@ function setupRoleToggle() {
     btn.addEventListener("click", function () {
       toggle.querySelectorAll("button").forEach(function (b) { b.classList.remove("active"); });
       btn.classList.add("active");
-      setRegisterRole(btn.getAttribute("data-role") || "customer");
+      setRegisterRole(btn.getAttribute("data-role") || "client");
     });
   });
 }
@@ -437,7 +428,9 @@ function initRegisterPage() {
   loadRegisterCategories();
   loadCitySelect();
   var params = new URLSearchParams(window.location.search);
-  setRegisterRole(params.get("role") === "provider" ? "provider" : "customer");
+  var roleParam = params.get("role");
+  var initRole = roleParam === "agent" ? "agent" : (roleParam === "supervisor" ? "supervisor" : "client");
+  setRegisterRole(initRole);
   setupPhotoPreview();
   setupRoleToggle();
 

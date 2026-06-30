@@ -19,7 +19,8 @@ if ($method === 'GET') {
 
     $result = mysqli_query($conn, "SELECT r.*, u.fname, u.lname
         FROM reviews r
-        JOIN users u ON r.user_id = u.id
+        JOIN clients cl ON r.user_id = cl.user_id
+        JOIN users u ON cl.user_id = u.id
         WHERE r.provider_id = $provider_id
         ORDER BY r.created_at DESC");
 
@@ -37,14 +38,13 @@ if ($method === 'GET') {
 
 // ── POST: add a new review ───────────────────────────────────
 if ($method === 'POST') {
-    $token   = getBearerToken();
-    $payload = verifyToken($token);
-    if (!$payload) {
-        http_response_code(401);
-        echo json_encode(['success' => false, 'message' => 'Login required to post a review.']);
+    $auth_user = getAuthUser($conn);
+    if ($auth_user['role'] !== 'client') {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'Only clients can post reviews.']);
         exit;
     }
-    $user_id = (int)$payload['id'];
+    $user_id = (int)$auth_user['id'];
 
     $data = json_decode(file_get_contents('php://input'), true);
     if (empty($data['provider_id']) || empty($data['rate'])) {

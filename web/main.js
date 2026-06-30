@@ -24,7 +24,8 @@ var API_ENDPOINTS = {
   reviews: "/reviews.php",
   bookings: "/bookings.php",
   favorites: "/favorites.php",
-  toggleFavorite: "/toggle_favorite.php"
+  toggleFavorite: "/toggle_favorite.php",
+  verifyProvider: "/verify_provider.php"
 };
 
 // =============================================================================
@@ -313,9 +314,13 @@ function updatePassword(data) {
   });
 }
 
-/** Standalone “join as workshop” page — adds row to providers table */
+/** Standalone join-as-workshop page -- adds row to providers table */
 function addProvider(data) {
-  return apiRequest("addProvider", { method: "POST", body: data });
+  return apiRequest('addProvider', { method: 'POST', body: data });
+}
+
+function verifyProvider(providerId) {
+  return apiRequest('verifyProvider', { method: 'POST', body: { provider_id: providerId } });
 }
 
 // ---------------------------------------------------------------------------
@@ -486,7 +491,17 @@ function renderHeader() {
 
   var token = localStorage.getItem("autoconnect_token");
   var user  = JSON.parse(localStorage.getItem("autoconnect_user") || "null");
+  var role  = user ? user.role : null;
   var authHtml;
+
+  // Add role-specific nav links
+  if (role === 'client') {
+    linksHtml += '<a href="../favorites/index.html" data-i18n="nav_favorites"></a>';
+    linksHtml += '<a href="../history/index.html" data-i18n="nav_history"></a>';
+  } else if (role === 'supervisor') {
+    linksHtml += '<a href="../verify/index.html" data-i18n="nav_verify"></a>';
+  }
+
   if (token && user) {
     authHtml =
       '<a href="' + base + 'profile/index.html" class="btn btn-sm btn-ghost" style="display:flex;align-items:center;gap:0.4rem">' +
@@ -540,7 +555,52 @@ function renderFooter() {
 }
 
 // =============================================================================
-// 8. initialization & shared event hooks
+// 8. sidebar navigation (role-aware)
+// =============================================================================
+
+function renderSidebar() {
+  var sidebarEl = document.getElementById("sidebar-nav");
+  if (!sidebarEl) return;
+
+  var storedUser = JSON.parse(localStorage.getItem("autoconnect_user") || "null");
+  var role = storedUser ? storedUser.role : "client";
+
+  var path = window.location.pathname;
+  var active = path.indexOf("/profile/")           !== -1 ? "profile"
+             : path.indexOf("/history/")           !== -1 ? "history"
+             : path.indexOf("/favorites/")         !== -1 ? "favorites"
+             : path.indexOf("/settings/")          !== -1 ? "settings"
+             : path.indexOf("/verify/")            !== -1 ? "verify"
+             : path.indexOf("/provider-register/") !== -1 ? "add-provider"
+             : "";
+
+  function link(page, href, icon, key) {
+    var cls = active === page ? ' class="active"' : '';
+    return '<a href="' + href + '"' + cls + '>' + icon + ' <span data-i18n="' + key + '"></span></a>';
+  }
+
+  var nav = link("profile", "../profile/index.html", "📊", "nav_dashboard");
+
+  if (role === "client") {
+    nav += link("history",        "../history/index.html",           "🕐", "service_history");
+    nav += link("favorites",      "../favorites/index.html",         "🔖", "nav_favorites");
+  } else if (role === "agent" || role === "supervisor") {
+    nav += link("add-provider",   "../provider-register/index.html", "➕", "add_provider");
+  } else if (role === "supervisor") {
+    nav += link("verify",         "../verify/index.html",            "✅", "nav_verify");
+  }
+
+  nav += link("settings", "../settings/index.html", "⚙", "settings_title");
+  nav += '<a href="#" onclick="logoutUser(); return false;" style="color:var(--accent-red,#e74c3c)">🚪 <span data-i18n="logout"></span></a>';
+
+  sidebarEl.innerHTML =
+    '<nav class="sidebar-nav">' + nav + '</nav>' +
+    '<p style="margin-top:1.5rem;font-size:0.8rem;color:var(--text-secondary)" data-i18n="system_status"></p>' +
+    '<p><span class="status-dot open"></span> <span data-i18n="connected"></span></p>';
+}
+
+// =============================================================================
+// 9. initialization & shared event hooks
 // =============================================================================
 
 /** Callback function that pages can override to run custom language update logic */
@@ -548,6 +608,7 @@ var onLanguageChange = null;
 
 document.addEventListener("DOMContentLoaded", function () {
   renderHeader();
+  renderSidebar();
   renderFooter();
   setLanguage(currentLang);
 

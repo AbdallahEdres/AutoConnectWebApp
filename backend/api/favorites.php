@@ -11,14 +11,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-$token   = getBearerToken();
-$payload = verifyToken($token);
-if (!$payload) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Unauthorized. Login to see favorites.']);
+$auth_user = getAuthUser($conn);
+if ($auth_user['role'] !== 'client') {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Only clients can access favorites.']);
     exit;
 }
-$user_id = (int)$payload['id'];
+$user_id = (int)$auth_user['id'];
 
 $result = mysqli_query($conn, "SELECT
         p.id, p.name_en, p.name_ar, p.phone, p.address_en, p.address_ar, p.city_en, p.city_ar, p.lat, p.lng,

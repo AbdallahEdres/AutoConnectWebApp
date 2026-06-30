@@ -1,5 +1,5 @@
 <?php
-// api/add_provider.php — POST: create a new provider with hours, photos, vehicle types
+// api/add_provider.php — POST: create a new provider (public, agent, or supervisor)
 require_once '../config/db.php';
 
 header('Content-Type: application/json');
@@ -13,14 +13,24 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $data = json_decode(file_get_contents('php://input'), true) ?? [];
 
+// Detect who is submitting — optional auth
 $token   = getBearerToken();
-$payload = verifyToken($token);
-if (empty($data['user_id']) && $payload) {
-    $data['user_id'] = (int)$payload['id'];
+$payload = $token ? verifyToken($token) : null;
+$auth_role = null;
+$auth_id   = null;
+
+if ($payload) {
+    $uid    = (int)$payload['id'];
+    $u_res  = mysqli_query($conn, "SELECT id, role, is_active FROM users WHERE id = $uid AND is_active = 1 LIMIT 1");
+    $u_row  = $u_res ? mysqli_fetch_assoc($u_res) : null;
+    if ($u_row) {
+        $auth_role = $u_row['role'];
+        $auth_id   = (int)$u_row['id'];
+    }
 }
 
 // Validate required fields
-$required_fields = ['name_en', 'name_ar', 'phone', 'address_en', 'city_en', 'user_id', 'category_id', 'working_hours'];
+$required_fields = ['name_en', 'name_ar', 'phone', 'address_en', 'city_en', 'category_id', 'working_hours'];
 foreach ($required_fields as $field) {
     if (empty($data[$field])) {
         http_response_code(400);
@@ -39,7 +49,6 @@ $city_en    = mysqli_real_escape_string($conn, trim($data['city_en']));
 $city_ar    = mysqli_real_escape_string($conn, isset($data['city_ar']) ? trim($data['city_ar']) : '');
 $bio_en     = mysqli_real_escape_string($conn, isset($data['bio_en']) ? trim($data['bio_en']) : '');
 $bio_ar     = mysqli_real_escape_string($conn, isset($data['bio_ar']) ? trim($data['bio_ar']) : '');
-$user_id     = (int)$data['user_id'];
 $category_id = (int)$data['category_id'];
 $lat_sql     = !empty($data['lat']) ? (float)$data['lat'] : 'NULL';
 $lng_sql     = !empty($data['lng']) ? (float)$data['lng'] : 'NULL';
@@ -48,11 +57,35 @@ $working_hours = is_array($data['working_hours']) ? $data['working_hours'] : jso
 $vehicle_types = $data['vehicle_types'] ?? [];
 $photos        = $data['photos'] ?? [];
 
+// Determine status, created_by, verified_by, verified_at based on who is submitting
+if ($auth_role === 'supervisor') {
+    $status       = 'active';
+    $created_by   = $auth_id;
+    $verified_by  = $auth_id;
+    $verified_at  = 'NOW()';
+} elseif ($auth_role === 'agent') {
+    $status       = 'pending';
+    $created_by   = $auth_id;
+    $verified_by  = 'NULL';
+    $verified_at  = 'NULL';
+} else {
+    // Public (no auth or unknown role)
+    $status       = 'pending';
+    $created_by   = 'NULL';
+    $verified_by  = 'NULL';
+    $verified_at  = 'NULL';
+}
+
+$created_by_sql  = is_int($created_by) ? $created_by : 'NULL';
+$verified_by_sql = is_int($verified_by ?? null) ? $verified_by : 'NULL';
+
 mysqli_begin_transaction($conn);
 
 // A. Insert provider
-$ok = mysqli_query($conn, "INSERT INTO providers (name_en, name_ar, phone, address_en, address_ar, bio_en, bio_ar, city_en, city_ar, lat, lng, status, user_id, category_id)
-    VALUES ('$name_en', '$name_ar', '$phone', '$address_en', '$address_ar', '$bio_en', '$bio_ar', '$city_en', '$city_ar', $lat_sql, $lng_sql, 'active', $user_id, $category_id)");
+$ok = mysqli_query($conn, "INSERT INTO providers
+    (name_en, name_ar, phone, address_en, address_ar, bio_en, bio_ar, city_en, city_ar, lat, lng, status, category_id, created_by, verified_by, verified_at)
+    VALUES
+    ('$name_en', '$name_ar', '$phone', '$address_en', '$address_ar', '$bio_en', '$bio_ar', '$city_en', '$city_ar', $lat_sql, $lng_sql, '$status', $category_id, $created_by_sql, $verified_by_sql, $verified_at)");
 
 if (!$ok) {
     mysqli_rollback($conn);
@@ -64,7 +97,9 @@ $provider_id = mysqli_insert_id($conn);
 
 // B. Insert working hours
 if ($working_hours) {
+    $valid_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     foreach ($working_hours as $hour) {
+        if (!in_array($hour['day'] ?? '', $valid_days, true)) continue;
         $day        = mysqli_real_escape_string($conn, $hour['day']);
         $open_time  = mysqli_real_escape_string($conn, $hour['open_time'] ?? '');
         $close_time = mysqli_real_escape_string($conn, $hour['close_time'] ?? '');
@@ -115,9 +150,9 @@ if (!empty($photos) && is_array($photos)) {
 
 mysqli_commit($conn);
 echo json_encode([
-    'success' => true,
-    'message' => 'Provider added successfully.',
-    'data' => ['id' => $provider_id],
+    'success'     => true,
+    'message'     => 'Provider added successfully.',
+    'data'        => ['id' => $provider_id, 'status' => $status],
     'provider_id' => $provider_id
 ]);
 ?>

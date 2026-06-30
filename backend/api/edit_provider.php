@@ -12,14 +12,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Authentication
-$token   = getBearerToken();
-$payload = verifyToken($token);
-if (!$payload) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Unauthorized.']);
+$auth_user = getAuthUser($conn);
+if ($auth_user['role'] !== 'agent') {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Only agents can edit providers.']);
     exit;
 }
-$auth_user_id = (int)$payload['id'];
+$auth_user_id = (int)$auth_user['id'];
 
 $data = json_decode(file_get_contents('php://input'), true) ?? [];
 
@@ -30,8 +29,8 @@ if (empty($data['id'])) {
 }
 $provider_id = (int)$data['id'];
 
-// Check provider exists and belongs to this user
-$check = mysqli_query($conn, "SELECT id, user_id FROM providers WHERE id = $provider_id");
+// Check provider exists and was created by this agent
+$check = mysqli_query($conn, "SELECT id, created_by FROM providers WHERE id = $provider_id");
 $check_row = mysqli_fetch_assoc($check);
 
 if (!$check_row) {
@@ -39,9 +38,9 @@ if (!$check_row) {
     echo json_encode(['success' => false, 'message' => 'Provider not found.']);
     exit;
 }
-if ((int)$check_row['user_id'] !== $auth_user_id) {
+if ((int)$check_row['created_by'] !== $auth_user_id) {
     http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Forbidden. You do not own this provider profile.']);
+    echo json_encode(['success' => false, 'message' => 'Forbidden. You did not create this provider profile.']);
     exit;
 }
 

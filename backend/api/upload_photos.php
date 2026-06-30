@@ -11,15 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Only logged-in users can upload photos.
-$token   = getBearerToken();
-$payload = verifyToken($token);
-if (!$payload) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'You must be logged in to upload photos.']);
-    exit;
-}
-
 $upload_dir = __DIR__ . '/../uploads/providers/';
 
 // Create folder if it doesn't exist yet

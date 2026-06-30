@@ -43,7 +43,7 @@
 
 .role-toggle {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 0;
   background: var(--bg-input);
   border-radius: var(--radius-md);

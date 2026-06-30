@@ -108,7 +108,7 @@ while ($sim = mysqli_fetch_assoc($sim_result)) {
 // Final formatting
 $provider['id']                = (int)$provider['id'];
 $provider['category_id']       = (int)$provider['category_id'];
-$provider['user_id']           = (int)$provider['user_id'];
+$provider['created_by']        = $provider['created_by'] !== null ? (int)$provider['created_by'] : null;
 $provider['lat']               = $provider['lat'] !== null ? (float)$provider['lat'] : null;
 $provider['lng']               = $provider['lng'] !== null ? (float)$provider['lng'] : null;
 $provider['is_open_now']       = (bool)$provider['is_open_now'];

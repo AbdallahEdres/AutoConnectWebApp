@@ -23,7 +23,7 @@ foreach ($required as $field) {
 }
 
 // Minimum password length check.
-if (strlen($data['password']) < 8) {
+if (strlen($data['password']) < 6) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Password must be at least 8 characters long.']);
     exit;
@@ -37,21 +37,10 @@ $phone    = mysqli_real_escape_string($conn, isset($data['phone']) ? trim($data[
 $role     = $data['role'];
 
 if ($role === 'customer') $role = 'client';
-if (!in_array($role, ['client', 'provider'], true)) {
+if (!in_array($role, ['client', 'agent', 'supervisor'], true)) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Role must be "client" or "provider".']);
+    echo json_encode(['success' => false, 'message' => 'Role must be "client", "agent", or "supervisor".']);
     exit;
-}
-
-if ($role === 'provider') {
-    $provider_required = ['name_en', 'name_ar', 'phone', 'address_en', 'city_en', 'category_id', 'working_hours'];
-    foreach ($provider_required as $field) {
-        if (!isset($data[$field]) || $data[$field] === '' || $data[$field] === []) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => "Provider field '$field' is required."]);
-            exit;
-        }
-    }
 }
 
 // Check if email already exists
@@ -62,7 +51,6 @@ if (mysqli_num_rows($check) > 0) {
     exit;
 }
 
-$provider_id = null;
 mysqli_begin_transaction($conn);
 
 $ok = mysqli_query($conn, "INSERT INTO users (fname, lname, email, password, phone, role) VALUES ('$fname', '$lname', '$email', '$password', '$phone', '$role')");
@@ -70,71 +58,32 @@ $ok = mysqli_query($conn, "INSERT INTO users (fname, lname, email, password, pho
 if ($ok) {
     $user_id = mysqli_insert_id($conn);
 
-    if ($role === 'provider') {
-        $name_en     = mysqli_real_escape_string($conn, trim($data['name_en']));
-        $name_ar     = mysqli_real_escape_string($conn, trim($data['name_ar']));
-        $provider_phone = mysqli_real_escape_string($conn, trim($data['phone']));
-        $address_en  = mysqli_real_escape_string($conn, trim($data['address_en']));
-        $address_ar  = mysqli_real_escape_string($conn, isset($data['address_ar']) ? trim($data['address_ar']) : '');
-        $city_en     = mysqli_real_escape_string($conn, trim($data['city_en']));
-        $city_ar     = mysqli_real_escape_string($conn, isset($data['city_ar']) ? trim($data['city_ar']) : '');
-        $bio_en      = mysqli_real_escape_string($conn, isset($data['bio_en']) ? trim($data['bio_en']) : '');
-        $bio_ar      = mysqli_real_escape_string($conn, isset($data['bio_ar']) ? trim($data['bio_ar']) : '');
-        $category_id = (int)$data['category_id'];
-        $lat_sql     = (isset($data['lat']) && $data['lat'] !== '') ? (float)$data['lat'] : 'NULL';
-        $lng_sql     = (isset($data['lng']) && $data['lng'] !== '') ? (float)$data['lng'] : 'NULL';
-
-        $ok = mysqli_query($conn, "INSERT INTO providers (name_en, name_ar, phone, address_en, address_ar, bio_en, bio_ar, city_en, city_ar, lat, lng, status, user_id, category_id)
-            VALUES ('$name_en', '$name_ar', '$provider_phone', '$address_en', '$address_ar', '$bio_en', '$bio_ar', '$city_en', '$city_ar', $lat_sql, $lng_sql, 'active', $user_id, $category_id)");
-
+    // Insert into the matching subtype table
+    if ($role === 'client') {
+        $vehicle_type  = mysqli_real_escape_string($conn, isset($data['vehicle_type'])  ? trim($data['vehicle_type'])  : '');
+        $vehicle_brand = mysqli_real_escape_string($conn, isset($data['vehicle_brand']) ? trim($data['vehicle_brand']) : '');
+        $ok = mysqli_query($conn, "INSERT INTO clients (user_id, vehicle_type, vehicle_brand) VALUES ($user_id, '$vehicle_type', '$vehicle_brand')");
         if (!$ok) {
             mysqli_rollback($conn);
             http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Failed to save provider profile.']);
+            echo json_encode(['success' => false, 'message' => 'Failed to create client profile.']);
             exit;
         }
-
-        $provider_id = mysqli_insert_id($conn);
-
-        $working_hours = is_array($data['working_hours']) ? $data['working_hours'] : json_decode($data['working_hours'], true);
-        $valid_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-        if ($working_hours) {
-            foreach ($working_hours as $hour) {
-                // Skip any entry with an invalid day name.
-                if (!in_array($hour['day'] ?? '', $valid_days, true)) continue;
-
-                $day        = mysqli_real_escape_string($conn, $hour['day']);
-                $open_time  = mysqli_real_escape_string($conn, $hour['open_time'] ?? '');
-                $close_time = mysqli_real_escape_string($conn, $hour['close_time'] ?? '');
-                $is_close   = (int)($hour['is_close'] ?? 0);
-                $open_sql   = $open_time  ? "'$open_time'"  : 'NULL';
-                $close_sql  = $close_time ? "'$close_time'" : 'NULL';
-
-                $ok = mysqli_query($conn, "INSERT INTO working_hours (provider_id, day, open_time, close_time, is_close)
-                    VALUES ($provider_id, '$day', $open_sql, $close_sql, $is_close)");
-
-                if (!$ok) {
-                    mysqli_rollback($conn);
-                    http_response_code(500);
-                    echo json_encode(['success' => false, 'message' => "Failed to save working hours for $day."]);
-                    exit;
-                }
-            }
+    } elseif ($role === 'agent') {
+        $ok = mysqli_query($conn, "INSERT INTO agents (user_id) VALUES ($user_id)");
+        if (!$ok) {
+            mysqli_rollback($conn);
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Failed to create agent profile.']);
+            exit;
         }
-
-        if (!empty($data['photos']) && is_array($data['photos'])) {
-            foreach ($data['photos'] as $index => $url) {
-                $url = mysqli_real_escape_string($conn, $url);
-                $sort_order = $index + 1;
-                $ok = mysqli_query($conn, "INSERT INTO provider_photos (provider_id, photo_url, sort_order) VALUES ($provider_id, '$url', $sort_order)");
-                if (!$ok) {
-                    mysqli_rollback($conn);
-                    http_response_code(500);
-                    echo json_encode(['success' => false, 'message' => 'Failed to save provider photo.']);
-                    exit;
-                }
-            }
+    } elseif ($role === 'supervisor') {
+        $ok = mysqli_query($conn, "INSERT INTO supervisors (user_id) VALUES ($user_id)");
+        if (!$ok) {
+            mysqli_rollback($conn);
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Failed to create supervisor profile.']);
+            exit;
         }
     }
 
@@ -143,7 +92,7 @@ if ($ok) {
     echo json_encode([
         'success' => true,
         'message' => 'User registered successfully',
-        'data'    => ['id' => $user_id, 'email' => $email, 'role' => $role, 'provider_id' => $provider_id]
+        'data'    => ['id' => $user_id, 'email' => $email, 'role' => $role]
     ]);
 } else {
     mysqli_rollback($conn);

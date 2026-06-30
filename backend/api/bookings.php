@@ -5,17 +5,16 @@ require_once '../config/db.php';
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 
-$method  = $_SERVER['REQUEST_METHOD'];
-$token   = getBearerToken();
-$payload = verifyToken($token);
+$method    = $_SERVER['REQUEST_METHOD'];
+$auth_user = getAuthUser($conn);
 
-if (!$payload) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Login required.']);
+if ($auth_user['role'] !== 'client') {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Only clients can access bookings.']);
     exit;
 }
 
-$user_id = (int)$payload['id'];
+$user_id = (int)$auth_user['id'];
 
 // ── GET: fetch all bookings for the logged-in user ───────────
 if ($method === 'GET') {

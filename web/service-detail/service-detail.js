@@ -6,6 +6,14 @@
 
 var detailMapInstance = null;
 
+function getStoredUser() {
+  try { return JSON.parse(localStorage.getItem("autoconnect_user") || "null"); } catch (e) { return null; }
+}
+function isClientUser() {
+  var u = getStoredUser();
+  return u && u.role === "client";
+}
+
 var DAY_KEY_MAP = {
   Monday: "day_mon", Tuesday: "day_tue", Wednesday: "day_wed",
   Thursday: "day_thu", Friday: "day_fri", Saturday: "day_sat", Sunday: "day_sun"
@@ -58,9 +66,10 @@ function renderDetail(p) {
     if (localStorage.getItem("autoconnect_token")) {
       callBtn.href = "tel:" + p.phone;
       callBtn.textContent = t("call_now");
-      callBtn.addEventListener("click", function () {
-        createBooking(p.id);
-      });
+      // Only clients log a booking when they call
+      if (isClientUser()) {
+        callBtn.addEventListener("click", function () { createBooking(p.id); });
+      }
     } else {
       callBtn.removeAttribute("href");
       callBtn.style.cursor = "pointer";
@@ -235,6 +244,12 @@ function setupFavoriteButton(providerId) {
 
   btn.textContent = "♡ " + t("favorite");
 
+  // Only clients can use favorites
+  if (!isClientUser()) {
+    btn.style.display = "none";
+    return;
+  }
+
   if (localStorage.getItem("autoconnect_token")) {
     getFavorites().then(function (favs) {
       var isFav = favs.some(function (f) { return f.id === Number(providerId); });
@@ -277,6 +292,11 @@ function renderReviewForm(providerId) {
   if (!localStorage.getItem("autoconnect_token")) {
     wrapper.innerHTML = '<a href="../login/index.html?from=' + encodeURIComponent(window.location.href) + '" class="btn btn-primary btn-sm">' + t("review_login_prompt") + '</a>';
     section.appendChild(wrapper);
+    return;
+  }
+
+  // Only clients can post reviews
+  if (!isClientUser()) {
     return;
   }
 
