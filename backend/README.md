@@ -2,6 +2,18 @@
 
 All endpoints live in `backend/api/`. Every response is JSON with `{ success: true|false, ... }`. Protected endpoints require an `Authorization: Bearer <token>` header (token is returned by `login.php` or `register.php`).
 
+## Roles
+
+Users have one of three roles, each with a matching subtype table (`clients`, `agents`, `supervisors`) that a registration row is always inserted into alongside `users`:
+
+| Role | Subtype table | Meaning |
+|------|----------------|---------|
+| `client` | `clients` (`vehicle_type`, `vehicle_brand`) | End customer booking services |
+| `agent` | `agents` | Workshop owner who submits and manages provider listings |
+| `supervisor` | `supervisors` | Platform admin who verifies providers |
+
+Providers are **not** users — they're a separate business entity (`providers` table) linked back to the agent/supervisor who created them via `created_by`, and to the supervisor who approved them via `verified_by`.
+
 ---
 
 ## Authentication
@@ -22,20 +34,18 @@ All endpoints live in `backend/api/`. Every response is JSON with `{ success: tr
 ### Register
 **`POST /api/register.php`**
 
-**Body (customer):** `{ fname, lname, email, password, role: "client", phone? }`
+**Body:** `{ fname, lname, email, password, role, phone? }`
 
-**Body (provider):** same as above plus `{ role: "provider", name_en, name_ar, phone, address_en, address_ar?, city_en, city_ar?, category_id, working_hours, bio_en?, bio_ar?, lat?, lng?, photos? }`
+`role` must be `client`, `agent`, or `supervisor` (`"customer"` is accepted as an alias for `"client"`).
+`password` must be at least 6 characters.
+**Client-only:** `vehicle_type?`, `vehicle_brand?`.
 
-`"customer"` is accepted as an alias for `"client"`.
-`password` must be at least 8 characters.
-`working_hours` is an array: `[{ day, open_time, close_time, is_close }]` where `day` is one of `Monday`–`Sunday`.
-`photos` is an array of URL strings returned by `upload_photos.php`.
-
-**Response:** `{ success, data: { id, email, role, provider_id } }`
+**Response:** `{ success, data: { id, email, role } }`
 
 **Errors:** `400` missing/invalid fields · `409` email already registered
 
-> Provider registration runs inside a DB transaction — user, provider, working hours, and photos are all inserted atomically.
+> Runs inside a DB transaction — the `users` row and the matching subtype row (`clients`/`agents`/`supervisors`) are inserted atomically.
+> This endpoint only creates users. To create a provider listing, use `add_provider.php` (see below).
 
 ---
 
@@ -87,26 +97,50 @@ If a valid auth token is provided, `is_saved` reflects whether the logged-in use
 ---
 
 ### Add Provider
-**`POST /api/add_provider.php`** — *Protected*
+**`POST /api/add_provider.php`** — auth optional (affects resulting `status`)
 
 **Required body fields:** `name_en`, `name_ar`, `phone`, `address_en`, `city_en`, `category_id`, `working_hours`
 
 **Optional:** `address_ar`, `city_ar`, `bio_en`, `bio_ar`, `lat`, `lng`, `vehicle_types` (array of IDs), `photos` (array of URL strings)
 
-Runs inside a DB transaction.
+`working_hours` is an array: `[{ day, open_time, close_time, is_close }]` where `day` is one of `Monday`–`Sunday`.
+`photos` is an array of URL strings returned by `upload_photos.php`.
 
-**Response:** `{ success, message, data: { provider_id } }`
+The resulting `status`, `created_by`, and `verified_by`/`verified_at` depend on who submits the request:
+
+| Submitter | `status` | `created_by` | `verified_by` / `verified_at` |
+|-----------|----------|---------------|--------------------------------|
+| `supervisor` | `active` | supervisor's user id | set immediately (self-verified) |
+| `agent` | `pending` | agent's user id | `NULL` |
+| No auth / other role | `pending` | `NULL` | `NULL` |
+
+Runs inside a DB transaction (provider, working hours, vehicle types, and photos are all inserted atomically).
+
+**Response:** `{ success, message, data: { id, status }, provider_id }`
 
 ---
 
 ### Edit Provider
-**`POST /api/edit_provider.php`** — *Protected + owner only*
+**`POST /api/edit_provider.php`** — *Protected + agent role + creator only*
 
 **Required body field:** `id` (provider ID)
 
-All other fields are optional. Sending `working_hours`, `vehicle_types`, or `photos` replaces all existing rows for that sub-table. Only the authenticated user who owns the provider profile can edit it (`403` otherwise).
+All other fields are optional. Sending `working_hours`, `vehicle_types`, or `photos` replaces all existing rows for that sub-table. Only users with role `agent` can call this endpoint (`403` otherwise), and only if their user id matches the provider's `created_by` (`403` otherwise).
 
 **Response:** `{ success, message }`
+
+---
+
+### Verify Provider
+**`POST /api/verify_provider.php`** — *Protected + supervisor role only*
+
+**Body:** `{ provider_id }`
+
+Sets the provider's `status` to `active` and stamps `verified_at`/`verified_by` with the current time and the calling supervisor's user id. Only users with role `supervisor` can call this endpoint (`403` otherwise).
+
+**Response:** `{ success, message }`
+
+**Errors:** `400` missing `provider_id` · `403` not a supervisor · `404` provider not found
 
 ---
 
