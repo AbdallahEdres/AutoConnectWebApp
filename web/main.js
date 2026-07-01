@@ -586,8 +586,9 @@ function renderSidebar() {
     nav += link("favorites",      "../favorites/index.html",         "🔖", "nav_favorites");
   } else if (role === "agent" || role === "supervisor") {
     nav += link("add-provider",   "../provider-register/index.html", "➕", "add_provider");
-  } else if (role === "supervisor") {
-    nav += link("verify",         "../verify/index.html",            "✅", "nav_verify");
+    if (role === "supervisor") {
+      nav += link("verify",         "../verify/index.html",            "✅", "nav_verify");
+    }
   }
 
   nav += link("settings", "../settings/index.html", "⚙", "settings_title");

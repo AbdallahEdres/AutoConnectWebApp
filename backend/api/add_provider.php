@@ -1,5 +1,5 @@
 <?php
-// api/add_provider.php — POST: create a new provider (public, agent, or supervisor)
+
 require_once '../config/db.php';
 
 header('Content-Type: application/json');
@@ -13,7 +13,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $data = json_decode(file_get_contents('php://input'), true) ?? [];
 
-// Detect who is submitting — optional auth
 $token   = getBearerToken();
 $payload = $token ? verifyToken($token) : null;
 $auth_role = null;

@@ -243,18 +243,18 @@ INSERT IGNORE INTO tagged_with (provider_id, vehicle_type_id) VALUES
 
 -- Insert provider photos
 INSERT IGNORE INTO provider_photos (provider_id, photo_url, sort_order) VALUES
-(1, 'assets/images/الخدمه.png', 1),
-(2, 'assets/images/طوارئ.png', 1),
-(3, 'assets/images/الخدمات.png', 1),
-(4, 'assets/images/الصفحه الرئيسيه.png', 1),
-(5, 'assets/images/الخدمه.png', 1),
-(6, 'assets/images/الخدمات.png', 1),
-(7, 'assets/images/الصفحه الرئيسيه.png', 1),
-(8, 'assets/images/الخدمه.png', 1),
-(9, 'assets/images/طوارئ.png', 1),
-(10, 'assets/images/المفضله.png', 1),
-(11, 'assets/images/الصفحه الرئيسيه.png', 1),
-(12, 'assets/images/الخدمات.png', 1);
+(1, 'assets/images/m1.jpg', 1),
+(2, 'assets/images/r1.jpg', 1),
+(3, 'assets/images/m2.jpg', 1),
+(4, 'assets/images/m3.jpg', 1),
+(5, 'assets/images/m4.jpg', 1),
+(6, 'assets/images/sp1.jpg', 1),
+(7, 'assets/images/m5.jpg', 1),
+(8, 'assets/images/m6.jpg', 1),
+(9, 'assets/images/m7.jpg', 1),
+(10, 'assets/images/m8.jpg', 1),
+(11, 'assets/images/m9.jpg', 1),
+(12, 'assets/images/m10.jpg', 1);
 
 -- Insert working hours
 INSERT IGNORE INTO working_hours (provider_id, day, open_time, close_time, is_close) VALUES
