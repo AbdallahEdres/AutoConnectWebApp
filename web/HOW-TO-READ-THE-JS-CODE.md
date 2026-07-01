@@ -34,9 +34,9 @@ Each screen is a self-contained folder under `web/` (e.g. `web/home/`, `web/serv
 |---------|-------------|
 | **Config** | `API_BASE` (hardcoded to `../../backend/api`) and `API_ENDPOINTS` — a key-to-filename map for every PHP endpoint |
 | **Utils** | `getDistanceKm()`, `formatDistance()`, `getUserLocation()`, `getStoredLocation()`, `saveLocation()`, `setEl()`, `addDistanceToProviders()` |
-| **API** | `apiRequest()` → single fetch gate. Helper wrappers: `getProviders()`, `getProviderById()`, `getCategories()`, `getRegions()`, `getUser()`, `getBookings()`, `createBooking()`, `loginUser()`, `registerUser()`, `updatePassword()`, `addProvider()`, `getReviews()`, `toggleFavorite()` |
+| **API** | `apiRequest()` → single fetch gate. Helper wrappers: `getProviders()`, `getProviderById()`, `getCategories()`, `getRegions()`, `getUser()`, `getBookings()`, `createBooking()`, `loginUser()`, `registerUser()`, `updatePassword()`, `addProvider()`, `verifyProvider()`, `getReviews()`, `postReview()`, `getFavorites()`, `toggleFavorite()` |
 | **UI** | `renderProviderCard()` / `renderProviderList()` — builds provider card HTML. `renderHorizontalProviderCard()` — wider card for the emergency page |
-| **Layout** | `renderHeader()` / `renderFooter()` — writes shared header/footer into `#site-header` / `#site-footer` |
+| **Layout** | `renderHeader()` / `renderFooter()` — writes shared header/footer into `#site-header` / `#site-footer`. `renderSidebar()` — role-aware sidebar nav (client vs. agent vs. supervisor) for `profile`, `favorites`, `history`, `settings`, `provider-register`, `verify` |
 | **Init** | `DOMContentLoaded` — calls `renderHeader()`, `renderFooter()`, `setLanguage()`, and wires up language toggler |
 
 ---
@@ -53,11 +53,12 @@ Each page loads its own script that runs on `DOMContentLoaded`:
 | **favorites/favorites.js** | `initFavoritesPage()`, `loadFavorites()` | `favorites/index.html` |
 | **profile/profile.js** | `initProfilePage()` | `profile/index.html` |
 | **history/history.js** | `initHistoryPage()` | `history/index.html` |
-| **provider-register/provider-register.js**| `initProviderRegisterPage()`, `fillCategoriesDropdown()` | `provider-register/index.html` |
+| **provider-register/provider-register.js**| `initProviderRegisterPage()`, `loadProviderCategories()`, `handleProviderSubmit()` | `provider-register/index.html` |
 | **service-detail/service-detail.js** | `initServiceDetailPage()`, `renderDetail()`, `renderPhotoGallery()`, `setupFavoriteButton()`, `renderReviewForm()` | `service-detail/index.html` |
 | **settings/settings.js** | `initSettingsPage()` (wires password changer form) | `settings/index.html` |
 | **login/login.js** | `initLoginPage()`, `handleLoginSubmit()`, `setupRoleToggle()` | `login/index.html` |
-| **register/register.js** | `initRegisterPage()`, `validateRegisterForm()`, `setupPhotoPreview()`, `initRegisterMap()`, `handleRegisterSubmit()` | `register/index.html` |
+| **register/register.js** | `initRegisterPage()`, `validateRegisterForm()`, `setRegisterRole()`, `handleRegisterSubmit()` | `register/index.html` |
+| **verify/verify.js** | `initVerifyPage()`, `loadUnverifiedProviders()`, `approveProvider()` | `verify/index.html` (supervisor only) |
 
 Each script can override `onLanguageChange(lang)` to run custom translation refresh actions.
 

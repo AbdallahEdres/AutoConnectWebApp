@@ -32,15 +32,19 @@ Later files can override earlier ones if selectors are equally specific.
 |------|--------------------------|---------------|
 | **home/index.html** | `.hero`, `.search-bar`, `.service-cards`, `.cta-banner` | `home/home.css` |
 | **login/index.html** | `.auth-card`, `.role-toggle`, `.auth-divider` | `login/login.css` |
-| **register/index.html** | `.auth-card--provider`, `.register-fields-hidden`, `.form-row` | `register/register.css` |
+| **register/index.html** | `.auth-card`, `.role-toggle`, `.register-fields-hidden`, `.form-row` | `register/register.css` |
 | **services/index.html** | `.filter-bar`, `.grid-3`, `.provider-card` | `services/services.css` |
 | **emergency/index.html** | `.emergency-hero`, `.emergency-banner`, `.grid-2` | `emergency/emergency.css` |
-| **service-detail/index.html** | `.detail-hero`, `.detail-layout`, `.map-placeholder` | `service-detail/service-detail.css` |
+| **service-detail/index.html** | `.detail-hero`, `.detail-layout`, `#detail-map` | `service-detail/service-detail.css` |
 | **favorites/index.html** | `.pills`, `.pill.active`, `.grid-auto` | components only |
-| **profile/index.html** | `.layout-with-sidebar`, `.sidebar`, `.profile-stats` | `profile/profile.css` |
-| **settings/index.html** | `.settings-grid`, `.tips-list`, `.delete-account-card` | `settings/settings.css` |
+| **history/index.html** | `.layout-with-sidebar`, `.sidebar` | components only |
+| **profile/index.html** | `.layout-with-sidebar`, `.sidebar`, `.profile-stats`, `.map-placeholder` | `profile/profile.css` |
+| **settings/index.html** | `.settings-grid`, `.tips-list`, `.delete-account-card`, `.map-placeholder` | `settings/settings.css` |
 | **provider-register/index.html** | `.provider-hero`, `.provider-form-card`, `.trust-features` | `provider-register/provider-register.css` |
+| **verify/index.html** | `.layout-with-sidebar`, `.sidebar`, `.card` | components only |
 | **All pages** | `#site-header` → `.site-header`, `.btn-primary`, `.section-title` | components (injected by main.js) |
+
+> **Known gap:** `.map-placeholder` (used in `profile/index.html` and `settings/index.html`) has no matching rule in *any* stylesheet — it renders as plain unstyled text. Add a rule to `profile.css`/`components.css` if you pick this up.
 
 ---
 
@@ -75,8 +79,8 @@ Later files can override earlier ones if selectors are equally specific.
 | `.service-type-card` | 3 cards: mechanic, parts, towing | Home |
 | `.cta-banner` | Full-width **yellow** band with dark text | Home |
 | `.auth-card` | Centered login/register box (420px) | Login, register |
-| `.auth-card--provider` | Wider register box (640px) for workshop fields | Register (provider) |
-| `.role-toggle` | عميل / مزود segmented control | Login, register |
+| `.auth-card--provider` | Wider card (640px) for workshop fields | Provider registration |
+| `.role-toggle` | عميل / وكيل / مشرف (client/agent/supervisor) 3-way segmented control | Register (login's toggle is commented out in HTML) |
 | `.filter-bar` | Horizontal row of filters + apply button | Services |
 | `.emergency-hero` | Large card with location button | Emergency |
 | `.emergency-banner` | Bottom warning strip (15088) | Emergency |

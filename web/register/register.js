@@ -5,10 +5,6 @@
  */
 
 var registerRole = "client";
-var selectedPhotos = [];
-var registerMapInitialized = false;
-var registerLat = DEFAULT_LOCATION.lat;
-var registerLng = DEFAULT_LOCATION.long;
 
 /**
   * Show validation error message and red border for field.
@@ -82,146 +78,6 @@ function validateRegisterForm() {
   }
 
   return isValid;
-}
-
-/**
-  * Upload selected workshop files via Multipart Form.
-  * @param {Array} files — list of file objects.
-  * @returns {Promise} JSON promise response from PHP.
-  */
-function uploadProviderPhotos(files) {
-  var formData = new FormData();
-  for (var i = 0; i < files.length; i++) {
-    formData.append("photos[]", files[i]);
-  }
-  return fetch(API_BASE + "/upload_photos.php", {
-    method: "POST",
-    body: formData
-  }).then(function (res) { return res.json(); });
-}
-
-/**
-  * Render the thumbnail gallery of selected pictures to be uploaded.
-  */
-function renderPhotoPreview() {
-  var grid = document.getElementById("photo-preview-grid");
-  var addBtn = document.getElementById("photo-add-btn");
-  var label = document.getElementById("photo-add-label");
-  if (!grid) return;
-
-  grid.innerHTML = "";
-
-  selectedPhotos.forEach(function (file, idx) {
-    var thumb = document.createElement("div");
-    thumb.className = "photo-thumb";
-
-    var img = document.createElement("img");
-    img.src = URL.createObjectURL(file);
-    img.alt = file.name;
-
-    var removeBtn = document.createElement("button");
-    removeBtn.type = "button";
-    removeBtn.className = "photo-thumb-remove";
-    removeBtn.textContent = "×";
-    removeBtn.addEventListener("click", function () {
-      URL.revokeObjectURL(img.src);
-      selectedPhotos.splice(idx, 1);
-      renderPhotoPreview();
-    });
-
-    thumb.appendChild(img);
-    thumb.appendChild(removeBtn);
-    grid.appendChild(thumb);
-  });
-
-  var count = selectedPhotos.length;
-  if (label) {
-    label.textContent = count > 0
-      ? (currentLang === "ar" ? "إضافة المزيد (" + count + "/10)" : "Add more (" + count + "/10)")
-      : t("add_photos");
-  }
-  if (addBtn) addBtn.style.display = count >= 10 ? "none" : "inline-flex";
-}
-
-/**
-  * Configure image selection pickers and events.
-  */
-function setupPhotoPreview() {
-  var input = document.getElementById("photo-input");
-  var addBtn = document.getElementById("photo-add-btn");
-  var uploadArea = document.getElementById("photo-upload-area");
-  if (!input || !addBtn) return;
-
-  addBtn.addEventListener("click", function () { input.click(); });
-  uploadArea.addEventListener("click", function (e) {
-    if (e.target === this) input.click();
-  });
-
-  input.addEventListener("change", function () {
-    var remaining = 10 - selectedPhotos.length;
-    Array.from(this.files).slice(0, remaining).forEach(function (file) {
-      if (file.type.startsWith("image/")) selectedPhotos.push(file);
-    });
-    renderPhotoPreview();
-    this.value = "";
-  });
-}
-
-/**
-  * Initialize the Leaflet interactive map picker for provider coordinates.
-  */
-function initRegisterMap() {
-  var mapEl = document.getElementById("register-map");
-  if (!mapEl || typeof L === "undefined") return;
-
-  var map = L.map("register-map").setView([registerLat, registerLng], 12);
-
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  }).addTo(map);
-
-  var marker = L.marker([registerLat, registerLng], { draggable: true }).addTo(map);
-
-  function updatePin(latlng) {
-    registerLat = latlng.lat;
-    registerLng = latlng.lng;
-  }
-
-  marker.on("dragend", function (e) { updatePin(e.target.getLatLng()); });
-
-  map.on("click", function (e) {
-    marker.setLatLng(e.latlng);
-    updatePin(e.latlng);
-  });
-
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function (pos) {
-      var lat = pos.coords.latitude;
-      var lng = pos.coords.longitude;
-      updatePin({ lat: lat, lng: lng });
-      map.setView([lat, lng], 15);
-      marker.setLatLng([lat, lng]);
-    });
-  }
-}
-
-/**
-  * Fetch categories for the provider registration dropdown.
-  */
-function loadRegisterCategories() {
-  var sel = document.getElementById("provider-category");
-  if (!sel) return;
-  getCategories().then(function (cats) {
-    sel.innerHTML = '<option value="">' + (currentLang === "ar" ? "— اختر نوع الخدمة —" : "— Select service type —") + "</option>";
-    cats.forEach(function (c) {
-      if (c.parent_id) return;
-      var opt = document.createElement("option");
-      opt.value = c.id;
-      opt.setAttribute("data-slug", c.slug);
-      opt.textContent = getLocalizedField(c, "name");
-      sel.appendChild(opt);
-    });
-  });
 }
 
 /**
@@ -331,78 +187,6 @@ function handleRegisterSubmit(e) {
 }
 
 /**
-  * Upload photos and then save the account and workshop details in one backend transaction.
-  */
-function saveProviderProfile(userData, submitBtn) {
-  var wh = [];
-  document.querySelectorAll(".wh-row").forEach(function (row) {
-    var isClosed = row.querySelector(".wh-closed").checked;
-    wh.push({
-      day: row.getAttribute("data-day"),
-      open_time: isClosed ? null : (row.querySelector(".wh-open").value || null),
-      close_time: isClosed ? null : (row.querySelector(".wh-close").value || null),
-      is_close: isClosed ? 1 : 0
-    });
-  });
-
-  var catSel = document.getElementById("provider-category");
-  var citySel = document.getElementById("city-select");
-  var cityEn = citySel ? citySel.value : "";
-  var cityAr = (citySel && citySel.options[citySel.selectedIndex])
-    ? citySel.options[citySel.selectedIndex].getAttribute("data-ar") || ""
-    : "";
-
-  var photoPromise = selectedPhotos.length > 0
-    ? uploadProviderPhotos(selectedPhotos)
-    : Promise.resolve({ success: true, urls: [] });
-
-  photoPromise.then(function (uploadRes) {
-    if (!uploadRes.success) {
-      showFormError(uploadRes.message || (currentLang === "ar" ? "فشل في رفع الصور" : "Photo upload failed"));
-      if (submitBtn) submitBtn.disabled = false;
-      return;
-    }
-
-    var providerData = Object.assign({}, userData, {
-      name_en: document.getElementById("name-en").value.trim(),
-      name_ar: document.getElementById("name-ar").value.trim(),
-      phone: document.getElementById("mobile").value.trim(),
-      address_en: document.getElementById("address-en").value.trim(),
-      address_ar: document.getElementById("address-ar").value.trim(),
-      city_en: cityEn,
-      city_ar: cityAr,
-      bio_en: document.getElementById("bio-en").value.trim(),
-      bio_ar: document.getElementById("bio-ar").value.trim(),
-      category_id: catSel ? catSel.value : "",
-      working_hours: wh,
-      photos: uploadRes.urls,
-      lat: registerLat,
-      lng: registerLng
-    });
-
-    registerUser(providerData).then(function (res) {
-      if (!res.success) {
-        if (res.message && res.message.toLowerCase().indexOf("email") !== -1) {
-          showFieldError("reg-email", res.message);
-        } else {
-          showFormError(res.message);
-        }
-        if (submitBtn) submitBtn.disabled = false;
-        return;
-      }
-      selectedPhotos = [];
-      window.location.href = "../login/index.html";
-    }).catch(function (err) {
-      showFormError(err.message || (currentLang === "ar" ? "فشل في حفظ بيانات الورشة" : "Provider setup failed"));
-      if (submitBtn) submitBtn.disabled = false;
-    });
-  }).catch(function (err) {
-    showFormError(err.message || (currentLang === "ar" ? "فشل في رفع الصور" : "Photo upload failed"));
-    if (submitBtn) submitBtn.disabled = false;
-  });
-}
-
-/**
   * Wire the tab role selection switches.
   */
 function setupRoleToggle() {
@@ -425,22 +209,12 @@ function initRegisterPage() {
   var registerForm = document.getElementById("register-form");
   if (!registerForm) return;
 
-  loadRegisterCategories();
   loadCitySelect();
   var params = new URLSearchParams(window.location.search);
   var roleParam = params.get("role");
   var initRole = roleParam === "agent" ? "agent" : (roleParam === "supervisor" ? "supervisor" : "client");
   setRegisterRole(initRole);
-  setupPhotoPreview();
   setupRoleToggle();
-
-  document.querySelectorAll(".wh-closed").forEach(function (cb) {
-    cb.addEventListener("change", function () {
-      var row = this.closest(".wh-row");
-      row.querySelector(".wh-open").disabled = this.checked;
-      row.querySelector(".wh-close").disabled = this.checked;
-    });
-  });
 
   registerForm.querySelectorAll(".form-control").forEach(function (input) {
     input.addEventListener("input", function () { clearFieldError(this.id); });
@@ -455,7 +229,6 @@ function initRegisterPage() {
   * @param {string} lang — current language ('ar' or 'en').
   */
 function onLanguageChange(lang) {
-  loadRegisterCategories();
   loadCitySelect();
   setRegisterRole(registerRole);
 }
