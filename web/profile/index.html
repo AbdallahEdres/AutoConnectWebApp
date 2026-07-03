@@ -19,7 +19,7 @@
     <aside class="sidebar" id="sidebar-nav"></aside>
 
     <div>
-      <h1 style="color:var(--accent-yellow);margin-bottom:1rem" data-i18n="profile_title"></h1>
+      <h1 style="color:var(--accent-yellow);margin-bottom:1rem" id="profile_title"></h1>
 
       <!-- 2. USER PROFILE INFO & STATS START -->
       <!-- Handled by: web/js/profile.js -> loadUserProfile() -->
@@ -27,9 +27,15 @@
         <article class="card profile-header-card">
           <h2 id="user-name">...</h2>
           <p id="user-id" style="color:var(--text-muted);font-size:0.85rem">...</p>
-          <p id="user-vehicle-row" class="provider-card__meta" style="display:none">🚗 <span id="user-vehicle"></span></p>
-          <p id="user-city-row" class="provider-card__meta" style="display:none">📍 <span id="user-city"></span></p>
-          <a href="../settings/index.html" class="btn btn-primary btn-sm" style="margin-top:0.75rem;display:inline-block"
+          <span id="user-role-badge" class="role-badge"></span>
+          <div>
+            <div id="client-vehicle-info">
+              <p id="user-vehicle-row" class="provider-card__meta" style="display:none">🚗 <span id="user-vehicle"></span></p>
+              <p id="user-city-row" class="provider-card__meta" style="display:none">📍 <span id="user-city"></span></p>
+            </div>
+          </div>
+          
+          <a href="../settings/index.html" class="btn btn-primary btn-sm" style="margin-top:0.75rem;display:block"
             data-i18n="edit_profile"></a>
         </article>
         <article class="card">
@@ -51,9 +57,9 @@
         </article>
       </div>
 
-      <!-- 3. FAVORITE PROVIDERS WIDGET START -->
+      <!-- 3. FAVORITE PROVIDERS WIDGET START (client only) -->
       <!-- Handled by: web/js/profile.js -> loadProfileFavorites() -->
-      <section style="margin-bottom:1.25rem">
+      <section id="client-favorites" style="margin-bottom:1.25rem">
         <div style="display:flex;justify-content:space-between;margin-bottom:1rem">
           <h2 class="section-title" data-i18n="favorite_providers"></h2>
           <a href="../favorites/index.html" data-i18n="view_all"></a>
@@ -67,7 +73,23 @@
         </div>
       </section>
 
-      <div class="grid-2">
+      <!-- 3b. AGENT WORKSHOPS WIDGET (agent only) -->
+      <section id="agent-section" class="card" style="display:none;margin-bottom:1.25rem">
+        <h3 data-i18n="agent_section_title"></h3>
+        <p class="section-subtitle" style="margin-top:0.5rem" data-i18n="agent_section_desc"></p>
+        <a href="../provider-register/index.html" class="btn btn-primary btn-sm" style="margin-top:0.75rem;display:inline-block"
+          data-i18n="add_provider"></a>
+      </section>
+
+      <!-- 3c. SUPERVISOR REVIEW WIDGET (supervisor only) -->
+      <section id="supervisor-section" class="card" style="display:none;margin-bottom:1.25rem">
+        <h3 data-i18n="supervisor_section_title"></h3>
+        <p class="section-subtitle" style="margin-top:0.5rem" data-i18n="supervisor_section_desc"></p>
+        <a href="../services/index.html" class="btn btn-primary btn-sm" style="margin-top:0.75rem;display:inline-block"
+          data-i18n="explore_directory"></a>
+      </section>
+
+      <!-- <div class="grid-2">
         <article id="saved-location-card" class="card" style="display:none">
           <div class="map-placeholder"><span data-i18n="saved_location"></span><br><span id="saved-location"></span>
           </div>
@@ -86,7 +108,7 @@
             </li>
           </ul>
         </article>
-      </div>
+      </div> -->
     </div>
   </div>
 

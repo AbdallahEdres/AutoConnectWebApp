@@ -13,14 +13,21 @@ function initProfilePage() {
     setEl("user-id", "#" + user.id);
     setEl("total-visits", user.total_visits || 0);
 
-    // Show role badge
+    var profileTitle = document.getElementById("profile_title");
+    var profileTitleKey = user.role == "client" ? "customer" : user.role;
+    profileTitle.textContent = t("profile_title_" + profileTitleKey);
+
+    // Show role badge (role "client" is labeled "customer" in translations)
     var roleBadge = document.getElementById("user-role-badge");
-    if (roleBadge) roleBadge.textContent = user.role || "";
+    var roleLabelKey = user.role === "client" ? "customer" : user.role;
+    if (roleBadge) roleBadge.textContent = t(roleLabelKey);
 
     // Client-only: vehicle info and favorites preview
-    var clientSection = document.getElementById("client-section");
+    var clientVehicleInfo = document.getElementById("client-vehicle-info");
+    var clientFavorites = document.getElementById("client-favorites");
     if (user.role === "client") {
-      if (clientSection) clientSection.style.display = "";
+      if (clientVehicleInfo) clientVehicleInfo.style.display = "";
+      if (clientFavorites) clientFavorites.style.display = "";
 
       var vehicleRow = document.getElementById("user-vehicle-row");
       var vehicleText = [user.vehicle_type, user.vehicle_brand].filter(Boolean).join(" - ");
@@ -42,10 +49,11 @@ function initProfilePage() {
         }
       });
     } else {
-      if (clientSection) clientSection.style.display = "none";
+      if (clientVehicleInfo) clientVehicleInfo.style.display = "none";
+      if (clientFavorites) clientFavorites.style.display = "none";
     }
 
-    // Agent-only: link to their provider profile
+    // Agent-only: shortcut to add a new provider (agents don't own workshops themselves)
     var agentSection = document.getElementById("agent-section");
     if (user.role === "agent") {
       if (agentSection) agentSection.style.display = "";

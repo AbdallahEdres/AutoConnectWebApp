@@ -22,6 +22,16 @@
   color: var(--accent-yellow);
 }
 
+.role-badge {
+  display: inline-block;
+  background: rgba(255, 204, 41, 0.15);
+  color: var(--accent-yellow);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
 .add-provider-card {
   border: 2px dashed var(--border-color);
   display: flex;
