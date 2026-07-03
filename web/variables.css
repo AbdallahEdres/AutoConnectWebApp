@@ -41,6 +41,6 @@
   /* Layout */
   --max-width: 1200px;          /* .container max width */
   --header-height: 64px;        /* sticky top bar */
-  --font-main: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --font-main: "Cairo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   --transition: 0.2s ease;      /* hover effects on links/buttons */
 }
