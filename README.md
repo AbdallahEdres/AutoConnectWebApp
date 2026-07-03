@@ -6,7 +6,6 @@ P2C platform to find nearby car and motorcycle garages, spare parts shops, and e
 
 ```
 AutoConnectWebApp/
-├── design/                         # UI mockups (Figma, PDF, PNG screenshots)
 ├── backend/                        # PHP API + MySQL schema
 │   ├── api/                        # One PHP file per API endpoint
 │   │   ├── login.php
