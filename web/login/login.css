@@ -34,11 +34,25 @@
 }
 
 .auth-logo {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--accent-yellow);
   margin-bottom: 1.5rem;
+}
+
+.auth-logo img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 5px rgba(255, 193, 7, 0.75));
+}
+
+.auth-logo > span > span {
+  color: var(--text-primary);
 }
 
 .role-toggle {

@@ -28,13 +28,23 @@
 }
 
 .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--accent-yellow);
   letter-spacing: 0.02em;
 }
 
-.logo span {
+.logo img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 4px rgba(255, 193, 7, 0.7));
+}
+
+.logo-text > span {
   color: var(--text-primary);
 }
 

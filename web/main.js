@@ -533,7 +533,10 @@ function renderHeader() {
         <button class="menu-toggle" id="menu-toggle" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>
-        <a href="${base}home/index.html" class="logo">Auto<span>Connect</span></a>
+        <a href="${base}home/index.html" class="logo">
+          <img src="${base}assets/images/autoconnect-logo.png" alt="">
+          <span class="logo-text">Auto<span>Connect</span></span>
+        </a>
         <nav class="nav-links" id="nav-links">${linksHtml}</nav>
         <div class="header-actions">
           <button type="button" class="lang-toggle" id="lang-toggle">EN</button>
@@ -556,11 +559,14 @@ function renderFooter() {
   el.innerHTML = `
     <footer class="site-footer">
       <div class="container footer-inner">
-        <a href="${base}home/index.html" class="logo">AutoConnect</a>
+        <a href="${base}home/index.html" class="logo">
+          <img src="${base}assets/images/autoconnect-logo.png" alt="">
+          <span class="logo-text">Auto<span>Connect</span></span>
+        </a>
         <div class="footer-links">
-          <a href="#" data-i18n="privacy"></a>
-          <a href="#" data-i18n="terms"></a>
-          <a href="#" data-i18n="contact"></a>
+          <a href="${base}privacy/index.html" data-i18n="privacy"></a>
+          <a href="${base}terms/index.html" data-i18n="terms"></a>
+          <a href="${base}contact/index.html" data-i18n="contact"></a>
         </div>
         <p class="footer-copy" data-i18n="copyright"></p>
       </div>
