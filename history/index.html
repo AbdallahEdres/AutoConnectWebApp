@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoConnect — Service History</title>
+  <link rel="stylesheet" href="../variables.css">
+  <link rel="stylesheet" href="../base.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+
+<body class="rtl">
+  <div id="site-header"></div>
+
+  <div class="layout-with-sidebar container page-main" style="padding-top:1.5rem">
+    <aside class="sidebar" id="sidebar-nav"></aside>
+
+    <div>
+      <h1 style="color:var(--accent-yellow);margin-bottom:0.25rem" data-i18n="service_history"></h1>
+      <p class="section-subtitle" style="margin-bottom:1.5rem" data-i18n="history_sub"></p>
+
+      <article class="card">
+        <table style="width:100%;border-collapse:collapse" id="history-table">
+          <thead>
+            <tr>
+              <th style="text-align:start;padding:0.65rem 0.5rem;border-bottom:1px solid var(--border-color)" data-i18n="history_provider"></th>
+              <th style="text-align:start;padding:0.65rem 0.5rem;border-bottom:1px solid var(--border-color)" data-i18n="history_date"></th>
+            </tr>
+          </thead>
+          <tbody id="history-body">
+            <tr><td colspan="2" style="padding:1rem 0.5rem;color:var(--text-muted)">...</td></tr>
+          </tbody>
+        </table>
+      </article>
+    </div>
+  </div>
+
+  <div id="site-footer"></div>
+
+  <script src="../i18n.js"></script>
+  <script src="../main.js"></script>
+  <script src="history.js"></script>
+</body>
+
+</html>

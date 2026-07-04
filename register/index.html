@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoConnect — إنشاء حساب</title>
+  <link rel="stylesheet" href="../variables.css">
+  <link rel="stylesheet" href="../base.css">
+  <link rel="stylesheet" href="../components.css">
+  <link rel="stylesheet" href="register.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+
+<body class="rtl">
+  <!-- ========================================== -->
+  <!-- 1. HEADER INJECTION POINT                  -->
+  <!-- Handled by: web/js/layout.js -> injectHeader() -->
+  <!-- ========================================== -->
+  <div id="site-header"></div>
+
+  <main class="page-main auth-card-wrap">
+    <!-- ========================================== -->
+    <!-- 2. MAIN REGISTER CARD START                -->
+    <!-- ========================================== -->
+    <div class="auth-card" id="register-card">
+      <h2 class="section-title" data-i18n="register_title">إنشاء حساب جديد</h2>
+      <p class="section-subtitle" id="register-subtitle" data-i18n="register_sub">انضم إلى أوتو كونيكت واستفد من خدماتنا المحفوظة</p>
+
+      <!-- ========================================== -->
+      <!-- ROLE SELECTOR TABS                         -->
+      <!-- Handled by: web/js/auth.js -> setupRoleToggle() -->
+      <!-- ========================================== -->
+      <div class="role-toggle" id="register-role-toggle">
+        <button type="button" class="active" data-role="client" data-i18n="customer">عميل</button>
+        <button type="button" data-role="agent" data-i18n="agent">وكيل</button>
+        <button type="button" data-role="supervisor" data-i18n="supervisor">مشرف</button>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- REGISTER FORM START                        -->
+      <!-- Handled by: web/js/auth.js -> handleRegisterSubmit() -->
+      <!-- ========================================== -->
+        <!-- Account (both roles) -->
+      <form id="register-form" novalidate>
+
+        <!-- ─── Shared fields (all roles) ─── -->
+        <div class="form-group">
+          <label for="reg-email">
+            <span data-i18n="email">البريد الإلكتروني</span> <span class="req">*</span>
+          </label>
+          <input class="form-control" type="email" id="reg-email" required>
+          <span class="form-error" id="err-reg-email"></span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fname">
+              <span data-i18n="fname">الاسم الأول</span> <span class="req">*</span>
+            </label>
+            <input class="form-control" type="text" id="fname" required>
+            <span class="form-error" id="err-fname"></span>
+          </div>
+          <div class="form-group">
+            <label for="lname">
+              <span data-i18n="lname">اسم العائلة</span> <span class="req">*</span>
+            </label>
+            <input class="form-control" type="text" id="lname" required>
+            <span class="form-error" id="err-lname"></span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="reg-password">
+              <span data-i18n="password">كلمة المرور</span> <span class="req">*</span>
+            </label>
+            <input class="form-control" type="password" id="reg-password" required>
+            <span class="form-error" id="err-reg-password"></span>
+          </div>
+          <div class="form-group">
+            <label for="confirm-password">
+              <span data-i18n="confirm_password">تأكيد كلمة المرور</span> <span class="req">*</span>
+            </label>
+            <input class="form-control" type="password" id="confirm-password" required>
+            <span class="form-error" id="err-confirm-password"></span>
+          </div>
+        </div>
+
+        <!-- ─── Client-only fields ─── -->
+        <div id="customer-fields">
+          <div class="form-group">
+            <label for="phone" data-i18n="phone">رقم الهاتف</label>
+            <input class="form-control" type="tel" id="phone">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="vehicle-type" data-i18n="vehicle_type">نوع المركبة</label>
+              <input class="form-control" type="text" id="vehicle-type" data-i18n-placeholder="vehicle_type_placeholder" placeholder="سيدان، دفع رباعي، شاحنة...">
+            </div>
+            <div class="form-group">
+              <label for="vehicle-brand" data-i18n="vehicle_brand">ماركة المركبة</label>
+              <input class="form-control" type="text" id="vehicle-brand" data-i18n-placeholder="vehicle_brand_placeholder" placeholder="تويوتا، بي إم دبليو...">
+            </div>
+          </div>
+        </div>
+
+        <!-- General API error (email taken, server error, etc.) -->
+        <span class="form-error" id="form-general-error" style="display:block;margin-bottom:0.5rem;text-align:center"></span>
+
+        <button type="submit" class="btn btn-primary btn-block" id="register-submit" data-i18n="create_account">
+          إنشاء حساب
+        </button>
+      </form>
+      <!-- ========================================== -->
+      <!-- REGISTER FORM END                          -->
+      <!-- ========================================== -->
+
+      <p class="auth-footer-text" style="margin-top:1rem">
+        <span data-i18n="have_account">لديك حساب بالفعل؟</span>
+        <a href="../login/index.html" data-i18n="nav_login">سجل الآن</a>
+        ·
+        <a href="../services/index.html" data-i18n="continue_guest">المتابعة كزائر</a>
+      </p>
+    </div>
+    <!-- ========================================== -->
+    <!-- MAIN REGISTER CARD END                     -->
+    <!-- ========================================== -->
+  </main>
+
+  <!-- ========================================== -->
+  <!-- 3. FOOTER INJECTION POINT                  -->
+  <!-- Handled by: web/js/layout.js -> injectFooter() -->
+  <!-- ========================================== -->
+  <div id="site-footer"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="../i18n.js"></script>
+  <script src="../main.js"></script>
+  <script src="register.js"></script>
+</body>
+
+</html>

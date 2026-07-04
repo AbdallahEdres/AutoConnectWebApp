@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoConnect — Service</title>
+  <link rel="stylesheet" href="../variables.css">
+  <link rel="stylesheet" href="../base.css">
+  <link rel="stylesheet" href="../components.css">
+  <link rel="stylesheet" href="service-detail.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+</head>
+
+<body class="rtl">
+  <div id="site-header"></div>
+
+  <main class="page-main container">
+    <div class="detail-hero" id="detail-hero"></div>
+    <div class="detail-layout">
+      <div class="detail-main">
+        <article class="card">
+          <h1 id="detail-title"></h1>
+          <p id="detail-rating" style="color:var(--accent-yellow)"></p>
+          <p id="detail-address" class="provider-card__meta"></p>
+          <p id="detail-phone" style="font-size:1.25rem;margin:0.5rem 0"></p>
+          <p id="detail-desc" style="color:var(--text-secondary)"></p>
+          <div class="detail-actions">
+            <a id="call-btn" href="#" class="btn btn-primary" data-i18n="call_now"></a>
+            <!-- <button type="button" id="location-btn" class="btn btn-ghost" data-i18n="our_location"></button> -->
+            <button type="button" class="btn btn-outline" data-i18n="favorite">♥</button>
+          </div>
+        </article>
+
+        <section class="card" id="photos-section" style="margin-top:1.25rem;display:none">
+          <h3 data-i18n="photos_label"></h3>
+          <div class="gallery-grid" id="photos-grid"></div>
+        </section>
+
+        <section class="card" id="hours-section" style="margin-top:1.25rem;display:none">
+          <h3 data-i18n="working_hours"></h3>
+          <ul class="wh-list" id="hours-list"></ul>
+        </section>
+
+        <section class="card" style="margin-top:1.25rem" id="reviews-section">
+          <h3 style="margin-bottom:0.75rem" data-i18n="reviews_title"></h3>
+          <ul id="reviews-list" style="color:var(--text-secondary);font-size:0.9rem"></ul>
+        </section>
+
+        <section style="margin-top:2rem">
+          <div style="display:flex;justify-content:space-between;margin-bottom:1rem">
+            <h2 class="section-title" data-i18n="similar_nearby"></h2>
+            <a href="../services/index.html" data-i18n="view_all"></a>
+          </div>
+          <div class="grid-3" id="similar-grid"></div>
+        </section>
+      </div>
+      <aside>
+        <article class="card" style="margin-bottom:1rem">
+          <h3 data-i18n="live_status"></h3>
+          <p><span class="status-dot open"></span> <span id="live-status"></span></p>
+        </article>
+        <article class="card">
+          <h3 data-i18n="our_location" style="margin-bottom:0.75rem"></h3>
+          <div id="detail-map"></div>
+          <a id="directions-link" class="btn btn-ghost btn-sm detail-directions" target="_blank" rel="noopener" data-i18n="directions"></a>
+        </article>
+      </aside>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <!-- Lightbox -->
+  <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close">&times;</button>
+    <img id="lightbox-img" src="" alt="">
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="../i18n.js"></script>
+  <script src="../main.js"></script>
+  <script src="service-detail.js"></script>
+</body>
+
+</html>

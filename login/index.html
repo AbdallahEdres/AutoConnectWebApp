@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoConnect — تسجيل الدخول</title>
+  <link rel="stylesheet" href="../variables.css">
+  <link rel="stylesheet" href="../base.css">
+  <link rel="stylesheet" href="../components.css">
+  <link rel="stylesheet" href="login.css">
+</head>
+
+<body class="rtl auth-page">
+  <!-- ========================================== -->
+  <!-- 1. HEADER SECTION (Injected via layout.js) -->
+  <!-- ========================================== -->
+  <div id="site-header"></div>
+
+  <!-- ========================================== -->
+  <!-- 2. MAIN LOGIN AREA START                   -->
+  <!-- ========================================== -->
+  <div class="auth-card-wrap">
+    <div class="auth-card">
+      
+      <!-- LOGO -->
+      <div class="auth-logo">
+        <img src="../assets/images/autoconnect-logo.png" alt="">
+        <span>Auto<span>Connect</span></span>
+      </div>
+      
+      <!-- ROLE SELECTOR START (Customer / Provider) -->
+      <!-- <div class="role-toggle">
+        <button type="button" class="active" data-i18n="customer">عميل</button>
+        <button type="button" data-i18n="agent">وكيل</button>
+        <button type="button" data-i18n="supervisor">مشرف</button>
+      </div> -->
+      <h2 class="section-title" data-i18n="login_title">مرحباً بعودتك</h2>
+      <p class="section-subtitle" data-i18n="login_sub">قم بتسجيل الدخول للمتابعة في أوتو كونيكت</p>
+      <form id="login-form" novalidate>
+        <div class="form-group">
+          <label for="email">
+            <span data-i18n="email">البريد الإلكتروني</span> <span style="color:var(--accent-yellow)">*</span>
+          </label>
+          <input class="form-control" type="email" id="email" placeholder="name@example.com" required>
+          <span class="form-error" id="err-email"></span>
+        </div>
+        <div class="form-group">
+          <label for="password">
+            <span data-i18n="password">كلمة المرور</span> <span style="color:var(--accent-yellow)">*</span>
+          </label>
+          <input class="form-control" type="password" id="password" placeholder="********" required>
+          <span class="form-error" id="err-password"></span>
+          <!-- <a href="#" style="font-size:0.8rem;color:var(--accent-yellow);float:inline-end;margin-top:0.25rem;display:block"
+            data-i18n="forgot_password">نسيت كلمة المرور؟</a> -->
+        </div>
+        <span class="form-error" id="form-login-error" style="display:block;margin-bottom:0.5rem;text-align:center"></span>
+        <button type="submit" class="btn btn-primary btn-block" data-i18n="login_btn">تسجيل الدخول</button>
+      </form>
+      <p class="auth-divider" data-i18n="or">أو</p>
+      <a href="../services/index.html" class="btn btn-ghost btn-block" data-i18n="guest_btn">المتابعة كضيف</a>
+      <p class="auth-footer-text">
+        <span data-i18n="no_account">ليس لديك حساب؟</span>
+        <a href="../register/index.html" data-i18n="signup_link">سجل الآن</a>
+      </p>
+      <p id="demo-hint" style="margin-top:1rem;font-size:0.75rem;color:var(--text-muted);text-align:center"></p>
+      <!-- ALTERNATIVE LOGIN / SIGNUP LINKS END -->
+    </div>
+  </div>
+  <!-- ========================================== -->
+  <!-- MAIN LOGIN AREA END                        -->
+  <!-- ========================================== -->
+
+  <!-- ========================================== -->
+  <!-- 3. BECOME A PARTNER (CTA) SECTION START    -->
+  <!-- ========================================== -->
+  <div class="provider-cta container">
+    <span>🤝</span>
+    <p data-i18n="cta_agent_sub">تريد تسجيل ورشة خدمة؟ سجّل كوكيل وابدأ في إضافة مزودي الخدمة.</p>
+    <a href="../register/index.html?role=agent" class="btn btn-ghost btn-sm" data-i18n="agent_btn">سجّل كوكيل</a>
+  </div>
+  <!-- ========================================== -->
+  <!-- BECOME A PARTNER (CTA) SECTION END         -->
+  <!-- ========================================== -->
+
+  <!-- ========================================== -->
+  <!-- 4. FOOTER SECTION (Injected via layout.js) -->
+  <!-- ========================================== -->
+  <div id="site-footer"></div>
+
+  <script src="../i18n.js"></script>
+  <script src="../main.js"></script>
+  <script src="login.js"></script>
+</body>
+
+</html>

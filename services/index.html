@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoConnect — الخدمات</title>
+  <link rel="stylesheet" href="../variables.css">
+  <link rel="stylesheet" href="../base.css">
+  <link rel="stylesheet" href="../components.css">
+  <link rel="stylesheet" href="services.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+</head>
+
+<body class="rtl">
+  <!-- ========================================== -->
+  <!-- 1. HEADER INJECTION POINT                  -->
+  <!-- Handled by: web/js/layout.js -> injectHeader() -->
+  <!-- ========================================== -->
+  <div id="site-header"></div>
+
+  <main class="page-main container">
+    <h1 class="section-title" data-i18n="filtered_services">خدمات مصفاة</h1>
+    <p class="section-subtitle" data-i18n="filtered_sub">عرض النتائج بناء على اختيارك</p>
+    <div id="active-filters" style="margin-bottom:1rem;display:flex;gap:0.5rem;flex-wrap:wrap"></div>
+
+    <!-- ========================================== -->
+    <!-- 2. FILTER BAR START                        -->
+    <!-- Handled by: web/js/services.js             -->
+    <!-- (listens to #apply-filter click)           -->
+    <!-- ========================================== -->
+    <div class="filter-bar">
+      <div class="form-group">
+        <label data-i18n="search_services">ابحث عن خدمة</label>
+        <input class="form-control" type="search" id="filter-search" data-i18n-placeholder="search_services">
+      </div>
+      <div class="form-group">
+        <label data-i18n="type">النوع</label>
+        <select class="form-control" id="filter-type"></select>
+      </div>
+      <div class="form-group">
+        <label data-i18n="region">المنطقة</label>
+        <select class="form-control" id="filter-region"></select>
+      </div>
+      <div class="form-group">
+        <label data-i18n="sort_by">ترتيب حسب</label>
+        <select class="form-control" id="filter-sort">
+          <option value="nearest" data-i18n="sort_nearest">الأقرب</option>
+          <option value="rating" data-i18n="sort_rating">التقييم</option>
+        </select>
+      </div>
+      <button type="button" class="btn btn-primary" id="apply-filter" data-i18n="apply_filter">تطبيق الفلتر</button>
+    </div>
+    <!-- ========================================== -->
+    <!-- FILTER BAR END                             -->
+    <!-- ========================================== -->
+
+    <section class="location-picker" id="location-picker" hidden>
+      <div class="location-picker__header">
+        <div>
+          <h2 id="location-picker-title"></h2>
+          <p id="location-picker-subtitle"></p>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" id="location-picker-close"></button>
+      </div>
+      <div id="search-location-map"></div>
+      <div class="location-picker__actions">
+        <button type="button" class="btn btn-outline btn-sm" id="location-map-default"></button>
+        <button type="button" class="btn btn-primary btn-sm" id="location-map-confirm"></button>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 3. RESULTS GRID START                      -->
+    <!-- Handled by: web/js/services.js             -->
+    <!-- (calls getProviders() and renders cards inside #providers-grid) -->
+    <!-- ========================================== -->
+
+    <div class="results-header">
+      <p id="results-count"></p>
+      <span class="badge-near" data-i18n="near_you">بالقرب من موقعك</span>
+    </div>
+
+    <div class="grid-3" id="providers-grid"></div>
+    <!-- ========================================== -->
+    <!-- RESULTS GRID END                           -->
+    <!-- ========================================== -->
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- 4. FOOTER INJECTION POINT                  -->
+  <!-- Handled by: web/js/layout.js -> injectFooter() -->
+  <!-- ========================================== -->
+  <div id="site-footer"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="../i18n.js"></script>
+  <script src="../main.js"></script>
+  <script src="services.js"></script>
+</body>
+
+</html>

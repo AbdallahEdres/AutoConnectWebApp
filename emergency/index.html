@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoConnect — Emergency</title>
+  <link rel="stylesheet" href="../variables.css">
+  <link rel="stylesheet" href="../base.css">
+  <link rel="stylesheet" href="../components.css">
+  <link rel="stylesheet" href="emergency.css">
+</head>
+
+<body class="rtl">
+  <div id="site-header"></div>
+
+  <main class="page-main container">
+    <section class="emergency-hero">
+      <h1 data-i18n="emergency_title"></h1>
+      <p data-i18n="emergency_sub"></p>
+      <button type="button" class="btn btn-primary btn-block" id="btn-use-location" data-i18n="use_location"
+        style="margin:1rem 0"></button>
+      <p id="location-error" style="color:var(--accent-red,#e74c3c);font-size:0.9rem;text-align:center;margin-bottom:0.5rem"></p>
+      <p style="text-align:center;color:var(--text-secondary);font-size:0.9rem" data-i18n="or_choose_area"></p>
+      <select class="form-control" id="region-select" style="margin-top:0.75rem"></select>
+    </section>
+
+    <div
+      style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
+      <h2 class="section-title" data-i18n="nearest_providers"></h2>
+      <span style="color:var(--text-secondary);font-size:0.9rem" data-i18n="results_by_location"></span>
+    </div>
+    <div id="emergency-results"></div>
+  </main>
+
+  <div class="emergency-banner">
+    <div class="container">
+      <strong>⚠</strong>
+      <span data-i18n="emergency_footer"></span>
+    </div>
+  </div>
+
+  <div id="site-footer"></div>
+
+  <script src="../i18n.js"></script>
+  <script src="../main.js"></script>
+  <script src="emergency.js"></script>
+</body>
+
+</html>

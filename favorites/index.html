@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoConnect — المفضلة</title>
+  <link rel="stylesheet" href="../variables.css">
+  <link rel="stylesheet" href="../base.css">
+  <link rel="stylesheet" href="../components.css">
+</head>
+
+<body class="rtl">
+  <div id="site-header"></div>
+
+  <div class="layout-with-sidebar container page-main" style="padding-top:1.5rem">
+    <aside class="sidebar" id="sidebar-nav"></aside>
+
+    <div>
+      <h1 class="section-title" data-i18n="favorites_title"></h1>
+      <p class="section-subtitle" data-i18n="favorites_sub"></p>
+
+      <div class="pills" style="margin:1rem 0">
+        <button type="button" class="pill active" data-category="" data-i18n="all_providers"></button>
+      </div>
+
+      <div class="grid-auto" id="favorites-grid"></div>
+
+      <section class="card"
+        style="margin-top:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">
+        <div>
+          <h3 data-i18n="more_services"></h3>
+          <p style="color:var(--text-secondary);font-size:0.9rem" data-i18n="filtered_sub"></p>
+        </div>
+        <a href="../services/index.html" class="btn btn-outline" data-i18n="explore_directory"></a>
+      </section>
+    </div>
+  </div>
+
+  <div id="site-footer"></div>
+
+  <script src="../i18n.js"></script>
+  <script src="../main.js"></script>
+  <script src="favorites.js"></script>
+</body>
+
+</html>

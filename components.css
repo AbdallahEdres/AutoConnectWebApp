@@ -1,0 +1,554 @@
+/**
+ * =============================================================================
+ * components.css — Reusable UI (shared across ALL pages)
+ * =============================================================================
+ * Loaded 3rd. Styles things that appear on many screens:
+ *   header/footer, buttons, cards, forms, provider cards, grids, sidebar.
+ *
+ * HTML: class names in index.html, pages/*.html, and strings from layout.js / ui.js
+ * =============================================================================
+ */
+
+/* ----- HEADER (injected into #site-header by layout.js) ----- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(11, 17, 30, 0.95);
+  border-bottom: 1px solid var(--border-color);
+  height: var(--header-height);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  gap: 1rem;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--accent-yellow);
+  letter-spacing: 0.02em;
+}
+
+.logo img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 4px rgba(255, 193, 7, 0.7));
+}
+
+.logo-text > span {
+  color: var(--text-primary);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  transition: color var(--transition);
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--accent-yellow);
+}
+
+.nav-links a.active {
+  border-bottom: 2px solid var(--accent-yellow);
+  padding-bottom: 2px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lang-toggle {
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.lang-toggle:hover {
+  border-color: var(--accent-yellow);
+  color: var(--accent-yellow);
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+}
+
+.icon-btn:hover {
+  border-color: var(--accent-yellow);
+  color: var(--accent-yellow);
+}
+
+/* ----- BUTTONS — use combo: class="btn btn-primary" etc. ----- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background: var(--accent-yellow);
+  color: #0b111e;
+}
+
+.btn-danger {
+  background: var(--accent-red);
+  color: #fff;
+}
+
+.btn-outline {
+  border: 1px solid var(--accent-yellow);
+  color: var(--accent-yellow);
+  background: transparent;
+}
+
+.btn-ghost {
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  background: transparent;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-sm {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+}
+
+/* ----- CARDS & SECTION TITLES (yellow bar before .section-title) ----- */
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  padding: 1.25rem;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.section-title {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.section-title::before {
+  content: "";
+  width: 4px;
+  height: 1.5rem;
+  background: var(--accent-yellow);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.section-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ----- FORMS — login, register, filters, settings ----- */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.35rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--accent-yellow);
+}
+
+.form-control.is-invalid {
+  border-color: var(--accent-yellow);
+}
+
+.form-error {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--accent-yellow);
+  margin-top: 0.2rem;
+  min-height: 1em;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* ----- PROVIDER CARD (built by ui.js → services, favorites, detail) ----- */
+.provider-card {
+  background: var(--bg-card-hover);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.provider-card__image {
+  height: 160px;
+  background: linear-gradient(135deg, #1e293b, #334155);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.provider-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.provider-card__badge {
+  position: absolute;
+  top: 0.75rem;
+  inset-inline-end: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--accent-yellow);
+  color: #0b111e;
+}
+
+.provider-card__body {
+  padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.provider-card__rating {
+  color: var(--accent-yellow);
+  font-size: 0.85rem;
+}
+
+.provider-card__review-count {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.provider-card__meta {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.open {
+  background: var(--success);
+}
+
+.status-dot.closed {
+  background: var(--text-muted);
+}
+
+.status-dot.pending {
+  background: var(--accent-yellow);
+}
+
+.provider-card__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
+}
+
+.provider-card__actions .btn {
+  flex: 1;
+  font-size: 0.8rem;
+  padding: 0.5rem;
+}
+
+/* ----- FILTER PILLS (favorites page category tabs) ----- */
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.pill {
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.pill.active {
+  background: var(--accent-yellow);
+  color: #0b111e;
+  border-color: var(--accent-yellow);
+}
+
+.filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--bg-input);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.filter-tag button {
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* ----- FOOTER (injected into #site-footer by layout.js) ----- */
+.site-footer {
+  background: #080d18;
+  border-top: 1px solid var(--border-color);
+  padding: 2rem 0 1.5rem;
+  margin-top: auto;
+}
+
+.footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.footer-links {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.footer-links a:hover {
+  color: var(--accent-yellow);
+}
+
+.footer-copy {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* ----- EMERGENCY WARNING STRIP (bottom of emergency.html) ----- */
+.emergency-banner {
+  background: #0f1628;
+  border-top: 1px solid var(--border-color);
+  padding: 0.85rem 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.emergency-banner strong {
+  color: var(--accent-red);
+}
+
+/* ----- LAYOUT GRIDS — put cards inside these ----- */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+/* ----- PAGINATION (services.html page numbers) ----- */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.pagination button {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.pagination button.active {
+  background: var(--accent-yellow);
+  color: #0b111e;
+  border-color: var(--accent-yellow);
+}
+
+/* ----- SIDEBAR LAYOUT (profile.html, settings.html) ----- */
+.layout-with-sidebar {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.sidebar {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  padding: 1.25rem;
+}
+
+.sidebar-nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+  background: rgba(255, 204, 41, 0.12);
+  color: var(--accent-yellow);
+}
+
+/* ----- MOBILE: hamburger menu + stack columns (max-width 900px / 640px) ----- */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+}
+
+.menu-toggle span {
+  width: 22px;
+  height: 2px;
+  background: var(--text-primary);
+}
+
+@media (max-width: 900px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .layout-with-sidebar {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: var(--header-height);
+    inset-inline: 0;
+    background: var(--bg-main);
+    flex-direction: column;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .menu-toggle {
+    display: flex;
+  }
+
+  .grid-2,
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

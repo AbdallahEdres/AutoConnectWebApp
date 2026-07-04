@@ -5,9 +5,12 @@
 $database = "autoconnect";
 
 $connection_attempts = [
-    ['host' => '127.0.0.1', 'user' => 'root', 'pass' => '', 'port' => 3306], // XAMPP
-    ['host' => '127.0.0.1', 'user' => 'root', 'pass' => 'root', 'port' => 3306], // XAMPP
-    ['host' => '127.0.0.1', 'user' => 'root', 'pass' => 'root', 'port' => 8889], // MAMP
+    [
+        'host' => '127.0.0.1',
+        'user' => 'autoconnect',
+        'pass' => 'AutoConnect@2026',
+        'port' => 3306
+    ]
 ];
 
 $conn = null;

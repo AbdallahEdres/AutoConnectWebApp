@@ -1,0 +1,42 @@
+.static-page {
+  max-width: 900px;
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+}
+
+.static-page__hero {
+  margin-bottom: 1.5rem;
+}
+
+.static-page__hero h1 {
+  color: var(--accent-yellow);
+  margin-bottom: 0.5rem;
+}
+
+.static-page__content {
+  display: grid;
+  gap: 1rem;
+}
+
+.static-page__content h2 {
+  margin-bottom: 0.6rem;
+}
+
+.static-page__content p,
+.static-page__content li {
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.static-page__content ul {
+  padding-inline-start: 1.25rem;
+}
+
+.contact-list {
+  list-style: none;
+  padding: 0;
+}
+
+.contact-list a {
+  color: var(--accent-yellow);
+}

@@ -1,0 +1,161 @@
+/* ----- HOME (index.html) ----- */
+.hero {
+  padding: 3rem 0 4rem;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: center;
+}
+
+.hero h1 {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  line-height: 1.3;
+  margin-bottom: 1rem;
+}
+
+.hero h1 .highlight {
+  color: var(--accent-yellow);
+}
+
+.hero p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.search-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  background: var(--bg-card);
+  padding: 0.5rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.search-bar select,
+.search-bar input {
+  flex: 1;
+  min-width: 140px;
+  padding: 0.65rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.hero-visual {
+  position: relative;
+}
+
+.hero-image {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  aspect-ratio: 4/3;
+  background: linear-gradient(145deg, #1e3a5f, #0f172a);
+}
+
+.hero-badge {
+  position: absolute;
+  bottom: -1rem;
+  inset-inline-start: -1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+}
+
+.hero-badge span {
+  color: var(--accent-yellow);
+  font-size: 1.5rem;
+}
+
+/* Home: 3 columns — mechanic, spare parts, towing */
+.service-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin: 3rem 0;
+}
+
+.service-type-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.service-type-card .icon-box {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 204, 41, 0.15);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.service-type-card ul {
+  margin: 1rem 0;
+  flex: 1;
+}
+
+.service-type-card li {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  padding: 0.25rem 0;
+  padding-inline-start: 1rem;
+  position: relative;
+}
+
+.service-type-card li::before {
+  content: "■";
+  position: absolute;
+  inset-inline-start: 0;
+  color: var(--accent-yellow);
+  font-size: 0.5rem;
+  top: 0.45rem;
+}
+
+.cta-banner {
+  background: var(--accent-yellow);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: center;
+  color: #0b111e;
+  margin: 2rem 0;
+}
+
+.cta-banner h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.cta-banner p {
+  opacity: 0.85;
+  margin-bottom: 1rem;
+}
+
+.cta-banner .btn {
+  margin-inline-end: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .hero-grid,
+  .cta-banner {
+    grid-template-columns: 1fr;
+  }
+  .service-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
