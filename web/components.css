@@ -309,6 +309,10 @@
   background: var(--text-muted);
 }
 
+.status-dot.pending {
+  background: var(--accent-yellow);
+}
+
 .provider-card__actions {
   display: flex;
   gap: 0.5rem;

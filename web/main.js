@@ -19,6 +19,7 @@ var API_ENDPOINTS = {
   login: "/login.php",
   register: "/register.php",
   addProvider: "/add_provider.php",
+  editProvider: "/edit_provider.php",
   uploadPhotos: "/upload_photos.php",
   updatePassword: "/update_password.php",
   reviews: "/reviews.php",
@@ -74,33 +75,33 @@ var DEFAULT_LOCATION = { lat: 30.0444, long: 31.2357 };
 
 /** All Egyptian governorates — used to populate city selects on the register form */
 var EGYPT_CITIES = [
-  { ar: "القاهرة",        en: "Cairo" },
-  { ar: "الجيزة",         en: "Giza" },
-  { ar: "الإسكندرية",     en: "Alexandria" },
-  { ar: "الشرقية",        en: "Sharqia" },
-  { ar: "الدقهلية",       en: "Dakahlia" },
-  { ar: "البحيرة",        en: "Beheira" },
-  { ar: "المنوفية",       en: "Monufia" },
-  { ar: "الغربية",        en: "Gharbia" },
-  { ar: "القليوبية",      en: "Qalyubia" },
-  { ar: "كفر الشيخ",      en: "Kafr El-Sheikh" },
-  { ar: "دمياط",          en: "Damietta" },
-  { ar: "بورسعيد",        en: "Port Said" },
-  { ar: "الإسماعيلية",    en: "Ismailia" },
-  { ar: "السويس",         en: "Suez" },
-  { ar: "شمال سيناء",     en: "North Sinai" },
-  { ar: "جنوب سيناء",     en: "South Sinai" },
-  { ar: "الفيوم",         en: "Faiyum" },
-  { ar: "بني سويف",       en: "Beni Suef" },
-  { ar: "المنيا",         en: "Minya" },
-  { ar: "أسيوط",          en: "Asyut" },
-  { ar: "سوهاج",          en: "Sohag" },
-  { ar: "قنا",            en: "Qena" },
-  { ar: "الأقصر",         en: "Luxor" },
-  { ar: "أسوان",          en: "Aswan" },
-  { ar: "البحر الأحمر",   en: "Red Sea" },
-  { ar: "الوادي الجديد",  en: "New Valley" },
-  { ar: "مطروح",          en: "Matrouh" }
+  { ar: "القاهرة", en: "Cairo" },
+  { ar: "الجيزة", en: "Giza" },
+  { ar: "الإسكندرية", en: "Alexandria" },
+  { ar: "الشرقية", en: "Sharqia" },
+  { ar: "الدقهلية", en: "Dakahlia" },
+  { ar: "البحيرة", en: "Beheira" },
+  { ar: "المنوفية", en: "Monufia" },
+  { ar: "الغربية", en: "Gharbia" },
+  { ar: "القليوبية", en: "Qalyubia" },
+  { ar: "كفر الشيخ", en: "Kafr El-Sheikh" },
+  { ar: "دمياط", en: "Damietta" },
+  { ar: "بورسعيد", en: "Port Said" },
+  { ar: "الإسماعيلية", en: "Ismailia" },
+  { ar: "السويس", en: "Suez" },
+  { ar: "شمال سيناء", en: "North Sinai" },
+  { ar: "جنوب سيناء", en: "South Sinai" },
+  { ar: "الفيوم", en: "Faiyum" },
+  { ar: "بني سويف", en: "Beni Suef" },
+  { ar: "المنيا", en: "Minya" },
+  { ar: "أسيوط", en: "Asyut" },
+  { ar: "سوهاج", en: "Sohag" },
+  { ar: "قنا", en: "Qena" },
+  { ar: "الأقصر", en: "Luxor" },
+  { ar: "أسوان", en: "Aswan" },
+  { ar: "البحر الأحمر", en: "Red Sea" },
+  { ar: "الوادي الجديد", en: "New Valley" },
+  { ar: "مطروح", en: "Matrouh" }
 ];
 
 /** Read last saved GPS from localStorage (set on emergency page) */
@@ -319,6 +320,10 @@ function addProvider(data) {
   return apiRequest('addProvider', { method: 'POST', body: data });
 }
 
+function editProvider(data) {
+  return apiRequest('editProvider', { method: 'POST', body: data });
+}
+
 function verifyProvider(providerId) {
   return apiRequest('verifyProvider', { method: 'POST', body: { provider_id: providerId } });
 }
@@ -361,9 +366,10 @@ function renderProviderCard(provider, options) {
   var base = options.basePath || getBasePath();
   var name = getLocalizedField(provider, "name");
   var address = getLocalizedField(provider, "address");
-  var isOpen = provider.status === "open" || provider.is_open_now === true;
+  var isOpen = provider.is_open_now === true;
   var statusText = isOpen ? t("open_now") : t("closed");
   var statusClass = isOpen ? "open" : "closed";
+  var isPending = provider.status === "pending";
   var distText = provider.distance_km != null ? formatDistance(provider.distance_km) : "";
   var img = provider.image ? base + provider.image : "";
   var detailUrl = base + "service-detail/index.html?id=" + provider.id;
@@ -373,8 +379,8 @@ function renderProviderCard(provider, options) {
   var loginUrl = base + "login/index.html?from=" + encodeURIComponent(window.location.href);
 
   var safePhone = escapeHtml(phone);
-  var phoneRow  = isLoggedIn && phone ? `<p class="provider-card__meta">📞 ${safePhone}</p>` : "";
-  var callBtn   = isLoggedIn
+  var phoneRow = isLoggedIn && phone ? `<p class="provider-card__meta">📞 ${safePhone}</p>` : "";
+  var callBtn = isLoggedIn
     ? `<a href="tel:${safePhone}" class="btn btn-primary btn-sm" onclick="createBooking(${provider.id})">${t("call_now")}</a>`
     : `<a href="${loginUrl}" class="btn btn-primary btn-sm">${t("show_phone")}</a>`;
 
@@ -386,7 +392,10 @@ function renderProviderCard(provider, options) {
     <article class="provider-card">
       <div class="provider-card__image">
         ${img ? `<img src="${img}" alt="${escapeHtml(name)}">` : ""}
-        ${badge ? `<span class="provider-card__badge">${escapeHtml(badge)}</span>` : ""}
+        <div style="position: absolute; top: 0.5rem; left: 0.5rem; display: flex; gap: 0.5rem;">
+          ${badge ? `<span class="provider-card__badge" style="position: static; margin: 0;">${escapeHtml(badge)}</span>` : ""}
+          ${isPending ? `<span class="provider-card__badge" style="position: static; margin: 0; background: var(--accent-yellow); color: #000;">${t("pending")}</span>` : ""}
+        </div>
       </div>
       <div class="provider-card__body">
         <p class="provider-card__rating">${ratingHtml}</p>
@@ -397,8 +406,9 @@ function renderProviderCard(provider, options) {
         ${phoneRow}
         <div class="provider-card__actions">
           <a href="${detailUrl}" class="btn btn-ghost btn-sm">${options.detailsLabel || t("view_details")}</a>
-          ${provider.lat && provider.lng ? `<a href="https://www.google.com/maps?q=${provider.lat},${provider.lng}" target="_blank" class="btn btn-ghost btn-sm">${t("view_map")}</a>` : ""}
-          ${callBtn}
+          ${options.showEdit && isPending ? `<a href="${base}provider-register/index.html?edit=${provider.id}" class="btn btn-ghost btn-sm">${currentLang === 'ar' ? 'تعديل' : 'Edit'}</a>` : ""}
+          ${provider.lat && provider.lng && !options.showEdit ? `<a href="https://www.google.com/maps?q=${provider.lat},${provider.lng}" target="_blank" class="btn btn-ghost btn-sm">${t("view_map")}</a>` : ""}
+          ${!options.showEdit ? callBtn : ""}
         </div>
       </div>
     </article>`;
@@ -415,9 +425,10 @@ function renderHorizontalProviderCard(provider, options) {
   options = options || {};
   var base = options.basePath || getBasePath();
   var name = getLocalizedField(provider, "name");
-  var isOpen = provider.status === "open" || provider.is_open_now === true;
+  var isOpen = provider.is_open_now === true;
   var statusText = isOpen ? t("open_now") : t("closed");
   var statusClass = isOpen ? "open" : "closed";
+  var isPending = provider.status === "pending";
   var distText = provider.distance_km != null ? formatDistance(provider.distance_km) : "";
   var img = provider.image ? base + provider.image : "";
   var phone = provider.phone || "";
@@ -425,15 +436,16 @@ function renderHorizontalProviderCard(provider, options) {
   var loginUrl = base + "login/index.html?from=" + encodeURIComponent(window.location.href);
 
   var safePhone2 = escapeHtml(phone);
-  var phoneRow   = isLoggedIn && phone ? `<p class="provider-card__meta">📞 ${safePhone2}</p>` : "";
-  var callBtn    = isLoggedIn
+  var phoneRow = isLoggedIn && phone ? `<p class="provider-card__meta">📞 ${safePhone2}</p>` : "";
+  var callBtn = isLoggedIn
     ? `<a href="tel:${safePhone2}" class="btn btn-danger btn-sm" onclick="createBooking(${provider.id})">${t("call_now")}</a>`
     : `<a href="${loginUrl}" class="btn btn-danger btn-sm">${t("show_phone")}</a>`;
 
   return `
-    <article class="card" style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center">
-      <div style="width:120px;height:90px;border-radius:8px;overflow:hidden;flex-shrink:0;background:#1a2230">
+    <article class="card" style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;position:relative;">
+      <div style="width:120px;height:90px;border-radius:8px;overflow:hidden;flex-shrink:0;background:#1a2230;position:relative;">
         ${img ? `<img src="${img}" alt="" style="width:100%;height:100%;object-fit:cover">` : ""}
+        ${isPending ? `<span class="provider-card__badge" style="position: absolute; top: 4px; left: 4px; margin: 0; background: var(--accent-yellow); color: #000; font-size: 0.7rem; padding: 0.15rem 0.4rem;">${t("pending")}</span>` : ""}
       </div>
       <div style="flex:1;min-width:180px">
         <h3>${escapeHtml(name)}</h3>
@@ -443,6 +455,7 @@ function renderHorizontalProviderCard(provider, options) {
         ${phoneRow}
       </div>
       <div style="display:flex;gap:0.5rem">
+        ${options.showEdit ? `<a href="${base}provider-register/index.html?edit=${provider.id}" class="btn btn-secondary btn-sm">${currentLang === 'ar' ? 'تعديل' : 'Edit'}</a>` : ""}
         ${provider.lat && provider.lng ? `<a href="https://www.google.com/maps?q=${provider.lat},${provider.lng}" target="_blank" class="btn btn-outline btn-sm">${t("view_map")}</a>` : ""}
         ${callBtn}
       </div>
@@ -490,8 +503,8 @@ function renderHeader() {
   });
 
   var token = localStorage.getItem("autoconnect_token");
-  var user  = JSON.parse(localStorage.getItem("autoconnect_user") || "null");
-  var role  = user ? user.role : null;
+  var user = JSON.parse(localStorage.getItem("autoconnect_user") || "null");
+  var role = user ? user.role : null;
   var authHtml;
 
   // Add role-specific nav links
@@ -566,13 +579,13 @@ function renderSidebar() {
   var role = storedUser ? storedUser.role : "client";
 
   var path = window.location.pathname;
-  var active = path.indexOf("/profile/")           !== -1 ? "profile"
-             : path.indexOf("/history/")           !== -1 ? "history"
-             : path.indexOf("/favorites/")         !== -1 ? "favorites"
-             : path.indexOf("/settings/")          !== -1 ? "settings"
-             : path.indexOf("/verify/")            !== -1 ? "verify"
-             : path.indexOf("/provider-register/") !== -1 ? "add-provider"
-             : "";
+  var active = path.indexOf("/profile/") !== -1 ? "profile"
+    : path.indexOf("/history/") !== -1 ? "history"
+      : path.indexOf("/favorites/") !== -1 ? "favorites"
+        : path.indexOf("/settings/") !== -1 ? "settings"
+          : path.indexOf("/verify/") !== -1 ? "verify"
+            : path.indexOf("/provider-register/") !== -1 ? "add-provider"
+              : "";
 
   function link(page, href, icon, key) {
     var cls = active === page ? ' class="active"' : '';
@@ -582,12 +595,12 @@ function renderSidebar() {
   var nav = link("profile", "../profile/index.html", "📊", "nav_dashboard");
 
   if (role === "client") {
-    nav += link("history",        "../history/index.html",           "🕐", "service_history");
-    nav += link("favorites",      "../favorites/index.html",         "🔖", "nav_favorites");
+    nav += link("history", "../history/index.html", "🕐", "service_history");
+    nav += link("favorites", "../favorites/index.html", "🔖", "nav_favorites");
   } else if (role === "agent" || role === "supervisor") {
-    nav += link("add-provider",   "../provider-register/index.html", "➕", "add_provider");
+    nav += link("add-provider", "../provider-register/index.html", "➕", "add_provider");
     if (role === "supervisor") {
-      nav += link("verify",         "../verify/index.html",            "✅", "nav_verify");
+      nav += link("verify", "../verify/index.html", "✅", "nav_verify");
     }
   }
 

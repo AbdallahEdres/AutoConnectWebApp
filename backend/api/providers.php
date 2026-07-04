@@ -11,11 +11,22 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-$status_filter = (!empty($_GET['status']) && $_GET['status'] === 'pending') ? 'pending' : 'active';
+$status_filter = (!empty($_GET['status'])) ? mysqli_real_escape_string($conn, $_GET['status']) : 'active';
+
+$where_clause = "WHERE 1=1";
+if (empty($_GET['created_by']) && $status_filter !== 'all') {
+    $where_clause .= " AND p.status = '$status_filter'";
+} elseif (!empty($_GET['created_by'])) {
+    $created_by = (int) $_GET['created_by'];
+    $where_clause .= " AND p.created_by = $created_by";
+    if ($status_filter !== 'all' && !empty($_GET['status'])) {
+        $where_clause .= " AND p.status = '$status_filter'";
+    }
+}
 
 $sql = "SELECT
             p.id, p.name_en, p.name_ar, p.phone, p.address_en, p.address_ar, p.city_en, p.city_ar,
-            p.lat, p.lng, p.status AS provider_status, p.verified_at,
+            p.lat, p.lng, p.status AS provider_status, p.verified_at, p.verified_by, p.created_by,
             c.name_en AS category_name_en, c.name_ar AS category_name_ar, c.slug AS category_slug,
             EXISTS (
                 SELECT 1 FROM working_hours wh
@@ -29,7 +40,7 @@ $sql = "SELECT
             (SELECT photo_url FROM provider_photos WHERE provider_id = p.id ORDER BY sort_order ASC LIMIT 1) AS image
         FROM providers p
         INNER JOIN categories c ON p.category_id = c.id
-        WHERE p.status = '$status_filter'";
+        $where_clause";
 
 // Filter by category slug (e.g. ?category_slug=mechanic)
 if (!empty($_GET['category_slug'])) {
@@ -60,15 +71,24 @@ $result = mysqli_query($conn, $sql);
 
 $providers = [];
 while ($row = mysqli_fetch_assoc($result)) {
-    $row['id']     = (int)   $row['id'];
-    $row['lat']    = $row['lat'] !== null ? (float) $row['lat'] : null;
-    $row['lng']    = $row['lng'] !== null ? (float) $row['lng'] : null;
+    $row['id'] = (int) $row['id'];
+    $row['lat'] = $row['lat'] !== null ? (float) $row['lat'] : null;
+    $row['lng'] = $row['lng'] !== null ? (float) $row['lng'] : null;
     $row['rating'] = (float) $row['rating'];
     $row['review_count'] = (int) $row['review_count'];
     $row['is_open_now'] = (bool) $row['is_open_now'];
     $row['provider_status'] = $row['provider_status'];
-    $row['status'] = $status_filter === 'pending' ? $row['provider_status'] : ($row['is_open_now'] ? 'open' : 'closed');
+
+    if ($row['provider_status'] === 'pending') {
+        $row['status'] = 'pending';
+    } else {
+        $row['status'] = $row['is_open_now'] ? 'open' : 'closed';
+    }
+
     unset($row['provider_status']);
+    unset($row['verified_by']);
+    unset($row['created_by']);
+
     if (empty($row['image'])) {
         $row['image'] = 'assets/images/provider_default.png';
     }

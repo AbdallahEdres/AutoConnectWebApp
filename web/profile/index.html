@@ -74,11 +74,17 @@
       </section>
 
       <!-- 3b. AGENT WORKSHOPS WIDGET (agent only) -->
-      <section id="agent-section" class="card" style="display:none;margin-bottom:1.25rem">
-        <h3 data-i18n="agent_section_title"></h3>
-        <p class="section-subtitle" style="margin-top:0.5rem" data-i18n="agent_section_desc"></p>
-        <a href="../provider-register/index.html" class="btn btn-primary btn-sm" style="margin-top:0.75rem;display:inline-block"
-          data-i18n="add_provider"></a>
+      <section id="agent-section" style="display:none;margin-bottom:1.25rem">
+        <div style="display:flex;justify-content:space-between;margin-bottom:1rem">
+          <h2 class="section-title" data-i18n="agent_section_title"></h2>
+        </div>
+        <div class="grid-auto">
+          <div id="agent-providers" style="display:contents"></div>
+          <a href="../provider-register/index.html" class="add-provider-card">
+            <span style="font-size:2rem">+</span>
+            <span data-i18n="add_provider"></span>
+          </a>
+        </div>
       </section>
 
       <!-- 3c. SUPERVISOR REVIEW WIDGET (supervisor only) -->

@@ -53,10 +53,16 @@ function initProfilePage() {
       if (clientFavorites) clientFavorites.style.display = "none";
     }
 
-    // Agent-only: shortcut to add a new provider (agents don't own workshops themselves)
+    // Agent-only: show workshops added by the agent
     var agentSection = document.getElementById("agent-section");
     if (user.role === "agent") {
       if (agentSection) agentSection.style.display = "";
+      getProviders({ created_by: user.id, status: 'all' }).then(function(providers) {
+        renderProviderList("agent-providers", providers, { basePath: getBasePath(), showEdit: true });
+      }).catch(function(err) {
+        var el = document.getElementById("agent-providers");
+        if (el) el.innerHTML = '<p class="section-subtitle">' + t("no_results") + '</p>';
+      });
     } else {
       if (agentSection) agentSection.style.display = "none";
     }

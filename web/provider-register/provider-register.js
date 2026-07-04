@@ -5,8 +5,12 @@
  */
 
 var selectedPhotos = [];
+var existingPhotoUrls = [];
 var providerLat = DEFAULT_LOCATION.lat;
 var providerLng = DEFAULT_LOCATION.long;
+var providerMap = null;
+var providerMarker = null;
+var editingProviderId = new URLSearchParams(window.location.search).get("edit");
 
 // ── Field error helpers ───────────────────────────────────────────────────────
 
@@ -33,13 +37,13 @@ function showFormError(message) {
 
 function loadProviderCategories() {
   var sel = document.getElementById("provider-category");
-  if (!sel) return;
-  getCategories().then(function (cats) {
+  if (!sel) return Promise.resolve();
+  return getCategories().then(function (cats) {
     var saved = sel.value;
     sel.innerHTML = '<option value="">' + (currentLang === "ar" ? "— اختر نوع الخدمة —" : "— Select service type —") + "</option>";
 
-    var parents  = cats.filter(function (c) { return !c.parent_id; });
-    var children = cats.filter(function (c) { return  c.parent_id; });
+    var parents = cats.filter(function (c) { return !c.parent_id; });
+    var children = cats.filter(function (c) { return c.parent_id; });
 
     parents.forEach(function (parent) {
       var subs = children.filter(function (c) { return String(c.parent_id) === String(parent.id); });
@@ -95,13 +99,31 @@ function loadProviderCitySelect() {
 // ── Photo preview ─────────────────────────────────────────────────────────────
 
 function renderPhotoPreview() {
-  var grid   = document.getElementById("photo-preview-grid");
+  var grid = document.getElementById("photo-preview-grid");
   var addBtn = document.getElementById("photo-add-btn");
-  var label  = document.getElementById("photo-add-label");
+  var label = document.getElementById("photo-add-label");
   if (!grid) return;
 
   grid.querySelectorAll("img").forEach(function (img) { URL.revokeObjectURL(img.src); });
   grid.innerHTML = "";
+  existingPhotoUrls.forEach(function (url, idx) {
+    var thumb = document.createElement("div");
+    thumb.className = "photo-thumb";
+    var img = document.createElement("img");
+    img.src = url;
+    img.alt = "Provider photo";
+    var removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "photo-thumb-remove";
+    removeBtn.textContent = "×";
+    removeBtn.addEventListener("click", function () {
+      existingPhotoUrls.splice(idx, 1);
+      renderPhotoPreview();
+    });
+    thumb.appendChild(img);
+    thumb.appendChild(removeBtn);
+    grid.appendChild(thumb);
+  });
   selectedPhotos.forEach(function (file, idx) {
     var thumb = document.createElement("div");
     thumb.className = "photo-thumb";
@@ -125,7 +147,7 @@ function renderPhotoPreview() {
     grid.appendChild(thumb);
   });
 
-  var count = selectedPhotos.length;
+  var count = existingPhotoUrls.length + selectedPhotos.length;
   if (label) {
     label.textContent = count > 0
       ? (currentLang === "ar" ? "إضافة المزيد (" + count + "/10)" : "Add more (" + count + "/10)")
@@ -135,8 +157,8 @@ function renderPhotoPreview() {
 }
 
 function setupPhotoPreview() {
-  var input      = document.getElementById("photo-input");
-  var addBtn     = document.getElementById("photo-add-btn");
+  var input = document.getElementById("photo-input");
+  var addBtn = document.getElementById("photo-add-btn");
   var uploadArea = document.getElementById("photo-upload-area");
   if (!input || !addBtn) return;
 
@@ -145,7 +167,7 @@ function setupPhotoPreview() {
     if (e.target === this) input.click();
   });
   input.addEventListener("change", function () {
-    var remaining = 10 - selectedPhotos.length;
+    var remaining = 10 - existingPhotoUrls.length - selectedPhotos.length;
     Array.from(this.files).slice(0, remaining).forEach(function (file) {
       if (file.type.startsWith("image/")) selectedPhotos.push(file);
     });
@@ -160,29 +182,72 @@ function initProviderMap() {
   var mapEl = document.getElementById("provider-map");
   if (!mapEl || typeof L === "undefined") return;
 
-  var map    = L.map("provider-map").setView([providerLat, providerLng], 12);
-  var marker = L.marker([providerLat, providerLng], { draggable: true }).addTo(map);
+  providerMap = L.map("provider-map").setView([providerLat, providerLng], 12);
+  providerMarker = L.marker([providerLat, providerLng], { draggable: true }).addTo(providerMap);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  }).addTo(map);
+  }).addTo(providerMap);
 
   function updatePin(latlng) {
     providerLat = latlng.lat;
     providerLng = latlng.lng;
   }
 
-  marker.on("dragend", function (e) { updatePin(e.target.getLatLng()); });
-  map.on("click", function (e) { marker.setLatLng(e.latlng); updatePin(e.latlng); });
+  providerMarker.on("dragend", function (e) { updatePin(e.target.getLatLng()); });
+  providerMap.on("click", function (e) { providerMarker.setLatLng(e.latlng); updatePin(e.latlng); });
 
-  if (navigator.geolocation) {
+  if (!editingProviderId && navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function (pos) {
       var lat = pos.coords.latitude;
       var lng = pos.coords.longitude;
       updatePin({ lat: lat, lng: lng });
-      map.setView([lat, lng], 15);
-      marker.setLatLng([lat, lng]);
+      providerMap.setView([lat, lng], 15);
+      providerMarker.setLatLng([lat, lng]);
     });
+  }
+}
+
+function fillProviderForm(provider) {
+  var values = {
+    "name-en": provider.name_en,
+    "name-ar": provider.name_ar,
+    "mobile": provider.phone,
+    "address-en": provider.address_en,
+    "address-ar": provider.address_ar,
+    "bio-en": provider.bio_en,
+    "bio-ar": provider.bio_ar,
+    "provider-category": provider.category_id,
+    "city-select": provider.city_en
+  };
+  Object.keys(values).forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.value = values[id] == null ? "" : values[id];
+  });
+
+  (provider.working_hours || []).forEach(function (hours) {
+    var row = document.querySelector('.wh-row[data-day="' + hours.day + '"]');
+    if (!row) return;
+    var closed = row.querySelector(".wh-closed");
+    closed.checked = Boolean(hours.is_close);
+    row.querySelector(".wh-open").value = hours.open_time ? hours.open_time.slice(0, 5) : "";
+    row.querySelector(".wh-close").value = hours.close_time ? hours.close_time.slice(0, 5) : "";
+    row.querySelector(".wh-open").disabled = closed.checked;
+    row.querySelector(".wh-close").disabled = closed.checked;
+  });
+
+  existingPhotoUrls = (provider.photos || []).map(function (photo) {
+    return typeof photo === "string" ? photo : photo.photo_url;
+  });
+  renderPhotoPreview();
+
+  if (provider.lat != null && provider.lng != null) {
+    providerLat = Number(provider.lat);
+    providerLng = Number(provider.lng);
+    if (providerMap && providerMarker) {
+      providerMap.setView([providerLat, providerLng], 15);
+      providerMarker.setLatLng([providerLat, providerLng]);
+    }
   }
 }
 
@@ -193,10 +258,10 @@ function collectWorkingHours() {
   document.querySelectorAll(".wh-row").forEach(function (row) {
     var isClosed = row.querySelector(".wh-closed").checked;
     wh.push({
-      day:        row.getAttribute("data-day"),
-      open_time:  isClosed ? null : (row.querySelector(".wh-open").value  || null),
+      day: row.getAttribute("data-day"),
+      open_time: isClosed ? null : (row.querySelector(".wh-open").value || null),
       close_time: isClosed ? null : (row.querySelector(".wh-close").value || null),
-      is_close:   isClosed ? 1 : 0
+      is_close: isClosed ? 1 : 0
     });
   });
   return wh;
@@ -230,31 +295,33 @@ function handleProviderSubmit(e) {
   var submitBtn = document.getElementById("provider-submit");
   if (submitBtn) submitBtn.disabled = true;
 
-  var catSel  = document.getElementById("provider-category");
+  var catSel = document.getElementById("provider-category");
   var citySel = document.getElementById("city-select");
-  var cityAr  = (citySel && citySel.options[citySel.selectedIndex])
+  var cityAr = (citySel && citySel.options[citySel.selectedIndex])
     ? citySel.options[citySel.selectedIndex].getAttribute("data-ar") || ""
     : "";
 
   var providerData = {
-    name_en:      document.getElementById("name-en").value.trim(),
-    name_ar:      document.getElementById("name-ar").value.trim(),
-    phone:        document.getElementById("mobile").value.trim(),
-    address_en:   document.getElementById("address-en").value.trim(),
-    address_ar:   (document.getElementById("address-ar") || {}).value || "",
-    city_en:      citySel ? citySel.value : "",
-    city_ar:      cityAr,
-    bio_en:       (document.getElementById("bio-en") || {}).value || "",
-    bio_ar:       (document.getElementById("bio-ar") || {}).value || "",
-    category_id:  catSel ? catSel.value : "",
+    name_en: document.getElementById("name-en").value.trim(),
+    name_ar: document.getElementById("name-ar").value.trim(),
+    phone: document.getElementById("mobile").value.trim(),
+    address_en: document.getElementById("address-en").value.trim(),
+    address_ar: (document.getElementById("address-ar") || {}).value || "",
+    city_en: citySel ? citySel.value : "",
+    city_ar: cityAr,
+    bio_en: (document.getElementById("bio-en") || {}).value || "",
+    bio_ar: (document.getElementById("bio-ar") || {}).value || "",
+    category_id: catSel ? catSel.value : "",
     working_hours: collectWorkingHours(),
-    lat:          providerLat,
-    lng:          providerLng
+    lat: providerLat,
+    lng: providerLng
   };
 
   var doSubmit = function (photoUrls) {
-    providerData.photos = photoUrls;
-    addProvider(providerData).then(function (res) {
+    providerData.photos = existingPhotoUrls.concat(photoUrls);
+    if (editingProviderId) providerData.id = editingProviderId;
+    var request = editingProviderId ? editProvider(providerData) : addProvider(providerData);
+    request.then(function (res) {
       if (!res.success) {
         showFormError(res.message || (currentLang === "ar" ? "فشل في حفظ بيانات الورشة" : "Provider setup failed"));
         if (submitBtn) submitBtn.disabled = false;
@@ -296,7 +363,7 @@ function initProviderRegisterPage() {
   var form = document.getElementById("provider-form");
   if (!form) return;
 
-  loadProviderCategories();
+  var categoriesReady = loadProviderCategories();
   loadProviderCitySelect();
   setupPhotoPreview();
   initProviderMap();
@@ -304,12 +371,26 @@ function initProviderRegisterPage() {
   document.querySelectorAll(".wh-closed").forEach(function (cb) {
     cb.addEventListener("change", function () {
       var row = this.closest(".wh-row");
-      row.querySelector(".wh-open").disabled  = this.checked;
+      row.querySelector(".wh-open").disabled = this.checked;
       row.querySelector(".wh-close").disabled = this.checked;
     });
   });
 
   form.addEventListener("submit", handleProviderSubmit);
+
+  if (editingProviderId) {
+    var submitBtn = document.getElementById("provider-submit");
+    if (submitBtn) {
+      submitBtn.removeAttribute("data-i18n");
+      submitBtn.textContent = currentLang === "ar" ? "حفظ التعديلات" : "Save changes";
+    }
+    Promise.all([categoriesReady, getProviderById(editingProviderId)])
+      .then(function (results) { fillProviderForm(results[1]); })
+      .catch(function (err) {
+        showFormError(err.message || (currentLang === "ar" ? "تعذر تحميل بيانات مزود الخدمة" : "Could not load provider data"));
+        if (submitBtn) submitBtn.disabled = true;
+      });
+  }
 }
 
 function onLanguageChange(lang) {
