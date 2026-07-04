@@ -12,6 +12,20 @@ function initVerifyPage() {
   }
 
   loadUnverifiedProviders();
+
+  var listEl = document.getElementById("verify-list");
+  listEl.addEventListener("click", function (event) {
+    var row = event.target.closest("[data-provider-details]");
+    if (!row || event.target.closest("button")) return;
+    window.location.href = row.getAttribute("data-provider-details");
+  });
+  listEl.addEventListener("keydown", function (event) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    var row = event.target.closest("[data-provider-details]");
+    if (!row || event.target.closest("button")) return;
+    event.preventDefault();
+    window.location.href = row.getAttribute("data-provider-details");
+  });
 }
 
 function loadUnverifiedProviders() {
@@ -29,7 +43,9 @@ function loadUnverifiedProviders() {
       listEl.innerHTML = providers.map(function (p) {
         var name = currentLang === "ar" ? (p.name_ar || p.name_en) : (p.name_en || p.name_ar);
         var city = currentLang === "ar" ? (p.city_ar || p.city_en) : (p.city_en || p.city_ar);
-        return "<article class='card' style='margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem'>" +
+        return "<article class='card' role='link' tabindex='0' aria-label='" + escapeHtml(name) +
+          "' data-provider-details='../service-detail/index.html?id=" + Number(p.id) +
+          "' style='margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;cursor:pointer'>" +
           "<div>" +
             "<h3 style='margin:0 0 0.25rem'>" + escapeHtml(name) + "</h3>" +
             "<p style='margin:0;color:var(--text-secondary);font-size:0.875rem'>" + escapeHtml(city || "") + " &mdash; " + escapeHtml(p.phone || "") + "</p>" +

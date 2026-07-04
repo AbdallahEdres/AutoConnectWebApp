@@ -25,9 +25,11 @@ function initProfilePage() {
     // Client-only: vehicle info and favorites preview
     var clientVehicleInfo = document.getElementById("client-vehicle-info");
     var clientFavorites = document.getElementById("client-favorites");
+    var serviceSummary = document.getElementById("service-summary");
     if (user.role === "client") {
       if (clientVehicleInfo) clientVehicleInfo.style.display = "";
       if (clientFavorites) clientFavorites.style.display = "";
+      if (serviceSummary) serviceSummary.style.display = "";
 
       var vehicleRow = document.getElementById("user-vehicle-row");
       var vehicleText = [user.vehicle_type, user.vehicle_brand].filter(Boolean).join(" - ");
@@ -51,6 +53,7 @@ function initProfilePage() {
     } else {
       if (clientVehicleInfo) clientVehicleInfo.style.display = "none";
       if (clientFavorites) clientFavorites.style.display = "none";
+      if (serviceSummary) serviceSummary.style.display = "none";
     }
 
     // Agent-only: show workshops added by the agent
