@@ -1,3 +1,2 @@
-# Uploaded files — keep the folder structure, ignore the contents
 backend/uploads/*
 !backend/uploads/.gitkeep

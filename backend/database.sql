@@ -151,9 +151,9 @@ INSERT IGNORE INTO categories (id, name_en, name_ar, slug, category_id) VALUES
 -- Insert Users (Passwords are bcrypt hashes of '123456' via password_hash())
 -- role: 'client' = end customer | 'agent' = workshop owner | 'supervisor' = platform admin
 INSERT IGNORE INTO users (id, fname, lname, email, password, phone, role) VALUES
-(1,  'Ahmed',   'Ali',    'ahmed@example.com',            '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01000000000', 'agent'),
+(1,  'Ahmed',   'Ali',    'agent@example.com',            '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01000000000', 'agent'),
 (2,  'Mohamed', 'Omar',   'mohamed@example.com',          '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01111111111', 'agent'),
-(3,  'Sara',    'Kamal',  'sara@example.com',             '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01222222222', 'client'),
+(3,  'Sara',    'Kamal',  'client@example.com',           '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01222222222', 'client'),
 (4,  'Mostafa', 'Hassan', 'mostafa.garage@example.com',   '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01010001001', 'agent'),
 (5,  'Mariam',  'Nabil',  'mariam.motocare@example.com',  '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01010001002', 'agent'),
 (6,  'Youssef', 'Samir',  'youssef.auto@example.com',     '$2y$10$D7dfCORc1Asp5cpTcqydSead58Y82OZaSLJUSaF5KQycuhsVtzfPi', '01010001003', 'agent'),

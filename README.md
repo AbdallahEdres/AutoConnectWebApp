@@ -5,7 +5,7 @@ P2C platform to find nearby car and motorcycle garages, spare parts shops, and e
 ## Directory Overview
 
 ```
-AutoConnectWebApp/
+AutoConnect/
 ├── backend/                        # PHP API + MySQL schema
 │   ├── api/                        # One PHP file per API endpoint
 │   │   ├── login.php
@@ -67,7 +67,7 @@ Requires **XAMPP** (Apache + MySQL). See the full setup guide:
 Short version:
 1. Start Apache and MySQL in XAMPP Control Panel.
 2. Import `backend/database.sql` in phpMyAdmin.
-3. Visit `http://localhost/AutoConnectWebApp/web/home/`
+3. Visit `http://localhost/AutoConnect/web/home/`
 
 ## Pages
 

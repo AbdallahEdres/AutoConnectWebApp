@@ -7,20 +7,30 @@ The project uses a real PHP/MySQL backend. You need **XAMPP** (or another Apache
 ## Option 1: XAMPP (Required for full functionality)
 
 ### First-time setup
-1. Download and install [XAMPP](https://www.apachefriends.org/download.html) for Windows.
-2. Place the `AutoConnectWebApp` folder inside `C:\xampp\htdocs\` so the path becomes:
+1. Setup XAMPP for Windows.
+2. Place the `AutoConnect` folder inside `C:\xampp\htdocs\` so the path becomes:
    ```
-   C:\xampp\htdocs\AutoConnectWebApp\
+   C:\xampp\htdocs\AutoConnect\
    ```
 3. Open the **XAMPP Control Panel** and start **Apache** and **MySQL**.
 4. Open your browser and go to **phpMyAdmin**: [http://localhost/phpmyadmin](http://localhost/phpmyadmin)
 5. Create a new database named `autoconnect`.
-6. Click the **Import** tab and import `backend/database.sql`.
+6. Click the **Import** tab and import `C:\xampp\htdocs\AutoConnect\backend\database.sql`.
 
 ### Running the app
 After the first-time setup, just:
 1. Start **Apache** and **MySQL** in the XAMPP Control Panel.
-2. Visit: [http://localhost/AutoConnectWebApp/web/](http://localhost/AutoConnectWebApp/web/)
+2. Visit: [http://localhost/AutoConnect/web/](http://localhost/AutoConnect/web/)
+
+### Test accounts
+
+These accounts are seeded by `database.sql` (all passwords are `123456`):
+
+| Role | Email | Password | Description |
+|---|---|---|---|
+| Client (customer) | `client@example.com` | `123456` | End customer booking services |
+| Agent | `agent@example.com` | `123456` | Workshop owner, responsible for adding providers |
+| Supervisor | `admin@autoconnect.com` | `123456` | Platform admin, responsible for verifying pending providers |
 
 ---
 
